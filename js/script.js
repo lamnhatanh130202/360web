@@ -262,7 +262,7 @@ const scenes = [
         id: "a0_ktoto",
         src: "./assets/a0_ktoto.jpg",
         hotspots: [
-            { yaw: 0.03, pitch: 0.0, text: "Rời Phòng", target: "a0_2", image: "./assets/icon/anhcongtruong.jpg",icon: "./assets/icon/vitri.png" },
+            { yaw: 0.03, pitch: 0.0, text: "Rời Phòng", target: "a0_2", image: "./assets/icon/anhcongtruong.jpg",icon: "./assets/icon/vitrixuong.png" },
             
         ]
     },
@@ -270,7 +270,7 @@ const scenes = [
         id: "a0_luat",
         src: "./assets/a0_luat.jpg",
         hotspots: [
-            { yaw: 0.03, pitch: -0.0, text: "Rời Phòng", target: "a0_2", image: "./assets/icon/anhcongtruong.jpg",icon: "./assets/icon/vitri.png" },
+            { yaw: 0.03, pitch: -0.0, text: "Rời Phòng", target: "a0_2", image: "./assets/icon/anhcongtruong.jpg",icon: "./assets/icon/vitrixuong.png" },
             
         ]
     },
@@ -286,7 +286,7 @@ const scenes = [
         id: "a0_qtcn_logistic",
         src: "./assets/a0_qtcn_logistic.jpg",
         hotspots: [
-            { yaw: 0.03, pitch: -0.0, text: "Rời Phòng", target: "khoacntt1", image: "./assets/icon/anhcongtruong.jpg",icon: "./assets/icon/vitri.png" },
+            { yaw: 0.03, pitch: -0.0, text: "Rời Phòng", target: "a0_2", image: "./assets/icon/anhcongtruong.jpg",icon: "./assets/icon/vitrixuong.png" },
             
         ]
     },
@@ -294,7 +294,7 @@ const scenes = [
         id: "a0_xahoihoc",
         src: "./assets/a0_xahoihoc.jpg",
         hotspots: [
-            { yaw: 0.03, pitch: -0.0, text: "Rời Phòng", target: "a0_1", image: "./assets/icon/anhcongtruong.jpg",icon: "./assets/icon/vitri.png" },
+            { yaw: 0.03, pitch: -0.0, text: "Rời Phòng", target: "a0_1", image: "./assets/icon/anhcongtruong.jpg",icon: "./assets/icon/vitrixuong.png" },
             
         ]
     },
