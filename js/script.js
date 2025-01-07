@@ -50,6 +50,8 @@ const khuVuc = {
     b1_datalab:"Phòng DataLab", 
     b1_phethong:"Phòng Nghiêm Cứu HTTM",
     b1_sejong5:"Phòng sejong5",
+    b1_sejong4:"Phòng sejong4",
+    b1_sejong6:"Phòng sejong6",
     b1_pm1:"Phòng máy 1",
     b1_pm2:"Phòng may 2",
     //tầng 2
@@ -125,12 +127,17 @@ const scenes = [
             { yaw: -0.2,pitch: -0.05, text: "Trước dãy A", target: "trcdaya", image: "./assets/anhminhhoa/anhcongtruong.jpg",icon: "./assets/icon/vitri.png" },
             { yaw: -0.7,pitch: -0.4, text: "Trước thư viện", target: "trcthuvien", image: "./assets/anhminhhoa/anhcongtruong.jpg",icon: "./assets/icon/vitri.png" },
             { yaw: 0.8, pitch: -0.05, text: "Dãy Học Hỏi Hiếu Hành", target: "loidi2", image: "./assets/icon/anhcongtruong.jpg",icon: "./assets/icon/vitri.png" },
-            { yaw: 2.4, pitch: -0.05, text: "Tầng Trệt Dãy B", target: "b0_1", image: "./assets/icon/anhcongtruong.jpg",icon: "./assets/icon/vitri.png" },
-            { yaw: 4.3, pitch: -0.05, text: "Tầng Trệt Dãy B 1", target: "b0_2", image: "./assets/icon/anhcongtruong.jpg",icon: "./assets/icon/vitri.png" },
-            { yaw: 4.3, pitch: -0.35, text: "Tầng 1 Dãy B 1", target: "b1_1", image: "./assets/icon/anhcongtruong.jpg",icon: "./assets/icon/vitri.png" },
-            { yaw: 4.3, pitch: -0.65, text: "Tầng 2 Dãy B 1", target: "b2_1", image: "./assets/icon/anhcongtruong.jpg",icon: "./assets/icon/vitri.png" },
-            { yaw: 4.3, pitch: -0.75, text: "Tầng 3 Dãy B 1", target: "b3_1", image: "./assets/icon/anhcongtruong.jpg",icon: "./assets/icon/vitri.png" },
-            { yaw: -0.2,pitch: -0.25, text: "Lầu 1 dãy a", target: "a1_1", image: "./assets/anhminhhoa/anhcongtruong.jpg",icon: "./assets/icon/vitri.png" },
+            { yaw: 2.2, pitch: -0.05, text: "Tầng Trệt Dãy B", target: "b0_1", image: "./assets/icon/anhcongtruong.jpg",icon: "./assets/icon/vitri.png" },
+            { yaw: 4, pitch: -0.05, text: "Tầng Trệt Dãy B 1", target: "b0_2", image: "./assets/icon/anhcongtruong.jpg",icon: "./assets/icon/vitri.png" },
+            { yaw: 4, pitch: -0.35, text: "Tầng 1 Dãy B 1", target: "b1_1", image: "./assets/icon/anhcongtruong.jpg",icon: "./assets/icon/vitri.png" },
+            { yaw: 4, pitch: -0.65, text: "Tầng 2 Dãy B 1", target: "b2_1", image: "./assets/icon/anhcongtruong.jpg",icon: "./assets/icon/vitri.png" },
+            { yaw: 4, pitch: -0.95, text: "Tầng 3 Dãy B 1", target: "b3_1", image: "./assets/icon/anhcongtruong.jpg",icon: "./assets/icon/vitri.png" },
+            { yaw: -0.2,pitch: -0.25, text: "Tầng 1 dãy a", target: "a1_1", image: "./assets/anhminhhoa/anhcongtruong.jpg",icon: "./assets/icon/vitri.png" },
+            { yaw: -0.2,pitch: -0.4, text: "Tầng 2 dãy a", target: "a2_1", image: "./assets/anhminhhoa/anhcongtruong.jpg",icon: "./assets/icon/vitri.png" },
+            { yaw: -0.2,pitch: -0.6, text: "Tầng 4 dãy a", target: "a4_1", image: "./assets/anhminhhoa/anhcongtruong.jpg",icon: "./assets/icon/vitri.png" },
+            { yaw: -0.2,pitch: -0.7, text: "Tầng 5 dãy a", target: "a5_1", image: "./assets/anhminhhoa/anhcongtruong.jpg",icon: "./assets/icon/vitri.png" },
+            { yaw: -0.2,pitch: -0.85, text: "Tầng 6 dãy a", target: "a6_1", image: "./assets/anhminhhoa/anhcongtruong.jpg",icon: "./assets/icon/vitri.png" },
+        
         ]
     },
     
@@ -184,9 +191,9 @@ const scenes = [
         id: "b0_2",
         src: "./assets/b0_2.jpg",
         hotspots: [
-            { yaw: -2.4, pitch: -0.0, text: "Tầng Trệt Dãy B ", target: "b0_1", image: "./assets/icon/anhcongtruong.jpg",icon: "./assets/icon/vitri.png" },
-            { yaw: -3, pitch: -0.0, text: "Sân trường ", target: "santruong", image: "./assets/icon/anhcongtruong.jpg",icon: "./assets/icon/vitri.png" },
-            { yaw: -1.4, pitch: -0.0, text: "Lên tầng 2 dãy B ", target: "b1_1", image: "./assets/icon/anhcongtruong.jpg",icon: "./assets/icon/vitri.png" },
+            { yaw: 1.3, pitch: -0.0, text: "Tầng Trệt Dãy B ", target: "b0_1", image: "./assets/icon/anhcongtruong.jpg",icon: "./assets/icon/vitri.png" },
+            { yaw: 0, pitch: -0.0, text: "Sân trường ", target: "santruong", image: "./assets/icon/anhcongtruong.jpg",icon: "./assets/icon/vitri.png" },
+            { yaw: 2, pitch: -0.0, text: "Lên tầng 2 dãy B ", target: "b1_1", image: "./assets/icon/anhcongtruong.jpg",icon: "./assets/icon/vitri.png" },
             
         ]
     },
@@ -369,6 +376,7 @@ const scenes = [
             { yaw: 2.2, pitch: 0.0, text: "Tầng 1 Dãy b 2", target: "b1_3", image: "./assets/icon/anhcongtruong.jpg",icon: "./assets/icon/vitri.png" },
             { yaw: -2.2, pitch: 0.0, text: "Tầng 1 Dãy b 3", target: "b1_4", image: "./assets/icon/anhcongtruong.jpg",icon: "./assets/icon/vitri.png" },
             { yaw: 0, pitch: 0.0, text: "Phòng HTTM", target: "b1_phethong", image: "./assets/icon/anhcongtruong.jpg",icon: "./assets/icon/vitri.png" },
+            { yaw: 1.2, pitch: 0.0, text: "Phòng Sejong6", target: "b1_sejong6", image: "./assets/icon/anhcongtruong.jpg",icon: "./assets/icon/vitri.png" },
         ]
     },
     {
@@ -420,6 +428,22 @@ const scenes = [
         src: "./assets/b1_sejong5.jpg",
         hotspots: [
             { yaw: -0.1, pitch: 0.4, text: "Ra Phòng", target: "b1_1", image: "./assets/icon/anhcongtruong.jpg",icon: "./assets/icon/vitrixuong.png" },
+            
+        ]
+    },
+    {
+        id: "b1_sejong4",
+        src: "./assets/b1_sejong4.jpg",
+        hotspots: [
+            { yaw: -0.1, pitch: 0.4, text: "Ra Phòng", target: "b1_1", image: "./assets/icon/anhcongtruong.jpg",icon: "./assets/icon/vitrixuong.png" },
+            
+        ]
+    },
+    {
+        id: "b1_sejong6",
+        src: "./assets/b1_sejong6.jpg",
+        hotspots: [
+            { yaw: -0.1, pitch: 0.4, text: "Ra Phòng", target: "b1_2", image: "./assets/icon/anhcongtruong.jpg",icon: "./assets/icon/vitrixuong.png" },
             
         ]
     },
