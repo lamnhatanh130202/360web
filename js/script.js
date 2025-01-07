@@ -72,9 +72,9 @@ const khuVuc = {
     b3_2:"BIII.13A",
     b3_3:"BIII.11",
     b3_4:"Khoa xã hội và nhân văn",
-    b3_5:"BIII.14a",
-    b3_5:"Cuối HL tầng 3",
-
+    b3_5:"Trước Phòng BIII.14a",
+    b3_6:"Cuối Hành Lang tầng 3",
+    b3_14a:"Phòng BIII.14a"
 };
 
 // Danh sách scene và hotspot
@@ -580,7 +580,8 @@ const scenes = [
         src: "./assets/b3_1.jpg",
         hotspots: [
             { yaw: 1.4, pitch: 0.0, text: "Tầng 3 Dãy b 2", target: "b3_3", image: "./assets/icon/anhcongtruong.jpg",icon: "./assets/icon/vitri.png" },
-            { yaw: 0, pitch: 0.0, text: "BIII.13A", target: "b3_2", image: "./assets/icon/anhcongtruong.jpg",icon: "./assets/icon/vitri.png" },
+            { yaw: -0.4, pitch: 0.2, text: "BIII.13A", target: "b3_2", image: "./assets/icon/anhcongtruong.jpg",icon: "./assets/icon/vitri.png" },
+            { yaw: -0.2, pitch: 0.3, text: "Xuống tầng 2", target: "b2_1", image: "./assets/icon/anhcongtruong.jpg",icon: "./assets/icon/vitrixuong.png" },
             { yaw: -1.4, pitch: 0.0, text: "BIII.14a", target: "b3_5", image: "./assets/icon/anhcongtruong.jpg",icon: "./assets/icon/vitri.png" },
             
         ]
@@ -590,7 +591,7 @@ const scenes = [
         src: "./assets/b3_2.jpg",
         hotspots: [
             { yaw: 3.1, pitch: 0.0, text: "Tầng 3 dãy b", target: "b3_1", image: "./assets/icon/anhcongtruong.jpg",icon: "./assets/icon/vitri.png" },
-            { yaw: 2.2, pitch: 0.0, text: "BIII.11", target: "b3_3", image: "./assets/icon/anhcongtruong.jpg",icon: "./assets/icon/vitri.png" },
+            { yaw: 2, pitch: 0.0, text: "BIII.11", target: "b3_3", image: "./assets/icon/anhcongtruong.jpg",icon: "./assets/icon/vitri.png" },
             { yaw: -2.2, pitch: 0.0, text: "BIII.14a", target: "b3_5", image: "./assets/icon/anhcongtruong.jpg",icon: "./assets/icon/vitri.png" },
         ]
     },
@@ -617,6 +618,7 @@ const scenes = [
         src: "./assets/b3_5.jpg",
         hotspots: [
             { yaw: 1.5, pitch: 0.0, text: "BIII.13A", target: "b3_2", image: "./assets/icon/anhcongtruong.jpg",icon: "./assets/icon/vitri.png" },
+            { yaw: 0, pitch: 0.0, text: "Phòng BIII.14A ", target: "b3_14a", image: "./assets/icon/anhcongtruong.jpg",icon: "./assets/icon/vitri.png" },
             { yaw: -1.6, pitch: 0.0, text: "Cuối HL tầng 3", target: "b3_6", image: "./assets/icon/anhcongtruong.jpg",icon: "./assets/icon/vitri.png" },
             
         ]
@@ -626,6 +628,14 @@ const scenes = [
         src: "./assets/b3_6.jpg",
         hotspots: [
             { yaw: 1.4, pitch: 0.0, text: "BIII.14a", target: "b3_5", image: "./assets/icon/anhcongtruong.jpg",icon: "./assets/icon/vitri.png" },
+            
+        ]
+    },
+    {
+        id: "b3_14a",
+        src: "./assets/b3_14a.jpg",
+        hotspots: [
+            { yaw: 1.3 , pitch: 0.0, text: "Rời Phòng", target: "b3_5", image: "./assets/icon/anhcongtruong.jpg",icon: "./assets/icon/vitri.png" },
             
         ]
     },
