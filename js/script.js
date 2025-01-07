@@ -19,7 +19,7 @@ const khuVuc = {
     trcdaya: "Trước Dãy A",
     truockhoacntt: "Trước Khoa CNTT",
     khoacntt1: "Khoa CNTT - Khu 1",
-    khoacntt2: "Khoa CNTT - Khu 2",
+
     santruong: " Giữa Sân Trường",
     a3_trcthuvien: "Trước Thư Viện",
     a3_thuvien1: "Thư Viện 1",
@@ -162,6 +162,7 @@ const scenes = [
         hotspots: [
             { yaw: 1.7, pitch: -0.05, text: "Dãy Học Hỏi Hiếu Hành 2", target: "loidi2", image: "./assets/icon/anhcongtruong.jpg",icon: "./assets/icon/vitri.png" },
             { yaw: 0.9, pitch: -0.1, text: "Trước Khoa Công Nghệ Thông Tin", target: "truockhoacntt", image: "./assets/icon/anhcongtruong.jpg",icon: "./assets/icon/vitri.png" },
+            { yaw: 0, pitch: 0.4, text: "Hành Lanh dãy A", target: "a0_2", image: "./assets/icon/anhcongtruong.jpg",icon: "./assets/icon/vitri.png" },
             { yaw: 4.7, pitch: -0.05, text: "Cổng Phụ", target: "congphu", image: "./assets/icon/congphu.jpg",icon: "./assets/icon/vitri.png" },
             { yaw: 2.5, pitch: -0.1, text: "Sân Trường", target: "santruong", image: "./assets/icon/congphu.jpg",icon: "./assets/icon/vitri.png" }
         ]
@@ -170,8 +171,7 @@ const scenes = [
         id: "truockhoacntt",
         src: "./assets/truockhoacntt.jpg",
         hotspots: [
-            { yaw: 0.06, pitch: -0.1, text: "Khoa Công Nghệ Thông Tin", target: "a0_1", image: "./assets/icon/anhcongtruong.jpg",icon: "./assets/icon/vitri.png" },
-            { yaw: 1, pitch: -0.1, text: "Hành Lanh dãy A", target: "a0_1", image: "./assets/icon/anhcongtruong.jpg",icon: "./assets/icon/vitri.png" },
+            { yaw: 0.06, pitch: -0.1, text: "Khoa Công Nghệ Thông Tin", target: "a0_cntt", image: "./assets/icon/anhcongtruong.jpg",icon: "./assets/icon/vitri.png" },
             { yaw: 3.3, pitch: 0.3, text: " Trước Dãy A", target: "trcdaya", image: "./assets/icon/anhcongtruong.jpg",icon: "./assets/icon/vitri.png" },
             { yaw: 4.4, pitch: -0.05, text: "Cổng Phụ", target: "congphu", image: "./assets/icon/congphu.jpg",icon: "./assets/icon/vitri.png" },
                 ]
