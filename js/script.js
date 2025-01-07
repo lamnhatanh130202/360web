@@ -123,16 +123,16 @@ const scenes = [
         src: "./assets/loidi1.jpg",
         hotspots: [
             { yaw: 1.5, pitch: -0.05, text: "Quay lại Lối đi lên", target: "duonglencong", image: "./assets/icon/anhcongtruong.jpg",icon: ".//assets/icon/vitri.png" },
-            { yaw: -1.4, pitch: -0.05, text: "Quay lại Khu Vực 3", target: "loidi2", image: "./assets/icon/anhcongtruong.jpg",icon: "./assets/icon/vitri.png" }
+            { yaw: -1.4, pitch: -0.05, text: "Dãy Học Hỏi Hiếu Hành 2", target: "loidi2", image: "./assets/icon/anhcongtruong.jpg",icon: "./assets/icon/vitri.png" }
         ]
     },
     {
         id: "loidi2",
         src: "./assets/loidi2.jpg",
         hotspots: [
-            { yaw: 1.7, pitch: -0.2, text: "Quay lại Khu Vực 3", target: "loidi1", image: "./assets/icon/anhcongtruong.jpg",icon: "./assets/icon/vitri.png" },
-            { yaw: -1.45, pitch: -0.1, text: "Quay lại Khu Vực 3", target: "trcdaya", image: "./assets/icon/anhcongtruong.jpg",icon: "./assets/icon/vitri.png" },
-            { yaw: -2.2, pitch: -0.1, text: "Sân Trường", target: "santruong", image: "./assets/icon/anhcongtruong.jpg",icon: "./assets/icon/vitri.png" }
+            { yaw: 1.5, pitch: 0, text: "Dãy Học Hỏi Hiếu Hành", target: "loidi1", image: "./assets/icon/anhcongtruong.jpg",icon: "./assets/icon/vitri.png" },
+            { yaw: -1.6, pitch: -0.1, text: "Trước Dãy A", target: "trcdaya", image: "./assets/icon/anhcongtruong.jpg",icon: "./assets/icon/vitri.png" },
+            { yaw: -2.4, pitch: -0.1, text: "Sân Trường", target: "santruong", image: "./assets/icon/anhcongtruong.jpg",icon: "./assets/icon/vitri.png" }
         ]
     },
     
@@ -160,21 +160,41 @@ const scenes = [
         id: "trcdaya",
         src: "./assets/truocdaya.jpg",
         hotspots: [
-            { yaw: 1.7, pitch: -0.05, text: "Quay lại Khu Vực 4", target: "loidi2", image: "./assets/icon/anhcongtruong.jpg",icon: "./assets/icon/vitri.png" },
-            { yaw: 0.7, pitch: -0.25, text: "Trước Khoa Công Nghệ Thông Tin", target: "truockhoacntt", image: "./assets/icon/anhcongtruong.jpg",icon: "./assets/icon/vitri.png" },
+            { yaw: 1.7, pitch: -0.05, text: "Dãy Học Hỏi Hiếu Hành 2", target: "loidi2", image: "./assets/icon/anhcongtruong.jpg",icon: "./assets/icon/vitri.png" },
+            { yaw: 0.9, pitch: -0.1, text: "Trước Khoa Công Nghệ Thông Tin", target: "truockhoacntt", image: "./assets/icon/anhcongtruong.jpg",icon: "./assets/icon/vitri.png" },
             { yaw: 4.7, pitch: -0.05, text: "Cổng Phụ", target: "congphu", image: "./assets/icon/congphu.jpg",icon: "./assets/icon/vitri.png" },
-            { yaw: 3, pitch: -0.001, text: "Sân Trường", target: "santruong", image: "./assets/icon/congphu.jpg",icon: "./assets/icon/vitri.png" }
+            { yaw: 2.5, pitch: -0.1, text: "Sân Trường", target: "santruong", image: "./assets/icon/congphu.jpg",icon: "./assets/icon/vitri.png" }
         ]
     },
     {
         id: "truockhoacntt",
         src: "./assets/truockhoacntt.jpg",
         hotspots: [
-            { yaw: 0.06, pitch: -0.1, text: "Quay lại Khu Vực 4", target: "a0_cntt", image: "./assets/icon/anhcongtruong.jpg",icon: "./assets/icon/vitri.png" },
+            { yaw: 0.06, pitch: -0.1, text: "Khoa Công Nghệ Thông Tin", target: "a0_1", image: "./assets/icon/anhcongtruong.jpg",icon: "./assets/icon/vitri.png" },
+            { yaw: 1, pitch: -0.1, text: "Hành Lanh dãy A", target: "a0_1", image: "./assets/icon/anhcongtruong.jpg",icon: "./assets/icon/vitri.png" },
             { yaw: 3.3, pitch: 0.3, text: " Trước Dãy A", target: "trcdaya", image: "./assets/icon/anhcongtruong.jpg",icon: "./assets/icon/vitri.png" },
             { yaw: 4.4, pitch: -0.05, text: "Cổng Phụ", target: "congphu", image: "./assets/icon/congphu.jpg",icon: "./assets/icon/vitri.png" },
                 ]
     },
+    {
+        id: "a0_1",
+        src: "./assets/a0_1.jpg",
+        hotspots: [
+            { yaw: 0.06, pitch: -0.1, text: "Khoa Công Nghệ Thông Tin", target: "a0_cntt", image: "./assets/icon/anhcongtruong.jpg",icon: "./assets/icon/vitri.png" },
+            { yaw: 3.3, pitch: 0.3, text: " Trước Dãy A", target: "trcdaya", image: "./assets/icon/anhcongtruong.jpg",icon: "./assets/icon/vitri.png" },
+            { yaw: 4.4, pitch: -0.05, text: "Cổng Phụ", target: "congphu", image: "./assets/icon/congphu.jpg",icon: "./assets/icon/vitri.png" },
+                ]
+    },
+    {
+        id: "a0_2",
+        src: "./assets/a0_2.jpg",
+        hotspots: [
+            { yaw: 0.06, pitch: -0.1, text: "Khoa Công Nghệ Thông Tin", target: "a0_cntt", image: "./assets/icon/anhcongtruong.jpg",icon: "./assets/icon/vitri.png" },
+            { yaw: 3.3, pitch: 0.3, text: " Trước Dãy A", target: "trcdaya", image: "./assets/icon/anhcongtruong.jpg",icon: "./assets/icon/vitri.png" },
+            { yaw: 4.4, pitch: -0.05, text: "Cổng Phụ", target: "congphu", image: "./assets/icon/congphu.jpg",icon: "./assets/icon/vitri.png" },
+                ]
+    },
+
     {
         id: "a0_cntt",
         src: "./assets/a0_cntt.jpg",
