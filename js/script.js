@@ -81,6 +81,14 @@ const khuVuc = {
     a4_1:"Tầng 4 dãy a",
     a4_2:"Tầng 4 dãy a 1",
     a4_3:"Tầng 4 dãy a 2",
+    // tầng 5
+    a5_1:"Tầng 5 dãy a",
+    a5_2:"Tầng 5 dãy a 1",
+    
+    // tầng 6
+    a6_1:"Tầng 4 dãy a",
+    a6_2:"Tầng 6 dãy a 1",
+    a6_3:"Tầng 6 dãy a 2",
 };
 
 // Danh sách scene và hotspot
@@ -728,6 +736,36 @@ const scenes = [
         src: "./assets/a5_2.jpg",
         hotspots: [
             { yaw: 2.9, pitch: 0.1, text: "Tầng 4 dãy a 2", target: "a4_3", image: "./assets/anhminhhoa/anhcongtruong.jpg",icon: "./assets/icon/vitri.png" },
+            
+        ]
+    },
+    //tầng 6 dãy a
+    {
+        id: "a6_1",
+        src: "./assets/a6_1.jpg",
+        hotspots: [
+            
+            { yaw: 5.3, pitch: 0.1, text: "Xuống tầng 5", target: "a5_1", image: "./assets/anhminhhoa/anhcongtruong.jpg",icon: "./assets/icon/vitrixuong.png" },
+            { yaw: 0, pitch: 0.3, text: "Tầng 6 dãy a 1", target: "a6_2", image: "./assets/anhminhhoa/anhcongtruong.jpg",icon: "./assets/icon/vitri.png" },
+            
+        ]
+    },
+ 
+    {
+        id: "a6_2",
+        src: "./assets/a6_2.jpg",
+        hotspots: [
+            { yaw: 3.1, pitch: 0.3, text: "Tầng 6 dãy a 2", target: "a6_3", image: "./assets/anhminhhoa/anhcongtruong.jpg",icon: "./assets/icon/vitri.png" },
+            { yaw: 0, pitch: 0.3, text: "Tầng 6 dãy a ", target: "a6_1", image: "./assets/anhminhhoa/anhcongtruong.jpg",icon: "./assets/icon/vitri.png" },
+            
+        ]
+    },
+    {
+        id: "a6_3",
+        src: "./assets/a6_3.jpg",
+        hotspots: [
+            { yaw: -1.5, pitch: 0.1, text: "xuống tầng 5 ", target: "a5_2", image: "./assets/anhminhhoa/anhcongtruong.jpg",icon: "./assets/icon/vitrixuong.png" },
+            { yaw: 1.3, pitch: 0.3, text: "Tầng 6 dãy a 1", target: "a6_2", image: "./assets/anhminhhoa/anhcongtruong.jpg",icon: "./assets/icon/vitri.png" },
             
         ]
     },
