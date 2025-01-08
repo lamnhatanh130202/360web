@@ -726,7 +726,7 @@ const scenes = [
         src: "./assets/a5_1.jpg",
         hotspots: [
             { yaw: -1.6, pitch: 0, text: "Lên tầng 6", target: "a5_1", image: "./assets/anhminhhoa/anhcongtruong.jpg",icon: "./assets/icon/vitri.png" },
-            { yaw: -1.6, pitch: 0.1, text: "Xuống tầng 5", target: "a4_1", image: "./assets/anhminhhoa/anhcongtruong.jpg",icon: "./assets/icon/vitri.png" },
+            { yaw: -1.6, pitch: 0.1, text: "Xuống tầng 4", target: "a4_1", image: "./assets/anhminhhoa/anhcongtruong.jpg",icon: "./assets/icon/vitrixuong.png" },
             
         ]
     },
