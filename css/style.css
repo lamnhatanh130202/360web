@@ -8,7 +8,7 @@ header {
     position: absolute; /* Đặt header ở vị trí tuyệt đối */
     top: 0;
     left: 0;
-    width: 99%; /* Header chiếm toàn bộ chiều ngang */
+    width: 100%; /* Header chiếm toàn bộ chiều ngang */
     z-index: 1000; /* Đặt z-index cao để nằm trên cùng */
     background-color: rgba(0, 0, 0, 0.5); /* Nền đen với độ trong suốt 50% */
     color: white; /* Màu chữ trắng để tương phản với nền */

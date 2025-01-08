@@ -343,7 +343,7 @@ const scenes = [
         id: "a1_3",
         src: "./assets/a1hop.jpg",
         hotspots: [
-            { yaw: 1.4, pitch: 0.0, text: "Tầng 1 dãy a 1", target: "a1_2", image: "./assets/anhminhhoa/anhcongtruong.jpg",icon: "./assets/icon/vitri.png" },
+            { yaw: 1.4, pitch: 0.3, text: "Tầng 1 dãy a 1", target: "a1_2", image: "./assets/anhminhhoa/anhcongtruong.jpg",icon: "./assets/icon/vitri.png" },
             { yaw: 1, pitch: 0.0, text: "Phòng Al.4", target: "a1_al4", image: "./assets/anhminhhoa/anhcongtruong.jpg",icon: "./assets/icon/vitri.png" },
             { yaw: 2.9, pitch: 0.0, text: "Tầng 1 dãy b 2", target: "b1_3", image: "./assets/anhminhhoa/anhcongtruong.jpg",icon: "./assets/icon/vitri.png" },
             { yaw: 3.2, pitch: 0.0, text: "Học Viện King Sejong", target: "a1_hocvienkingsejong", image: "./assets/anhminhhoa/anhcongtruong.jpg",icon: "./assets/icon/vitri.png" },
