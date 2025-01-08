@@ -255,7 +255,7 @@ const scenes = [
             { yaw: 0.7, pitch: -0.1, text: "Khoa kỹ thuật ô tô", target: "a0_ktoto", image: "./assets/anhminhhoa/anhcongtruong.jpg",icon: "./assets/icon/vitri.png" },
             { yaw: 0, pitch: -0.1, text: "Khoa Quản Trị Công Nghiệp và logistics", target: "a0_qtcn_logistic", image: "./assets/anhminhhoa/anhcongtruong.jpg",icon: "./assets/icon/vitri.png" },
             { yaw: -1, pitch: 0, text: "Khoa Luật", target: "a0_luat", image: "./assets/anhminhhoa/anhcongtruong.jpg",icon: "./assets/icon/vitri.png" },
-            { yaw: -1.2, pitch: 0.3, text: "Hành Lanh dãy A", target: "a0_1", image: "./assets/icon/congphu.jpg",icon: "./assets/icon/vitri.png" },
+            { yaw: -1.2, pitch: 0.3, text: "Hành Lanh dãy A", target: "a0_1", image: "./assets/anhminhhoa/anhcongtruong.jpg",icon: "./assets/icon/vitri.png" },
             { yaw: 3.3, pitch: 0.3, text: " Trước Dãy A", target: "trcdaya", image: "./assets/anhminhhoa/anhcongtruong.jpg",icon: "./assets/icon/vitri.png" },
             { yaw: 4.4, pitch: -0.05, text: "Cổng Phụ", target: "congphu", image: "./assets/icon/congphu.jpg",icon: "./assets/icon/vitri.png" },
                 ]
