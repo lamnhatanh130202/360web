@@ -12,7 +12,7 @@ header {
     z-index: 1000; /* Đặt z-index cao để nằm trên cùng */
     background-color: rgba(0, 0, 0, 0.5); /* Nền đen với độ trong suốt 50% */
     color: white; /* Màu chữ trắng để tương phản với nền */
-    padding: 10px; /* Thêm khoảng cách bên trong */
+    
     display: flex; /* Bố cục flex để sắp xếp nội dung */
     align-items: center; /* Căn giữa nội dung theo chiều dọc */
     justify-content: space-between; /* Dãn cách giữa các phần tử */
@@ -20,10 +20,7 @@ header {
 }
 
 /* Logo bên trái */
-header img#logo {
-    height: 50px; /* Đặt chiều cao cố định cho logo */
-    margin-right: 10px; /* Thêm khoảng cách giữa logo và tiêu đề */
-}
+
 
 /* Tiêu đề căn giữa */
 header h1#tieude {
@@ -53,7 +50,7 @@ header #header button:hover {
     font-size: 18px;
     font-weight: bold;
     color: #007bff; /* Màu xanh nổi bật */
-    margin-top: 10px;
+    
     text-align: center;
     background-color: rgba(255, 255, 255, 0.8); /* Nền trắng trong suốt */
     padding: 10px;
@@ -68,8 +65,8 @@ main {
 
 
 #logo{
-    width: 80px;
-    height: 80px;
+    width: 200px;
+    height: 100px;
     margin-right: 30px ;
 }
 #controls {
