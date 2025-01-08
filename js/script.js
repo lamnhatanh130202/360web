@@ -48,7 +48,7 @@ const khuVuc = {
     b1_5:"Tầng 1 dãy b 4",
     // Các phòng ở tầng 1 khu b
     b1_datalab:"Phòng DataLab", 
-    b1_phethong:"Phòng Nghiêm Cứu HTTM",
+    b1_phethong:"Phòng Nghiên Cứu HTTM",
     b1_sejong5:"Phòng sejong5",
     b1_sejong4:"Phòng sejong4",
     b1_sejong6:"Phòng sejong6",
@@ -384,7 +384,7 @@ const scenes = [
         hotspots: [
             { yaw: 1.4, pitch: 0.0, text: "Phòng sejong 4", target: "b1_sejong4", image: "./assets/anhminhhoa/anhcongtruong.jpg",icon: "./assets/icon/vitri.png" },
             { yaw: 0.8, pitch: 0.0, text: "Phòng sejong 5", target: "b1_sejong5", image: "./assets/anhminhhoa/anhcongtruong.jpg",icon: "./assets/icon/vitri.png" },
-            { yaw: -0.4, pitch: 0.2, text: "Trước Phòng Trung tâm Nghiêm Cứu HTTM", target: "b1_2", image: "./assets/anhminhhoa/anhcongtruong.jpg",icon: "./assets/icon/vitri.png" },
+            { yaw: -0.4, pitch: 0.2, text: "Trước Phòng Trung tâm Nghiên Cứu HTTM", target: "b1_2", image: "./assets/anhminhhoa/anhcongtruong.jpg",icon: "./assets/icon/vitri.png" },
             { yaw: -0.9, pitch: 0.0, text: "Phòng DataLAB", target: "b1_datalab", image: "./assets/anhminhhoa/anhcongtruong.jpg",icon: "./assets/icon/vitri.png" },
             { yaw: 0, pitch: 0.0, text: "Lên tầng 2 dãy b", target: "b2_1", image: "./assets/anhminhhoa/anhcongtruong.jpg",icon: "./assets/icon/vitri.png" },
             { yaw: -1.4, pitch: 0.0, text: "Tầng 1 Dãy b 3", target: "b1_4", image: "./assets/anhminhhoa/anhcongtruong.jpg",icon: "./assets/icon/vitri.png" },
@@ -533,7 +533,7 @@ const scenes = [
         id: "b2_5",
         src: "./assets/b2_5.jpg",
         hotspots: [
-            { yaw: 1.4, pitch: 0.0, text: "Tầng 2 dãy b 3", target: "b2_4", image: "./assets/anhminhhoa/anhcongtruong.jpg",icon: "./assets/icon/vitri.png" },
+            { yaw: -0.1, pitch: 0.0, text: "Tầng 2 dãy b 3", target: "b2_4", image: "./assets/anhminhhoa/anhcongtruong.jpg",icon: "./assets/icon/vitri.png" },
             
         ]
     },
@@ -725,7 +725,7 @@ const scenes = [
         id: "a5_1",
         src: "./assets/a5_1.jpg",
         hotspots: [
-            { yaw: -1.6, pitch: 0, text: "Lên tầng 6", target: "a5_1", image: "./assets/anhminhhoa/anhcongtruong.jpg",icon: "./assets/icon/vitri.png" },
+            { yaw: -1.6, pitch: 0, text: "Lên tầng 6", target: "a6_1", image: "./assets/anhminhhoa/anhcongtruong.jpg",icon: "./assets/icon/vitri.png" },
             { yaw: -1.6, pitch: 0.1, text: "Xuống tầng 4", target: "a4_1", image: "./assets/anhminhhoa/anhcongtruong.jpg",icon: "./assets/icon/vitrixuong.png" },
             
         ]
