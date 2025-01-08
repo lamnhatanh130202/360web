@@ -639,9 +639,9 @@ const scenes = [
         id: "b3_2",
         src: "./assets/b3_2.jpg",
         hotspots: [
-            { yaw: 3.1, pitch: 0.0, text: "Tầng 3 dãy b", target: "b3_1", image: "./assets/anhminhhoa/anhcongtruong.jpg",icon: "./assets/icon/vitri.png" },
-            { yaw: 2, pitch: 0.0, text: "BIII.11", target: "b3_3", image: "./assets/anhminhhoa/anhcongtruong.jpg",icon: "./assets/icon/vitri.png" },
-            { yaw: -2.2, pitch: 0.0, text: "BIII.14a", target: "b3_5", image: "./assets/anhminhhoa/anhcongtruong.jpg",icon: "./assets/icon/vitri.png" },
+            { yaw: 3.1, pitch: 0.3, text: "Tầng 3 dãy b", target: "b3_1", image: "./assets/anhminhhoa/anhcongtruong.jpg",icon: "./assets/icon/vitri.png" },
+            { yaw: 1.8, pitch: 0.3, text: "BIII.11", target: "b3_3", image: "./assets/anhminhhoa/anhcongtruong.jpg",icon: "./assets/icon/vitri.png" },
+            { yaw: -2.0, pitch: 0.3, text: "BIII.14a", target: "b3_5", image: "./assets/anhminhhoa/anhcongtruong.jpg",icon: "./assets/icon/vitri.png" },
         ]
     },
     {
@@ -666,9 +666,9 @@ const scenes = [
         id: "b3_5",
         src: "./assets/b3_5.jpg",
         hotspots: [
-            { yaw: 1.5, pitch: 0.0, text: "BIII.13A", target: "b3_2", image: "./assets/anhminhhoa/anhcongtruong.jpg",icon: "./assets/icon/vitri.png" },
+            { yaw: 1.5, pitch: 0.3, text: "BIII.13A", target: "b3_2", image: "./assets/anhminhhoa/anhcongtruong.jpg",icon: "./assets/icon/vitri.png" },
             { yaw: 0, pitch: 0.0, text: "Phòng BIII.14A ", target: "b3_14a", image: "./assets/anhminhhoa/anhcongtruong.jpg",icon: "./assets/icon/vitri.png" },
-            { yaw: -1.6, pitch: 0.0, text: "Cuối HL tầng 3", target: "b3_6", image: "./assets/anhminhhoa/anhcongtruong.jpg",icon: "./assets/icon/vitri.png" },
+            { yaw: -1.6, pitch: 0.3, text: "Cuối HL tầng 3", target: "b3_6", image: "./assets/anhminhhoa/anhcongtruong.jpg",icon: "./assets/icon/vitri.png" },
             
         ]
     },
@@ -676,7 +676,7 @@ const scenes = [
         id: "b3_6",
         src: "./assets/b3_6.jpg",
         hotspots: [
-            { yaw: 1.4, pitch: 0.0, text: "BIII.14a", target: "b3_5", image: "./assets/anhminhhoa/anhcongtruong.jpg",icon: "./assets/icon/vitri.png" },
+            { yaw: 0 , pitch: 0.4, text: "BIII.14a", target: "b3_5", image: "./assets/anhminhhoa/anhcongtruong.jpg",icon: "./assets/icon/vitri.png" },
             
         ]
     },
