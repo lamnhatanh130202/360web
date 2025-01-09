@@ -1,187 +1,190 @@
-<!DOCTYPE html>
-<html lang="vi">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tham Quan Đại Học Bình Dương 360°</title>
-    <!-- Liên kết CSS -->
-    <link rel="stylesheet" href="./css/style.css">
-    <!-- Thư viện Marzipano -->
-    <script src="./js/marzipano.js"></script>
-</head>
-<body>
-    <header>
-    <img id="logo" src="./assets/icon/logo BDU Eng.png" alt="logo">
-    <h1 id="tieude">Tham Quan Đại Học Bình Dương 360°</h1>
-    <div id="header">
-        <button id="toggleAutoRotate">Dừng lại</button>
-    </div>
-    <div id="tenKhuVuc">Tên khu vực: Cổng  Chính</div>
-</header>
-
-    <main>     
-        <div id="scenePreview" class="scene-preview"></div>                                                     
-        <div id="menu">
-            <button id="menuButton">☰</button>
-            <ul id="menuList">
-                <li>
-                    <span>Khu vực ngoài sân</span>
-                    <ul>
-                        <li data-scene="congtruong" data-preview="./assets/anhminhhoa/anhcongtruong.jpg">Cổng Chính</li>
-                        <li data-scene="congphu" data-preview="./assets/anhminhhoa/anhcongtruong.jpg">Cổng Phụ</li>
-                        <li data-scene="santruong" data-preview="./assets/anhminhhoa/anhcongtruong.jpg">Sân Trường</li>
-                        <li data-scene="loidi1" data-preview="./assets/anhminhhoa/anhcongtruong.jpg">Dãy Học Hỏi Hiếu Hành 1 </li>
-                        <li data-scene="loidi2" data-preview="./assets/anhminhhoa/anhcongtruong.jpg">Dãy Học Hỏi Hiếu Hành 2</li>
-                        <li data-scene="TrungtamPTNLS" data-preview="./assets/anhminhhoa/anhcongtruong.jpg">Trung Tâm PTNLS</li>
-                        <li data-scene="phongtuyensinh" data-preview="./assets/anhminhhoa/anhcongtruong.jpg">Phòng Tuyển Sinh</li>
-                        <li data-scene="phongan" data-preview="./assets/anhminhhoa/anhcongtruong.jpg">Phòng Ăn </li>
-
-                    </ul>
-                </li>
-                <li>
-                    <span>Dãy A</span>
-                    <ul>
-                        <li>
-                            <span>Tầng Trệt</span>
-                            <ul>
-                                <li data-scene="trcdaya" data-preview="./assets/anhminhhoa/anhcongtruong.jpg">Trước dãy a</li>
-                                <li data-scene="a0_1" data-preview="./assets/anhminhhoa/anhcongtruong.jpg">Hành lang dãy a 1</li>
-                                <li data-scene="a0_2" data-preview="./assets/anhminhhoa/anhcongtruong.jpg">Hành lang dãy a 2</li>
-                                <li data-scene="truockhoacntt" data-preview="./assets/anhminhhoa/anhcongtruong.jpg">Trước Khoa CNTT</li>
-                                <li data-scene="a0_cntt" data-preview="./assets/anhminhhoa/anhcongtruong.jpg">Khoa CNTT</li>
-                                <li data-scene="a0_kientruc" data-preview="./assets/anhminhhoa/anhcongtruong.jpg">Khoa Kiến Trúc</li>
-                                <li data-scene="a0_ktoto" data-preview="./assets/anhminhhoa/anhcongtruong.jpg">Khoa Kỹ Thuật ÔTô</li>
-                                <li data-scene="a0_luat" data-preview="./assets/anhminhhoa/anhcongtruong.jpg">Khoa Luật</li>
-                                <li data-scene="a0_phongkebencntt" data-preview="./assets/anhminhhoa/anhcongtruong.jpg">Khoa</li>
-                                <li data-scene="a0_qtcn_logistic" data-preview="./assets/anhminhhoa/anhcongtruong.jpg">Khoa Quản Trị Công Nghiệp và logistics</li>
-                                <li data-scene="a0_xahoihoc" data-preview="./assets/anhminhhoa/anhcongtruong.jpg">Khoa Xã Hội Học,Truyền Thông3</li>
-                                
-
-                                
-                            </ul>
-                        </li>
-                        <li>
-                            <span>Tầng 1</span>
-                            <ul>
-                                <li data-scene="a1_1" data-preview="./assets/anhminhhoa/anhcongtruong.jpg">Tầng 1 dãy a</li>
-                                <li data-scene="a1_2" data-preview="./assets/anhminhhoa/anhcongtruong.jpg">Tầng 1 dãy a 1</li>
-                                <li data-scene="a1_3" data-preview="./assets/anhminhhoa/anhcongtruong.jpg">Tầng 1 dãy a 2</li>
-                                <li data-scene="a1_al4" data-preview="./assets/anhminhhoa/anhcongtruong.jpg">Phòng Al.4</li>
-                                <li data-scene="a1_hocvienkingsejong" data-preview="./assets/anhminhhoa/anhcongtruong.jpg">Học Viện King Sejong</li>
-                            </ul>
-                        </li>
-                        <li>
-                            <span>Tầng 2</span>
-                            <ul>
-                                <li data-scene="a2_1" data-preview="./assets/anhminhhoa/anhcongtruong.jpg">Tầng 2 dãy a</li>
-                                <li data-scene="a2_2" data-preview="./assets/anhminhhoa/anhcongtruong.jpg">Tầng 2 dãy a 1</li>
-                                <li data-scene="a2_3" data-preview="./assets/anhminhhoa/anhcongtruong.jpg">Tầng 2 dãy a 2</li>
-                            </ul>   
-                        </li>
-                        <li>
-                            <span>Tầng 3</span>
-                            <ul>
-                                <li data-scene="a3_trcthuvien" data-preview="./assets/anhminhhoa/anhcongtruong.jpg" >Trước Thư Viện</li>
-                                <li data-scene="a3_thuvien1" data-preview="./assets/anhminhhoa/anhcongtruong.jpg" >Thư Viện 1</li>
-                                <li data-scene="a3_thuvien2" data-preview="./assets/anhminhhoa/anhcongtruong.jpg" >Thư Viện 2</li>
-                                <li data-scene="a3_sauthuvien" data-preview="./assets/anhminhhoa/anhcongtruong.jpg" >Sau Thư Viện</li>
-                            </ul>
-                        </li>
-                        <li>
-                            <span>Tầng 4</span>
-                            <ul>
-                                <li data-scene="a4_1" data-preview="./assets/anhminhhoa/anhcongtruong.jpg" >Tầng 4 dãy a</li>
-                                <li data-scene="a4_2" data-preview="./assets/anhminhhoa/anhcongtruong.jpg" >Tầng 4 dãy a 1</li>
-                                <li data-scene="a4_3" data-preview="./assets/anhminhhoa/anhcongtruong.jpg" > Tầng 4 dãy a 2</li>
-                                
-                            </ul>
-                        </li>
-                        <li>
-                            <span>Tầng 5</span>
-                            <ul>
-                                <li data-scene="a5_1" data-preview="./assets/anhminhhoa/anhcongtruong.jpg" >Tầng 5 dãy a </li>
-                                <li data-scene="a5_2" data-preview="./assets/anhminhhoa/anhcongtruong.jpg" > Tầng 5 dãy a 1</li>
-                            </ul>
-                        </li>
-                        <li>
-                            <span>Tầng 6</span>
-                            <ul>
-                                <li data-scene="a6_1" data-preview="./assets/anhminhhoa/anhcongtruong.jpg" >Tầng 6 dãy a</li>
-                                <li data-scene="a6_2" data-preview="./assets/anhminhhoa/anhcongtruong.jpg" >Tầng 6 dãy a 1</li>
-                                <li data-scene="a6_3" data-preview="./assets/anhminhhoa/anhcongtruong.jpg" > Tầng 6 dãy a 2</li>
-                            </ul>
-                        </li>
-                    </ul>
-                </li>
-                <li>
-                    <span>Dãy B</span>
-                    <ul>
-                        <li>
-                            <span>Tầng Trệt</span>
-                            <ul>
-                                <li data-scene="b0_1" data-preview="./assets/anhminhhoa/anhcongtruong.jpg">Tầng Trệt dãy b</li>
-                                <li data-scene="b0_2" data-preview="./assets/anhminhhoa/anhcongtruong.jpg">Tầng Trệt dãy b 1</li>
-                            </ul>
-                        </li>
-                        <li>
-                            <span>Tầng 1</span>
-                            <ul>
-                                <li data-scene="b1_1" data-preview="./assets/anhminhhoa/anhcongtruong.jpg">Tầng 1 dãy b</li>
-                                <li data-scene="b1_2" data-preview="./assets/anhminhhoa/anhcongtruong.jpg">Tầng 1 dãy b 1</li>
-                                <li data-scene="b1_3" data-preview="./assets/anhminhhoa/anhcongtruong.jpg">Tầng 1 dãy b 2</li>
-                                <li data-scene="b1_4" data-preview="./assets/anhminhhoa/anhcongtruong.jpg">Tầng 1 dãy b 3</li>
-                                <li data-scene="b1_5" data-preview="./assets/anhminhhoa/anhcongtruong.jpg">Tầng 1 dãy b 4</li>
-                            </ul>
-                        </li>
-                        <li>
-                            <span>Tầng 2</span>
-                            <ul>
-                                <li data-scene="b2_1" data-preview="./assets/anhminhhoa/anhcongtruong.jpg">Tầng 2 dãy b</li>
-                                <li data-scene="b2_2" data-preview="./assets/anhminhhoa/anhcongtruong.jpg">Tầng 2 dãy b 1</li>
-                                <li data-scene="b2_3" data-preview="./assets/anhminhhoa/anhcongtruong.jpg">Tầng 2 dãy b 2</li>
-                                <li data-scene="b2_4" data-preview="./assets/anhminhhoa/anhcongtruong.jpg">Tầng 2 dãy b 3</li>
-                                <li data-scene="b2_5" data-preview="./assets/anhminhhoa/anhcongtruong.jpg">Tầng 2 dãy b 4</li>
-                            </ul>
-                        </li>
-                        <li>
-                            <span>Tầng 3</span>
-                            <ul>
-                                <li data-scene="b3_1" data-preview="./assets/anhminhhoa/anhcongtruong.jpg">Tầng 3 dãy b</li>
-                                <li data-scene="b3_2" data-preview="./assets/anhminhhoa/anhcongtruong.jpg">BIII.13A</li>
-                                <li data-scene="b3_3" data-preview="./assets/anhminhhoa/anhcongtruong.jpg">BIII.11</li>
-                                <li data-scene="b3_4" data-preview="./assets/anhminhhoa/anhcongtruong.jpg">Khoa xã hội và nhân văn</li>
-                                <li data-scene="b3_5" data-preview="./assets/anhminhhoa/anhcongtruong.jpg">Trước phòng BIII.14a</li>
-                                <li data-scene="b3_14a" data-preview="./assets/anhminhhoa/anhcongtruong.jpg">BIII.14a</li>
-                                <li data-scene="b3_6" data-preview="./assets/anhminhhoa/anhcongtruong.jpg">Cuối HL tầng 3</li>
-                            </ul>
-                        </li>
-                    </ul>
-                </li>
-            </ul>
+    <!DOCTYPE html>
+    <html lang="vi">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Tham Quan Đại Học Bình Dương 360°</title>
+        <!-- Liên kết CSS -->
+        <link rel="stylesheet" href="./css/style.css">
+        <!-- Thư viện Marzipano -->
+        <script src="./js/marzipano.js"></script>
+    </head>
+    <body>
+        <header>
+        <img id="logo" src="./assets/icon/logo BDU Eng.png" alt="logo">
+        <h1 id="tieude">Tham Quan Đại Học Bình Dương 360°</h1>
+        <div id="header">
+    
+                <button id="toggleAutoRotate">Dừng lại</button>
+            
+            
         </div>
-        
-        
-        <div id="pano" style="width: 100%; height: 100%;"></div>
-        <div id="hoverPreview">
-            <img id="previewImage" src="" alt="Preview">
-        </div>
-        
-          
-        
+        <div id="tenKhuVuc">Tên khu vực: Cổng  Chính</div>
+    </header>
 
-        </div>
-        
-    </main>
-    <footer>
-        <div id="controls">
-            <button id="left">Quay trái</button>
-            <button id="right">Quay phải</button>
-            <button id="zoomIn">Phóng to</button>               
-            <button id="zoomOut">Thu Nhỏ</button>
-        </div>
-    </footer>
+        <main>     
+            <div id="scenePreview" class="scene-preview"></div>                                                     
+            <div id="menu">
+                <button id="menuButton">☰</button>
+                <ul id="menuList">
+                    <li>
+                        <span>Khu vực ngoài sân</span>
+                        <ul>
+                            <li data-scene="congtruong" data-preview="./assets/anhminhhoa/anhcongtruong.jpg">Cổng Chính</li>
+                            <li data-scene="congphu" data-preview="./assets/anhminhhoa/anhcongtruong.jpg">Cổng Phụ</li>
+                            <li data-scene="santruong" data-preview="./assets/anhminhhoa/anhcongtruong.jpg">Sân Trường</li>
+                            <li data-scene="loidi1" data-preview="./assets/anhminhhoa/anhcongtruong.jpg">Dãy Học Hỏi Hiếu Hành 1 </li>
+                            <li data-scene="loidi2" data-preview="./assets/anhminhhoa/anhcongtruong.jpg">Dãy Học Hỏi Hiếu Hành 2</li>
+                            <li data-scene="TrungtamPTNLS" data-preview="./assets/anhminhhoa/anhcongtruong.jpg">Trung Tâm PTNLS</li>
+                            <li data-scene="phongtuyensinh" data-preview="./assets/anhminhhoa/anhcongtruong.jpg">Phòng Tuyển Sinh</li>
+                            <li data-scene="phongan" data-preview="./assets/anhminhhoa/anhcongtruong.jpg">Phòng Ăn </li>
 
-    <!-- Liên kết file JavaScript -->
-    <script src="./js/script.js"></script>
-</body>
-</html>
+                        </ul>
+                    </li>
+                    <li>
+                        <span>Dãy A</span>
+                        <ul>
+                            <li>
+                                <span>Tầng Trệt</span>
+                                <ul>
+                                    <li data-scene="trcdaya" data-preview="./assets/anhminhhoa/anhcongtruong.jpg">Trước dãy a</li>
+                                    <li data-scene="a0_1" data-preview="./assets/anhminhhoa/anhcongtruong.jpg">Hành lang dãy a 1</li>
+                                    <li data-scene="a0_2" data-preview="./assets/anhminhhoa/anhcongtruong.jpg">Hành lang dãy a 2</li>
+                                    <li data-scene="truockhoacntt" data-preview="./assets/anhminhhoa/anhcongtruong.jpg">Trước Khoa CNTT</li>
+                                    <li data-scene="a0_cntt" data-preview="./assets/anhminhhoa/anhcongtruong.jpg">Khoa CNTT</li>
+                                    <li data-scene="a0_kientruc" data-preview="./assets/anhminhhoa/anhcongtruong.jpg">Khoa Kiến Trúc</li>
+                                    <li data-scene="a0_ktoto" data-preview="./assets/anhminhhoa/anhcongtruong.jpg">Khoa Kỹ Thuật ÔTô</li>
+                                    <li data-scene="a0_luat" data-preview="./assets/anhminhhoa/anhcongtruong.jpg">Khoa Luật</li>
+                                    <li data-scene="a0_phongkebencntt" data-preview="./assets/anhminhhoa/anhcongtruong.jpg">Khoa</li>
+                                    <li data-scene="a0_qtcn_logistic" data-preview="./assets/anhminhhoa/anhcongtruong.jpg">Khoa Quản Trị Công Nghiệp và logistics</li>
+                                    <li data-scene="a0_xahoihoc" data-preview="./assets/anhminhhoa/anhcongtruong.jpg">Khoa Xã Hội Học,Truyền Thông3</li>
+                                    
+
+                                    
+                                </ul>
+                            </li>
+                            <li>
+                                <span>Tầng 1</span>
+                                <ul>
+                                    <li data-scene="a1_1" data-preview="./assets/anhminhhoa/anhcongtruong.jpg">Tầng 1 dãy a</li>
+                                    <li data-scene="a1_2" data-preview="./assets/anhminhhoa/anhcongtruong.jpg">Tầng 1 dãy a 1</li>
+                                    <li data-scene="a1_3" data-preview="./assets/anhminhhoa/anhcongtruong.jpg">Tầng 1 dãy a 2</li>
+                                    <li data-scene="a1_al4" data-preview="./assets/anhminhhoa/anhcongtruong.jpg">Phòng Al.4</li>
+                                    <li data-scene="a1_hocvienkingsejong" data-preview="./assets/anhminhhoa/anhcongtruong.jpg">Học Viện King Sejong</li>
+                                </ul>
+                            </li>
+                            <li>
+                                <span>Tầng 2</span>
+                                <ul>
+                                    <li data-scene="a2_1" data-preview="./assets/anhminhhoa/anhcongtruong.jpg">Tầng 2 dãy a</li>
+                                    <li data-scene="a2_2" data-preview="./assets/anhminhhoa/anhcongtruong.jpg">Tầng 2 dãy a 1</li>
+                                    <li data-scene="a2_3" data-preview="./assets/anhminhhoa/anhcongtruong.jpg">Tầng 2 dãy a 2</li>
+                                </ul>   
+                            </li>
+                            <li>
+                                <span>Tầng 3</span>
+                                <ul>
+                                    <li data-scene="a3_trcthuvien" data-preview="./assets/anhminhhoa/anhcongtruong.jpg" >Trước Thư Viện</li>
+                                    <li data-scene="a3_thuvien1" data-preview="./assets/anhminhhoa/anhcongtruong.jpg" >Thư Viện 1</li>
+                                    <li data-scene="a3_thuvien2" data-preview="./assets/anhminhhoa/anhcongtruong.jpg" >Thư Viện 2</li>
+                                    <li data-scene="a3_sauthuvien" data-preview="./assets/anhminhhoa/anhcongtruong.jpg" >Sau Thư Viện</li>
+                                </ul>
+                            </li>
+                            <li>
+                                <span>Tầng 4</span>
+                                <ul>
+                                    <li data-scene="a4_1" data-preview="./assets/anhminhhoa/anhcongtruong.jpg" >Tầng 4 dãy a</li>
+                                    <li data-scene="a4_2" data-preview="./assets/anhminhhoa/anhcongtruong.jpg" >Tầng 4 dãy a 1</li>
+                                    <li data-scene="a4_3" data-preview="./assets/anhminhhoa/anhcongtruong.jpg" > Tầng 4 dãy a 2</li>
+                                    
+                                </ul>
+                            </li>
+                            <li>
+                                <span>Tầng 5</span>
+                                <ul>
+                                    <li data-scene="a5_1" data-preview="./assets/anhminhhoa/anhcongtruong.jpg" >Tầng 5 dãy a </li>
+                                    <li data-scene="a5_2" data-preview="./assets/anhminhhoa/anhcongtruong.jpg" > Tầng 5 dãy a 1</li>
+                                </ul>
+                            </li>
+                            <li>
+                                <span>Tầng 6</span>
+                                <ul>
+                                    <li data-scene="a6_1" data-preview="./assets/anhminhhoa/anhcongtruong.jpg" >Tầng 6 dãy a</li>
+                                    <li data-scene="a6_2" data-preview="./assets/anhminhhoa/anhcongtruong.jpg" >Tầng 6 dãy a 1</li>
+                                    <li data-scene="a6_3" data-preview="./assets/anhminhhoa/anhcongtruong.jpg" > Tầng 6 dãy a 2</li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </li>
+                    <li>
+                        <span>Dãy B</span>
+                        <ul>
+                            <li>
+                                <span>Tầng Trệt</span>
+                                <ul>
+                                    <li data-scene="b0_1" data-preview="./assets/anhminhhoa/anhcongtruong.jpg">Tầng Trệt dãy b</li>
+                                    <li data-scene="b0_2" data-preview="./assets/anhminhhoa/anhcongtruong.jpg">Tầng Trệt dãy b 1</li>
+                                </ul>
+                            </li>
+                            <li>
+                                <span>Tầng 1</span>
+                                <ul>
+                                    <li data-scene="b1_1" data-preview="./assets/anhminhhoa/anhcongtruong.jpg">Tầng 1 dãy b</li>
+                                    <li data-scene="b1_2" data-preview="./assets/anhminhhoa/anhcongtruong.jpg">Tầng 1 dãy b 1</li>
+                                    <li data-scene="b1_3" data-preview="./assets/anhminhhoa/anhcongtruong.jpg">Tầng 1 dãy b 2</li>
+                                    <li data-scene="b1_4" data-preview="./assets/anhminhhoa/anhcongtruong.jpg">Tầng 1 dãy b 3</li>
+                                    <li data-scene="b1_5" data-preview="./assets/anhminhhoa/anhcongtruong.jpg">Tầng 1 dãy b 4</li>
+                                </ul>
+                            </li>
+                            <li>
+                                <span>Tầng 2</span>
+                                <ul>
+                                    <li data-scene="b2_1" data-preview="./assets/anhminhhoa/anhcongtruong.jpg">Tầng 2 dãy b</li>
+                                    <li data-scene="b2_2" data-preview="./assets/anhminhhoa/anhcongtruong.jpg">Tầng 2 dãy b 1</li>
+                                    <li data-scene="b2_3" data-preview="./assets/anhminhhoa/anhcongtruong.jpg">Tầng 2 dãy b 2</li>
+                                    <li data-scene="b2_4" data-preview="./assets/anhminhhoa/anhcongtruong.jpg">Tầng 2 dãy b 3</li>
+                                    <li data-scene="b2_5" data-preview="./assets/anhminhhoa/anhcongtruong.jpg">Tầng 2 dãy b 4</li>
+                                </ul>
+                            </li>
+                            <li>
+                                <span>Tầng 3</span>
+                                <ul>
+                                    <li data-scene="b3_1" data-preview="./assets/anhminhhoa/anhcongtruong.jpg">Tầng 3 dãy b</li>
+                                    <li data-scene="b3_2" data-preview="./assets/anhminhhoa/anhcongtruong.jpg">BIII.13A</li>
+                                    <li data-scene="b3_3" data-preview="./assets/anhminhhoa/anhcongtruong.jpg">BIII.11</li>
+                                    <li data-scene="b3_4" data-preview="./assets/anhminhhoa/anhcongtruong.jpg">Khoa xã hội và nhân văn</li>
+                                    <li data-scene="b3_5" data-preview="./assets/anhminhhoa/anhcongtruong.jpg">Trước phòng BIII.14a</li>
+                                    <li data-scene="b3_14a" data-preview="./assets/anhminhhoa/anhcongtruong.jpg">BIII.14a</li>
+                                    <li data-scene="b3_6" data-preview="./assets/anhminhhoa/anhcongtruong.jpg">Cuối HL tầng 3</li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+            
+            
+            <div id="pano" style="width: 100%; height: 100%;"></div>
+            <div id="hoverPreview">
+                <img id="previewImage" src="" alt="Preview">
+            </div>
+            
+            
+            
+
+            </div>
+            
+        </main>
+        <footer>
+            <div id="controls">
+                <button id="left">Quay trái</button>
+                <button id="right">Quay phải</button>
+                <button id="zoomIn">Phóng to</button>               
+                <button id="zoomOut">Thu Nhỏ</button>
+            </div>
+        </footer>
+
+        <!-- Liên kết file JavaScript -->
+        <script src="./js/script.js"></script>
+    </body>
+    </html>

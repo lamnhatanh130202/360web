@@ -123,11 +123,45 @@ main {
     box-shadow: 0 6px 8px rgba(0, 0, 0, 0.3); /* Tăng đổ bóng */
 }
 
+
 /* Đảm bảo nút có độ lớn phù hợp trên thiết bị nhỏ */
 @media (max-width: 768px) {
     #menuButton {
         font-size: 16px; /* Giảm kích thước chữ trên thiết bị nhỏ */
         padding: 8px 16px; /* Giảm khoảng cách bên trong */
+    }
+    header h1#tieude {
+        display: none;
+        font-size: 10px; /* Kích thước chữ lớn hơn */
+        margin: 0;
+        flex: 1; /* Chiếm không gian còn lại */
+        text-align: center; /* Căn giữa nội dung */
+    }
+    #logo{
+        width: 80px;
+        height: 40px;
+        margin-right: 0px ;
+    }
+    #tenKhuVuc {
+        font-size: 10px;
+        font-weight: bold;
+        color: #007bff; /* Màu xanh nổi bật */
+        
+        text-align: center;
+        background-color: rgba(255, 255, 255, 0.8); /* Nền trắng trong suốt */
+        padding: 10px;
+        border-radius: 5px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Đổ bóng nhẹ */
+    }
+    header #header button {
+        background-color: #070a0d; /* Màu nền xanh */
+        border: none;
+        color: white;
+        padding: 10px 20px;
+        font-size: 10px;
+        border-radius: 5px; /* Bo góc */
+        cursor: pointer;
+        transition: background-color 0.3s ease;
     }
 }
 
@@ -274,3 +308,9 @@ main {
 #rotateLeft:hover, #rotateRight:hover {
     background-color: #0056b3;
 }
+
+
+
+
+
+

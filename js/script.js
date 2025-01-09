@@ -1008,7 +1008,6 @@ function initializePreview() {
 }
 
 
-
 // Cập nhật hàm initialize
 function initialize() {
     initializeMenu();
@@ -1016,9 +1015,7 @@ function initialize() {
 }
  // Load scene đầu tiên và bắt đầu xoay
  loadScene(scenes[0]);
-  // Đảm bảo nút toggle hiển thị đúng trạng thái
-  const toggleButton = document.getElementById("toggleAutoRotate");
-  toggleButton.innerText = isAutoRotating ? "Dừng lại" : "Tiếp tục";
+
 
 // Chạy ứng dụng
 initialize();
