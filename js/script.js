@@ -1,5 +1,6 @@
 // viewer và các biến toàn cục
 const viewer = new Marzipano.Viewer(document.getElementById("pano"));
+const limiter = Marzipano.RectilinearView.limit.traditional(1024, 120 * Math.PI / 180);
 let isAutoRotating = true;
 let autoRotateInterval;
 let autoRotateTimeout;
@@ -966,19 +967,39 @@ function setupControls(view) {
 }
 
 
-    document.getElementById("zoomIn").onclick = () => {
-        const currentFov = view.fov();
-        smoothMove(currentFov, currentFov * 0.8, 300,
-            value => view.setFov(value)
-        );
-    };
+document.getElementById("zoomIn").onclick = () => {
+    const currentFov = view.fov();
+    console.log("Zoom In: Current FOV", currentFov);
+    smoothMove(currentFov, currentFov * 0.8, 300,
+        value => {
+            console.log("Updating FOV to", value);
+            view.setFov(value);
+        }
+    );
+};
 
-    document.getElementById("zoomOut").onclick = () => {
+document.getElementById("zoomOut").onclick = () => {
+    const currentFov = view.fov();
+    console.log("Zoom Out: Current FOV", currentFov);
+    smoothMove(currentFov, currentFov * 1.2, 300,
+        value => {
+            console.log("Updating FOV to", value);
+            view.setFov(value);
+        }
+    );
+};
+
+
+
+
+    document.getElementById("pano").addEventListener("wheel", (event) => {
+        const delta = event.deltaY; // Nhận giá trị lăn chuột
         const currentFov = view.fov();
-        smoothMove(currentFov, currentFov * 1.2, 300,
-            value => view.setFov(value)
-        );
-    };
+        const newFov = delta > 0 ? currentFov * 1.1 : currentFov * 0.9; // Zoom in hoặc zoom out
+        view.setFov(Math.max(0.2, Math.min(newFov, 1.5))); // Giới hạn FOV
+        event.preventDefault(); // Ngăn hành vi mặc định của trình duyệt
+    });
+    
 
      const toggleButton = document.getElementById("toggleAutoRotate");
     toggleButton.innerText = isAutoRotating ? "Dừng lại" : "Tiếp tục";
