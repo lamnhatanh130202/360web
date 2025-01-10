@@ -212,6 +212,11 @@ main {
     font-weight: bold; /* Chữ đậm */
     border-bottom: 1px solid #f0f0f0; /* Đường viền phân cách */
     transition: all 0.3s ease; /* Hiệu ứng chuyển đổi */
+    
+        white-space: nowrap; /* Không xuống dòng */
+        overflow: hidden; /* Ẩn nội dung tràn */
+        text-overflow: ellipsis; /* Thêm dấu "..." khi tràn */
+    
 }
 
 #menuList li:hover {

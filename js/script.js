@@ -911,23 +911,60 @@ function loadScene(sceneData) {
     
     // Tách riêng phần thiết lập controls
 function setupControls(view) {
-    document.getElementById("left").onclick = () => {
-        stopAutoRotate();
-        const currentYaw = view.yaw();
-        smoothMove(currentYaw, currentYaw - 0.1, 500, 
-            value => view.setYaw(value), 
-            () => resetAutoRotate(view)
-        );
+    let isRotatingLeft = false;
+    let isRotatingRight = false;
+
+    // Xử lý sự kiện giữ chuột cho nút "left"
+    const rotateLeft = () => {
+        if (isRotatingLeft) {
+            stopAutoRotate();
+            const currentYaw = view.yaw();
+            view.setYaw(currentYaw - 0.01); // Xoay nhẹ nhàng hơn
+            requestAnimationFrame(rotateLeft); // Tiếp tục xoay
+        } else {
+            resetAutoRotate(view); // Reset tự động xoay nếu dừng
+        }
     };
 
-    document.getElementById("right").onclick = () => {
-        stopAutoRotate();
-        const currentYaw = view.yaw();
-        smoothMove(currentYaw, currentYaw + 0.5, 500, 
-            value => view.setYaw(value), 
-            () => resetAutoRotate(view)
-        );
+    // Xử lý sự kiện giữ chuột cho nút "right"
+    const rotateRight = () => {
+        if (isRotatingRight) {
+            stopAutoRotate();
+            const currentYaw = view.yaw();
+            view.setYaw(currentYaw + 0.01); // Xoay nhẹ nhàng hơn
+            requestAnimationFrame(rotateRight); // Tiếp tục xoay
+        } else {
+            resetAutoRotate(view); // Reset tự động xoay nếu dừng
+        }
     };
+
+    // Thêm sự kiện cho nút "left"
+    const leftButton = document.getElementById("left");
+    leftButton.onmousedown = () => {
+        isRotatingLeft = true;
+        rotateLeft();
+    };
+    leftButton.onmouseup = () => {
+        isRotatingLeft = false;
+    };
+    leftButton.onmouseleave = () => {
+        isRotatingLeft = false;
+    };
+
+    // Thêm sự kiện cho nút "right"
+    const rightButton = document.getElementById("right");
+    rightButton.onmousedown = () => {
+        isRotatingRight = true;
+        rotateRight();
+    };
+    rightButton.onmouseup = () => {
+        isRotatingRight = false;
+    };
+    rightButton.onmouseleave = () => {
+        isRotatingRight = false;
+    };
+}
+
 
     document.getElementById("zoomIn").onclick = () => {
         const currentFov = view.fov();
@@ -948,11 +985,6 @@ function setupControls(view) {
     toggleButton.onclick = () => toggleAutoRotate(view, toggleButton);
 
 
-    // Bắt đầu xoay tự động
-    if (isAutoRotating) {
-        startAutoRotate(view);
-    }
-}
 
 // Khởi tạo menu và sự kiện
 function initializeMenu() {
