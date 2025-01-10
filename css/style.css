@@ -2,6 +2,8 @@ body, html {
     margin: 0;
     padding: 0;
     height: 100%;
+    overflow-x: hidden; /* Ngăn tràn ngang */
+    overflow-y: hidden; 
 }
 /* Đặt header nằm đè lên hình nền */
 header {
@@ -82,7 +84,7 @@ main {
     padding: 10px 20px;
     font-size: 16px;
     cursor: pointer;
-    background-color: #219957;
+    background-color: #ad171c ;
     color: white;
     border: none;
     border-radius: 5px;
@@ -90,7 +92,7 @@ main {
 }
 
 #controls button:hover {
-    background-color: #24b364;
+    background-color: #931116 ;
 }
 
 #menu {
@@ -105,7 +107,7 @@ main {
 
 #menuButton {
     cursor: pointer;
-    background-color: rgb(7, 247, 15); /* Màu nền */
+    background-color: #ad171c ; /* Màu nền */
     border: none; /* Loại bỏ viền cũ */
     color: white; /* Màu chữ */
     font-size: 18px; /* Tăng kích thước chữ */
@@ -118,7 +120,7 @@ main {
 
 /* Hiệu ứng khi hover vào nút */
 #menuButton:hover {
-    background-color: rgb(4, 200, 12); /* Màu nền khi hover */
+    background-color: #ad171c ; /* Màu nền khi hover */
     transform: scale(1.1); /* Phóng to nhẹ */
     box-shadow: 0 6px 8px rgba(0, 0, 0, 0.3); /* Tăng đổ bóng */
 }
@@ -127,9 +129,10 @@ main {
 /* Đảm bảo nút có độ lớn phù hợp trên thiết bị nhỏ */
 @media (max-width: 768px) {
     #menuButton {
-        font-size: 16px; /* Giảm kích thước chữ trên thiết bị nhỏ */
+        font-size: 14px; /* Giảm kích thước chữ trên thiết bị nhỏ */
         padding: 8px 16px; /* Giảm khoảng cách bên trong */
     }
+    
     header h1#tieude {
         display: none;
         font-size: 10px; /* Kích thước chữ lớn hơn */
@@ -154,7 +157,7 @@ main {
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Đổ bóng nhẹ */
     }
     header #header button {
-        background-color: #070a0d; /* Màu nền xanh */
+        background-color: #ad171c ; /* Màu nền xanh */
         border: none;
         color: white;
         padding: 10px 20px;
@@ -162,6 +165,24 @@ main {
         border-radius: 5px; /* Bo góc */
         cursor: pointer;
         transition: background-color 0.3s ease;
+    }
+    .hotspot {
+        width: 30px !important;
+        height: 30px !important;
+    }
+
+    .hotspot-icon {
+        width: 25px !important;
+        height: 25px !important;
+    }
+
+    .hotspot-info {
+        top: -60px !important;
+        font-size: 12px !important;
+    }
+    .hotspot-info img {
+        width: 80px !important; 
+        height: 50px !important;
     }
 }
 
@@ -175,7 +196,9 @@ main {
     list-style: none;
     padding: 0;
     margin: 0;
-    width: 220px; /* Tăng chiều rộng menu */
+    width: 240px;
+
+    
     z-index: 1000;
     border-radius: 10px; /* Bo tròn góc menu */
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2); /* Đổ bóng */
@@ -226,7 +249,7 @@ main {
 
 /* Tạo hiệu ứng hover cho cấp con */
 #menuList ul li:hover {
-    background: rgba(7, 247, 15, 0.8); /* Màu nền sáng hơn khi hover */
+    background: #ad171c ; /* Màu nền sáng hơn khi hover */
     color: white;
 }
 
