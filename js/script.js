@@ -562,7 +562,7 @@ const scenes = [
         id: "a2_1",
         src: "./assets/a2_1.jpg",
         hotspots: [
-            { yaw: 4.8, pitch: 0, text: "Lên tầng 3", target: "a3_1", image: "./assets/anhminhhoa/anhcongtruong.jpg",icon: "./assets/icon/vitri.png" },
+            { yaw: 4.8, pitch: 0, text: "Lên tầng 3", target: "a3_sauthuvien", image: "./assets/anhminhhoa/anhcongtruong.jpg",icon: "./assets/icon/vitri.png" },
             { yaw: 4.8, pitch: 0.1, text: "Xuống tầng 1", target: "a1_1", image: "./assets/anhminhhoa/anhcongtruong.jpg",icon: "./assets/icon/vitrixuong.png" },
             { yaw: 0, pitch: 0.3, text: "Tầng 2 dãy a 1", target: "a2_2", image: "./assets/anhminhhoa/anhcongtruong.jpg",icon: "./assets/icon/vitri.png" },
             
