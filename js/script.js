@@ -1060,6 +1060,29 @@ function initializePreview() {
     });
 }
 
+if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("/service-worker.js")
+        .then(() => console.log("Service Worker Registered"))
+        .catch(err => console.log("Service Worker Failed", err));
+}
+
+let deferredPrompt;
+window.addEventListener("beforeinstallprompt", (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    document.getElementById("installButton").style.display = "block";
+});
+
+document.getElementById("installButton").addEventListener("click", () => {
+    deferredPrompt.prompt();
+    deferredPrompt.userChoice.then(choiceResult => {
+        if (choiceResult.outcome === "accepted") {
+            console.log("User installed the app");
+        }
+        deferredPrompt = null;
+    });
+});
+
 
 // Cập nhật hàm initialize
 function initialize() {

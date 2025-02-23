@@ -8,11 +8,16 @@
         <link rel="stylesheet" href="./css/style.css">
         <!-- Thư viện Marzipano -->
         <script src="./js/marzipano.js"></script>
+        <link rel="manifest" href="manifest.json">
+
     </head>
     <body>
         <header>
         <img id="logo" src="./assets/icon/logo BDU Eng.png" alt="logo">
+        
         <h1 id="tieude">Tham Quan Đại Học Bình Dương 360°</h1>
+        <button id="installButton" style="display: none;">Cài đặt ứng dụng</button>
+
         <div id="header">
     
                 <button id="toggleAutoRotate">Dừng lại</button>
@@ -186,5 +191,11 @@
 
         <!-- Liên kết file JavaScript -->
         <script src="./js/script.js"></script>
+
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <meta name="apple-mobile-web-app-status-bar-style" content="black">
+        <meta name="apple-mobile-web-app-title" content="Web360">
+        <link rel="apple-touch-icon" href="icons/icon-192x192.png">
+
     </body>
     </html>
