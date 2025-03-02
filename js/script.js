@@ -9,7 +9,7 @@ const sceneCache = {};
 
 // Danh sách tên khu vực
 const khuVuc = {
-    // tầng trệt và các khu vực kháce
+    // tầng trệt và các khu vực khác 
     congtruong: "Cổng Chính",
     congphu: " Cổng Phụ",
     duonglencong: "Đường Lên Cổng",
@@ -25,17 +25,20 @@ const khuVuc = {
     a0_kientruc: "Khoa Kiến Trúc ",
     a0_ktoto: "Khoa Kỹ Thuật ÔTô ",
     a0_luat: "Khoa Luật ",
+    a0_kinhte: "Khoa Kinh Tế     ",
     a0_phongkebencntt: "Khoa ",
     a0_qtcn_logistic: "Khoa Quản Trị Công Nghiệp và logistics",
     a0_xahoihoc: "Khoa Xã Hội Học,Truyền Thông",
     a0_1: "Hành Lang Dãy A 1",
     a0_2: "Hành Lang Dãy A 2",
+    a0_3: "Hành Lang Dãy A 3",
 
     santruong: " Giữa Sân Trường",
     
     
-    b0_1: "Tầng Trệt Dãy B 1",
-    b0_2:"Tầng Trệt Dãy B 2",
+    b0_1: "Tầng Trệt Dãy B ",
+    b0_2:"Tầng Trệt Dãy B 1",
+    b0_3:"Tầng Trệt Dãy B 2",
     // Tầng 1
     a1_1:"Tầng 1 dãy a",
     a1_2:"Tầng 1 dãy a 1",
@@ -108,7 +111,18 @@ const scenes = [
         id: "congphu",
         src: "./assets/congphu.jpg",
         hotspots: [
-            { yaw: -0.3,pitch: -0.05, text: "Hành Lang dãy a", target: "a0_1", image: "./assets/anhminhhoa/anhcongtruong.jpg",icon: "./assets/icon/vitri.png" }
+            { yaw: -0.3,pitch: -0.05, text: "Hành Lang dãy a", target: "a0_1", image: "./assets/anhminhhoa/anhcongtruong.jpg",icon: "./assets/icon/vitri.png" },
+            { yaw: 2.6,pitch: 0.02, text: "Cổng Khu E", target: "e0_conge", image: "./assets/anhminhhoa/anhcongtruong.jpg",icon: "./assets/icon/vitri.png" },
+        
+        ]
+    },
+    {
+        id: "e0_conge",
+        src: "./assets/e0_conge.jpg",
+        hotspots: [
+            { yaw: -0.3,pitch: -0.05, text: "Cổng Phụ Khu Chính", target: "congphu", image: "./assets/anhminhhoa/anhcongtruong.jpg",icon: "./assets/icon/vitri.png" },
+            { yaw: 3.1,pitch: 0.05, text: "Cổng Phụ Khu Chính", target: "congphu", image: "./assets/anhminhhoa/anhcongtruong.jpg",icon: "./assets/icon/vitri.png" },
+        
         ]
     },
     {
@@ -207,6 +221,14 @@ const scenes = [
             { yaw: 1.3, pitch: -0.0, text: "Tầng Trệt Dãy B ", target: "b0_1", image: "./assets/anhminhhoa/anhcongtruong.jpg",icon: "./assets/icon/vitri.png" },
             { yaw: 0, pitch: -0.0, text: "Sân trường ", target: "santruong", image: "./assets/anhminhhoa/anhcongtruong.jpg",icon: "./assets/icon/vitri.png" },
             { yaw: 2, pitch: -0.0, text: "Lên tầng 2 dãy B ", target: "b1_1", image: "./assets/anhminhhoa/anhcongtruong.jpg",icon: "./assets/icon/vitri.png" },
+            { yaw: -2, pitch: 0.3, text: "Tầng Trệt Dãy B ", target: "b0_3", image: "./assets/anhminhhoa/anhcongtruong.jpg",icon: "./assets/icon/vitri.png" },
+        ]
+    },
+    {
+        id: "b0_3",
+        src: "./assets/b0_3.jpg",
+        hotspots: [
+            { yaw: 1.5, pitch: 0.3, text: "Cổng Phụ ", target: "congphu", image: "./assets/anhminhhoa/anhcongtruong.jpg",icon: "./assets/icon/vitri.png" },
             
         ]
     },
@@ -246,9 +268,24 @@ const scenes = [
             { yaw: 2.3, pitch: -0.01, text: "Cổng Phụ", target: "congphu", image: "./assets/anhminhhoa/anhcongtruong.jpg",icon: "./assets/icon/vitri.png" },
                 ]
     },
+
     {
         id: "a0_2",
         src: "./assets/a0_2.jpg",
+        hotspots: [
+            
+            
+            { yaw: 1.3, pitch: 0.3, text: " Hành Lang Dãy A 3", target: "a0_3", image: "./assets/anhminhhoa/anhcongtruong.jpg",icon: "./assets/icon/vitri.png" },
+            { yaw: 0, pitch: 0.3, text: "Khoa kinh tế", target: "a0_kinhte", image: "./assets/anhminhhoa/anhcongtruong.jpg",icon: "./assets/icon/vitri.png" },
+            { yaw: -1.5, pitch: 0.5, text: "Hành Lang Dãy A 1", target: "a0_1", image: "./assets/anhminhhoa/anhcongtruong.jpg",icon: "./assets/icon/vitri.png" },
+           
+           
+                ]
+    },
+
+    {
+        id: "a0_3",
+        src: "./assets/a0_3.jpg",
         hotspots: [
             { yaw: 1.35, pitch: -0.1, text: "Khoa Công Nghệ Thông Tin", target: "a0_cntt", image: "./assets/anhminhhoa/anhcongtruong.jpg",icon: "./assets/icon/vitri.png" },
             { yaw: 1.25, pitch: -0.1, text: "Khoa ", target: "a0_phongkebencntt", image: "./assets/anhminhhoa/anhcongtruong.jpg",icon: "./assets/icon/vitri.png" },
@@ -282,7 +319,7 @@ const scenes = [
         id: "a0_ktoto",
         src: "./assets/a0_ktoto.jpg",
         hotspots: [
-            { yaw: 0.03, pitch: 0.0, text: "Rời Phòng", target: "a0_2", image: "./assets/anhminhhoa/anhcongtruong.jpg",icon: "./assets/icon/vitrixuong.png" },
+            { yaw: 0.03, pitch: 0.0, text: "Rời Phòng", target: "a0_3", image: "./assets/anhminhhoa/anhcongtruong.jpg",icon: "./assets/icon/vitrixuong.png" },
             
         ]
     },
@@ -290,7 +327,7 @@ const scenes = [
         id: "a0_luat",
         src: "./assets/a0_luat.jpg",
         hotspots: [
-            { yaw: 0.03, pitch: -0.0, text: "Rời Phòng", target: "a0_2", image: "./assets/anhminhhoa/anhcongtruong.jpg",icon: "./assets/icon/vitrixuong.png" },
+            { yaw: 0.03, pitch: -0.0, text: "Rời Phòng", target: "a0_3", image: "./assets/anhminhhoa/anhcongtruong.jpg",icon: "./assets/icon/vitrixuong.png" },
             
         ]
     },
@@ -307,7 +344,7 @@ const scenes = [
         id: "a0_qtcn_logistic",
         src: "./assets/a0_qtcn_logistic.jpg",
         hotspots: [
-            { yaw: 0.03, pitch: -0.0, text: "Rời Phòng", target: "a0_2", image: "./assets/anhminhhoa/anhcongtruong.jpg",icon: "./assets/icon/vitrixuong.png" },
+            { yaw: 0.03, pitch: -0.0, text: "Rời Phòng", target: "a0_3", image: "./assets/anhminhhoa/anhcongtruong.jpg",icon: "./assets/icon/vitrixuong.png" },
             
         ]
     },
@@ -319,6 +356,16 @@ const scenes = [
             
         ]
     },
+
+    {
+        id: "a0_kinhte",
+        src: "./assets/a0_kinhte.jpg",
+        hotspots: [
+            { yaw: 0.03, pitch: -0.0, text: "Rời Phòng", target: "a0_2", image: "./assets/anhminhhoa/anhcongtruong.jpg",icon: "./assets/icon/vitrixuong.png" },
+            
+        ]
+    },
+    
     // tầng 1 dãy a 
     {
         id: "a1_1",
