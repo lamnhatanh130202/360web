@@ -111,20 +111,12 @@ const scenes = [
         id: "congphu",
         src: "./assets/congphu.jpg",
         hotspots: [
-            { yaw: -0.3,pitch: -0.05, text: "Hành Lang dãy a", target: "a0_1", image: "./assets/anhminhhoa/anhcongtruong.jpg",icon: "./assets/icon/vitri.png" },
+            { yaw: -0.3,pitch: -0.05, text: "Hành Lang dãy a", target: "e0_sauconge", image: "./assets/anhminhhoa/anhcongtruong.jpg",icon: "./assets/icon/vitri.png" },
             { yaw: 2.6,pitch: 0.02, text: "Cổng Khu E", target: "e0_conge", image: "./assets/anhminhhoa/anhcongtruong.jpg",icon: "./assets/icon/vitri.png" },
         
         ]
     },
-    {
-        id: "e0_conge",
-        src: "./assets/e0_conge.jpg",
-        hotspots: [
-            { yaw: -0.3,pitch: -0.05, text: "Cổng Phụ Khu Chính", target: "congphu", image: "./assets/anhminhhoa/anhcongtruong.jpg",icon: "./assets/icon/vitri.png" },
-            { yaw: 3.1,pitch: 0.05, text: "Cổng Phụ Khu Chính", target: "congphu", image: "./assets/anhminhhoa/anhcongtruong.jpg",icon: "./assets/icon/vitri.png" },
-        
-        ]
-    },
+    
     {
         id: "phongtuyensinh",
         src: "./assets/phongtuyensinh.jpg",
@@ -232,7 +224,30 @@ const scenes = [
             
         ]
     },
-// Tầng trệt dãy a
+
+    //Tầng trệt khu e
+
+
+    {
+        id: "e0_conge",
+        src: "./assets/e0_conge.jpg",
+        hotspots: [
+            { yaw: 0,pitch: 0.04, text: "Cổng Khu E", target: "e0_truocsanbaigiuxe", image: "./assets/anhminhhoa/anhcongtruong.jpg",icon: "./assets/icon/vitri.png" },
+            { yaw: 3.1,pitch: 0.05, text: "Cổng Phụ Khu Chính", target: "congphu", image: "./assets/anhminhhoa/anhcongtruong.jpg",icon: "./assets/icon/vitri.png" },
+        
+        ]
+    },
+    {
+        id: "e0_truocsanbaigiuxe",
+        src: "./assets/e0_truocsanbaigiuxe.jpg",
+        hotspots: [
+            { yaw: -0.3,pitch: -0.05, text: "Cổng Khu E", target: "congphu", image: "./assets/anhminhhoa/anhcongtruong.jpg",icon: "./assets/icon/vitri.png" },
+            { yaw: 3.1,pitch: 0.4, text: "Cổng Khu E", target: "e0_conge", image: "./assets/anhminhhoa/anhcongtruong.jpg",icon: "./assets/icon/vitri.png" },
+            { yaw: 1.1,pitch: 0.05, text: "Cổng Khu E", target: "e0_conge", image: "./assets/anhminhhoa/anhcongtruong.jpg",icon: "./assets/icon/vitri.png" },
+        ]
+    },
+
+    // Tầng trệt dãy a
     {
         id: "trcdaya",
         src: "./assets/truocdaya.jpg",
@@ -839,12 +854,9 @@ function stopAutoRotate() {
 }
 
 function resetAutoRotate(view) {
-    if (!isAutoRotating) return; // Không reset nếu đang tắt
-
+    if (!isAutoRotating) return;
     clearTimeout(autoRotateTimeout);
-    autoRotateTimeout = setTimeout(() => {
-        startAutoRotate(view);
-    }, 3000);
+    autoRotateTimeout = setTimeout(() => startAutoRotate(view), 3000);
 }
 
 function toggleAutoRotate(view, button) {
@@ -862,12 +874,10 @@ function toggleAutoRotate(view, button) {
 // Hàm di chuyển mượt mà
 function smoothMove(start, end, duration, updateCallback, callback) {
     const startTime = performance.now();
-    const easeInOutCubic = t => t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
-    
     function animate(currentTime) {
         const elapsed = currentTime - startTime;
         const progress = Math.min(elapsed / duration, 1);
-        const value = start + (end - start) * easeInOutCubic(progress);
+        const value = start + (end - start) * progress;
         updateCallback(value);
         if (progress < 1) {
             requestAnimationFrame(animate);
@@ -925,7 +935,7 @@ function addHotspot(scene, hotspotData) {
 function createScene(sceneData) {
     const source = Marzipano.ImageUrlSource.fromString(sceneData.src);
     const geometry = new Marzipano.EquirectGeometry([{ width: 3500 }]);
-    const limiter = Marzipano.RectilinearView.limit.traditional(1024, 120 * Math.PI / 180);
+    const limiter = Marzipano.RectilinearView.limit.traditional(1024, 180 * Math.PI / 180);
     const view = new Marzipano.RectilinearView({ yaw: 0, pitch: 0, fov: Math.PI / 3 }, limiter);
     const scene = viewer.createScene({ source, geometry, view });
 
@@ -1014,44 +1024,33 @@ function setupControls(view) {
 }
 
 
-document.getElementById("zoomIn").onclick = () => {
-    const currentFov = view.fov();
-    console.log("Zoom In: Current FOV", currentFov);
-    smoothMove(currentFov, currentFov * 0.8, 300,
-        value => {
-            console.log("Updating FOV to", value);
-            view.setFov(value);
-        }
-    );
-};
-
-document.getElementById("zoomOut").onclick = () => {
-    const currentFov = view.fov();
-    console.log("Zoom Out: Current FOV", currentFov);
-    smoothMove(currentFov, currentFov * 1.2, 300,
-        value => {
-            console.log("Updating FOV to", value);
-            view.setFov(value);
-        }
-    );
-};
-
-
-
-
-    document.getElementById("pano").addEventListener("wheel", (event) => {
-        const delta = event.deltaY; // Nhận giá trị lăn chuột
-        const currentFov = view.fov();
-        const newFov = delta > 0 ? currentFov * 1.1 : currentFov * 0.9; // Zoom in hoặc zoom out
-        view.setFov(Math.max(0.2, Math.min(newFov, 1.5))); // Giới hạn FOV
-        event.preventDefault(); // Ngăn hành vi mặc định của trình duyệt
-    });
-    
-
      const toggleButton = document.getElementById("toggleAutoRotate");
     toggleButton.innerText = isAutoRotating ? "Dừng lại" : "Tiếp tục";
     toggleButton.onclick = () => toggleAutoRotate(view, toggleButton);
 
+    document.addEventListener("DOMContentLoaded", () => {
+        document.getElementById("zoomIn").addEventListener("click", () => zoom(0.8));
+        document.getElementById("zoomOut").addEventListener("click", () => zoom(1.2));
+    });
+    
+
+    // Cập nhật hàm zoom in/out
+function zoom(factor) {
+    const view = viewer.view();
+    if (!view) return console.error("view is undefined");
+    const currentFov = view.fov();
+    const newFov = Math.max(0.2, Math.min(currentFov * factor, 1.5)); // Giới hạn FOV
+    smoothMove(currentFov, newFov, 300, value => view.setFov(value));
+}
+
+document.getElementById("zoomIn").addEventListener("click", () => zoom(0.8));
+document.getElementById("zoomOut").addEventListener("click", () => zoom(1.2));
+
+document.getElementById("pano").addEventListener("wheel", event => {
+    const factor = event.deltaY > 0 ? 1.1 : 0.9;
+    zoom(factor);
+    event.preventDefault();
+});
 
 
 // Khởi tạo menu và sự kiện
