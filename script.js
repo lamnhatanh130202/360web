@@ -833,31 +833,51 @@ const scenes = [
         ]
     },
 ];
+try { window.SCENES = scenes; } catch (e) {}
 
 // Cập nhật hàm điều khiển xoay
-function startAutoRotate(view) {
-    if (!isAutoRotating) return; // Kiểm tra trạng thái trước khi bắt đầu
-    
-    stopAutoRotate(); // Dừng interval hiện tại nếu có
-    autoRotateInterval = setInterval(() => {
-        if (view) {
-            view.setYaw(view.yaw() + 0.001);
-        }
-    }, 16);
-}
+function startAutoRotate(view, speed = 0.02) {
+    if (typeof window === 'undefined') return;
+    if (window.__autoRotate && window.__autoRotate.running) return;
+    window.__autoRotate = window.__autoRotate || { running: false, rafId: null, last: 0, speed };
+    window.__autoRotate.running = true;
+    window.__autoRotate.speed = speed;
+    window.__autoRotate.last = performance.now();
+  
+    const loop = (t) => {
+      if (!window.__autoRotate.running) return;
+      const dt = (t - window.__autoRotate.last) / 1000;
+      window.__autoRotate.last = t;
+      try { view.setYaw(view.yaw() + window.__autoRotate.speed * dt); } catch (e) {}
+      window.__autoRotate.rafId = requestAnimationFrame(loop);
+    };
+    window.__autoRotate.rafId = requestAnimationFrame(loop);
+  }
+  function stopAutoRotate() {
+    if (typeof window === 'undefined' || !window.__autoRotate) return;
+    window.__autoRotate.running = false;
+    if (window.__autoRotate.rafId) cancelAnimationFrame(window.__autoRotate.rafId);
+    window.__autoRotate.rafId = null;
+  }
+  
 
-function stopAutoRotate() {
-    if (autoRotateInterval) {
-        clearInterval(autoRotateInterval);
-        autoRotateInterval = null;
-    }
-}
-
-function resetAutoRotate(view) {
-    if (!isAutoRotating) return;
-    clearTimeout(autoRotateTimeout);
-    autoRotateTimeout = setTimeout(() => startAutoRotate(view), 3000);
-}
+  function resetAutoRotate(view) {
+    stopAutoRotate();
+    if (view) startAutoRotate(view);
+    (() => {
+        const el = viewer.stage().domElement();
+        let idleTimer;
+        const pause = () => stopAutoRotate();
+        const resume = () => {
+          clearTimeout(idleTimer);
+          idleTimer = setTimeout(() => startAutoRotate(viewer.view(), 0.015), 5000);
+        };
+        ['mousedown','touchstart','wheel','keydown'].forEach(ev => el.addEventListener(ev, pause, { passive: true }));
+        ['mouseup','touchend','keyup'].forEach(ev => el.addEventListener(ev, resume, { passive: true }));
+      })();
+      
+  }
+  
 
 function toggleAutoRotate(view, button) {
     isAutoRotating = !isAutoRotating;
@@ -951,8 +971,6 @@ function loadScene(sceneData) {
     if (!sceneCache[sceneData.id]) {
         sceneCache[sceneData.id] = createScene(sceneData);
     }
-    
-    
     const { scene, view } = sceneCache[sceneData.id];
     currentView = view; // Lưu view hiện tại
     scene.switchTo();
@@ -1022,8 +1040,6 @@ function setupControls(view) {
         isRotatingRight = false;
     };
 }
-
-
      const toggleButton = document.getElementById("toggleAutoRotate");
     toggleButton.innerText = isAutoRotating ? "Dừng lại" : "Tiếp tục";
     toggleButton.onclick = () => toggleAutoRotate(view, toggleButton);
@@ -1080,7 +1096,6 @@ function initializeMenu() {
         });
     });
 }
-
 // Khởi tạo preview khi hover
 function initializePreview() {
     const hoverPreview = document.getElementById('hoverPreview');
@@ -1128,8 +1143,6 @@ document.getElementById("installButton").addEventListener("click", () => {
         deferredPrompt = null;
     });
 });
-
-
 // Cập nhật hàm initialize
 function initialize() {
     initializeMenu();

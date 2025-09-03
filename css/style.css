@@ -336,7 +336,108 @@ main {
 #rotateLeft:hover, #rotateRight:hover {
     background-color: #0056b3;
 }
-
+/* ========== Mini map ========== */
+#minimap {
+    position: fixed;
+    right: 16px;
+    bottom: 16px;
+    width: 280px;                /* đổi nếu muốn lớn hơn */
+    aspect-ratio: 800 / 500;     /* khớp map gốc (đã set trong js) */
+    z-index: 1100;
+    background: rgba(255,255,255,.85);
+    backdrop-filter: blur(6px);
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0,0,0,.25);
+    overflow: hidden;
+    border: 1px solid rgba(0,0,0,.08);
+  }
+  #minimap > img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;           /* map.png nên đúng tỉ lệ 800x500 */
+    display: block;
+  }
+  #minimap-marker {
+    /* kích thước/position đã set bằng JS; thêm hiệu ứng pulse cho nổi bật */
+    animation: mm-pulse 1.6s infinite ease-in-out;
+  }
+  @keyframes mm-pulse {
+    0%   { box-shadow: 0 0 0 3px rgba(255,59,48,.3); transform: translate(-50%,-50%) scale(1); }
+    70%  { box-shadow: 0 0 0 10px rgba(255,59,48,0); transform: translate(-50%,-50%) scale(1.05); }
+    100% { box-shadow: 0 0 0 3px rgba(255,59,48,.3); transform: translate(-50%,-50%) scale(1); }
+  }
+  
+  /* ========== Panel chỉ đường (Nav) ========== */
+  #directions {
+    position: fixed;
+    left: 16px;
+    bottom: 16px;
+    max-width: 320px;
+    z-index: 1100;
+    background: rgba(255,255,255,.94);
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0,0,0,.25);
+    padding: 12px;
+    font-size: 14px;
+    color: #111;
+    border: 1px solid rgba(0,0,0,.08);
+  }
+  #directions ol {
+    margin: 0;
+    padding-left: 18px;
+  }
+  #directions button {
+    appearance: none;
+    border: 0;
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-size: 14px;
+    cursor: pointer;
+    background: #ad171c;         /* màu đỏ chủ đạo đang dùng */
+    color: #fff;
+    transition: transform .06s ease, opacity .2s ease;
+  }
+  #directions button:hover { transform: translateY(-1px); }
+  #directions button + button { margin-left: 8px; }
+  
+  /* ========== Ưu tiên tương tác trên pano/overlay ========== */
+  #pano { position: relative; z-index: 1; }
+  header, #menu, #hoverPreview, #controls, #minimap, #directions { z-index: 1000; }
+  
+  /* ========== Tinh chỉnh hotspot hiển thị trên cùng ========== */
+  .hotspot { z-index: 900; position: relative; }
+  .hotspot .hotspot-info { z-index: 901; }
+  
+  /* ========== Responsive cho mobile ========== */
+  @media (max-width: 768px) {
+    #minimap {
+      width: 180px;
+      right: 10px;
+      bottom: 10px;
+      border-radius: 10px;
+    }
+    #directions {
+      max-width: 75vw;
+      left: 10px;
+      bottom: 10px;
+      font-size: 13px;
+      padding: 10px;
+    }
+    #directions button {
+      padding: 7px 10px;
+      font-size: 13px;
+    }
+  }
+  
+  /* ========== (Tùy chọn) Nút menu nổi khi cuộn ========== */
+  #menu {
+    backdrop-filter: blur(6px);
+  }
+  #menuList {
+    /* đảm bảo nổi trên pano/preview */
+    z-index: 1200;
+  }
+  
 
 
 
