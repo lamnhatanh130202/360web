@@ -1,0 +1,8 @@
+{
+    "nodes": ["congtruong","truockhoacntt","a0_cntt"],
+    "edges": [
+      {"from":"congtruong","to":"truockhoacntt","w":1},
+      {"from":"truockhoacntt","to":"a0_cntt","w":1}
+    ]
+  }
+  

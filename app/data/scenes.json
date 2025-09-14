@@ -1,0 +1,16 @@
+[
+  {
+    "id": "congtruong",
+    "name": { "vi": "Cổng Chính", "en": "Main Gate" },
+    "url": "/tiles/congtruong/{z}/{f}/{y}/{x}.jpg",
+    "hotspots": [
+      { "target": "truong", "yaw": 0.5, "pitch": 0.1, "label": "Vào trường" }
+    ]
+  },
+  {
+    "id": "truong",
+    "name": { "vi": "Khuôn viên", "en": "Campus" },
+    "url": "/tiles/truong/{z}/{f}/{y}/{x}.jpg",
+    "hotspots": []
+  }
+]
