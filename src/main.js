@@ -110,4 +110,8 @@ document.getElementById('installButton')?.addEventListener('click', async () => 
       li.classList.toggle('active', li.dataset.scene === activeId);
     });
   }
+  window.addEventListener("resize", () => {
+    viewer.updateSize();   // viewer là instance Marzipano
+  });
+  
 })();

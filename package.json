@@ -1,27 +1,14 @@
 {
-  "dependencies": {
-    "@capacitor/cli": "^7.0.1",
-    "@capacitor/core": "^7.0.1"
-  },
+  "name": "web360",
+  "private": true,
+  "type": "module",
   "scripts": {
-    "build": "ionic build"
+    "dev": "vite --host --port 5173",
+    "build": "vite build",
+    "preview": "vite preview --host --port 5173"
   },
-  "name": "360web",
-  "version": "1.0.0",
-  "main": "index.js",
   "devDependencies": {
-    "@angular/cli": "19.1.8"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/lamnhatanh130202/360web.git"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/lamnhatanh130202/360web/issues"
-  },
-  "homepage": "https://github.com/lamnhatanh130202/360web#readme",
-  "description": ""
+    "esbuild": "^0.25.10",
+    "vite": "^5.4.10"
+  }
 }

@@ -1,10 +1,31 @@
-body, html {
-    margin: 0;
-    padding: 0;
-    height: 100%;
-    overflow-x: hidden; /* Ngăn tràn ngang */
-    overflow-y: hidden; 
+/* 1) layout cơ bản */
+html, body { height: 100%; margin: 0; }
+body { min-height: 100vh; }
+
+/* 2) cho pano phủ kín toàn bộ viewport */
+#pano {
+  position: fixed;
+  inset: 0;         /* top:0; right:0; bottom:0; left:0 */
+  width: 100%;
+  height: 100%;
+  z-index: 1;
 }
+
+/* 3) header/footer nổi trên pano (nếu muốn thấy) */
+.header, .footer {
+  position: relative;    /* hoặc fixed nếu bạn muốn nó bám màn hình */
+  z-index: 2;
+  background: rgba(80,80,80,.8); /* để nhìn xuyên được pano */
+  color: #fff;
+}
+
+/* 4) chặn CSS nào đó đang bó chiều rộng con bên trong pano */
+
+  
+  /* nếu có overlay (#hotspots, #minimap, #fade) */
+  #hotspots, #minimap, #fade { position: absolute; inset: 0; pointer-events: none; }
+  #minimap { pointer-events: auto; } /* nếu cần click */
+  
 /* Đặt header nằm đè lên hình nền */
 header {
     position: absolute; /* Đặt header ở vị trí tuyệt đối */
