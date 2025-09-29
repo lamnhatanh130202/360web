@@ -113,4 +113,44 @@ document.getElementById('installButton')?.addEventListener('click', async () => 
   window.addEventListener('resize', () => {
     app.updateSize();          //  dùng API từ bootstrap
   });
+
+  // ---------- Route (Dijkstra) UI ----------
+  const fromSel = document.getElementById('routeFrom');
+  const toSel   = document.getElementById('routeTo');
+  const btnRoute = document.getElementById('routeBtn'); // chú ý: id = routeBtn
+
+  // Dùng graph từ app (bootstrap trả về). Nếu app không expose, fallback fetch.
+  let graph = app?.graph;
+  if (!graph) {
+    try {
+      graph = await fetch('/data/graph.json').then(r => r.json());
+    } catch (e) {
+      console.warn('Không tải được graph.json:', e);
+    }
+  }
+
+  if (graph && fromSel && toSel) {
+    // clear options (tránh nhân đôi khi HMR)
+    fromSel.innerHTML = '';
+    toSel.innerHTML = '';
+
+    graph.nodes.forEach(n => {
+      const o1 = document.createElement('option');
+      o1.value = n.id;
+      o1.textContent = n.label || n.id;
+      const o2 = o1.cloneNode(true);
+      fromSel.appendChild(o1);
+      toSel.appendChild(o2);
+    });
+  }
+
+  btnRoute?.addEventListener('click', () => {
+    if (!fromSel || !toSel || !app?.route) return;
+    const a = fromSel.value;
+    const b = toSel.value;
+    if (!a || !b || a === b) return;
+    app.route(a, b); // API do bootstrap trả về
+  });
+
+  
 })();

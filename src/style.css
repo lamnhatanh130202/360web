@@ -1,8 +1,8 @@
-/* 1) layout cơ bản */
+/*  layout cơ bản */
 html, body { height: 100%; margin: 0; }
 body { min-height: 100vh; }
 
-/* 2) cho pano phủ kín toàn bộ viewport */
+/*  cho pano phủ kín toàn bộ viewport */
 #pano {
   position: fixed;
   inset: 0;         /* top:0; right:0; bottom:0; left:0 */
@@ -11,7 +11,7 @@ body { min-height: 100vh; }
   z-index: 1;
 }
 
-/* 3) header/footer nổi trên pano (nếu muốn thấy) */
+/* header/footer nổi trên pano  */
 .header, .footer {
   position: relative;    /* hoặc fixed nếu bạn muốn nó bám màn hình */
   z-index: 2;
@@ -19,7 +19,7 @@ body { min-height: 100vh; }
   color: #fff;
 }
 
-/* 4) chặn CSS nào đó đang bó chiều rộng con bên trong pano */
+/* chặn CSS nào đó đang bó chiều rộng con bên trong pano */
 
   
   /* nếu có overlay (#hotspots, #minimap, #fade) */
@@ -42,8 +42,6 @@ header {
     box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2); /* Tạo hiệu ứng bóng cho header */
 }
 
-/* Logo bên trái */
-
 
 /* Tiêu đề căn giữa */
 header h1#tieude {
@@ -52,7 +50,13 @@ header h1#tieude {
     flex: 1; /* Chiếm không gian còn lại */
     text-align: center; /* Căn giữa nội dung */
 }
-
+.brand {
+    display: flex;
+    align-items: center;
+    gap: 10px; /* khoảng cách giữa logo và chữ */
+    margin: 0 auto; /* đẩy ra giữa */
+  }
+  
 /* Button ở góc phải */
 header #header button {
     background-color: #0e1a28; /* Màu nền xanh */
@@ -85,8 +89,6 @@ main {
     height: 100%;
     overflow: hidden;
 }
-
-
 #logo{
     width: 200px;
     height: 100px;
@@ -147,78 +149,7 @@ main {
 }
 
 
-/* Đảm bảo nút có độ lớn phù hợp trên thiết bị nhỏ */
-@media (max-width: 768px) {
-    #menuButton {
-        font-size: 14px; /* Giảm kích thước chữ trên thiết bị nhỏ */
-        padding: 8px 16px; /* Giảm khoảng cách bên trong */
-    }
-    
-    header h1#tieude {
-        display: none;
-        font-size: 10px; /* Kích thước chữ lớn hơn */
-        margin: 0;
-        flex: 1; /* Chiếm không gian còn lại */
-        text-align: center; /* Căn giữa nội dung */
-    }
-    #logo{
-        width: 80px;
-        height: 40px;
-        margin-right: 0px ;
-    }
-    #tenKhuVuc {
-        font-size: 10px;
-        font-weight: bold;
-        color: #007bff; /* Màu xanh nổi bật */
-        
-        text-align: center;
-        background-color: rgba(255, 255, 255, 0.8); /* Nền trắng trong suốt */
-        padding: 10px;
-        border-radius: 5px;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Đổ bóng nhẹ */
-    }
-    header #header button {
-        background-color: #ad171c ; /* Màu nền xanh */
-        border: none;
-        color: white;
-        padding: 10px 20px;
-        font-size: 10px;
-        border-radius: 5px; /* Bo góc */
-        cursor: pointer;
-        transition: background-color 0.3s ease;
-    }
-    .hotspot {
-        width: 30px !important;
-        height: 30px !important;
-    }
-    .hotspot-btn{
-        padding:6px 10px; border:0; border-radius:999px;
-        background: rgba(255,255,255,.9);
-        box-shadow: 0 2px 8px rgba(0,0,0,.2);
-        font-size: 13px; cursor: pointer;
-      }
-      
-    .hotspot-icon {
-        width: 25px !important;
-        height: 25px !important;
-    }
 
-    /* Hotspot gắn vào hotspotContainer (KHÔNG thêm position:fixed/absolute lên body) */
-.hotspot-img {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    transform: translate(-50%, -50%);  /* căn giữa tại yaw/pitch */
-    pointer-events: auto;
-    user-select: none;
-  }
-  .hotspot-img img { width: 10px; height: 10px; }
-  .hotspot-img span {
-    margin-top: 4px; font-size: 12px; color: #fff;
-    background: rgba(0,0,0,.6); padding: 2px 6px; border-radius: 6px;
-  }
-  
-}
 
 #menuList {
     display: none; /* Ban đầu ẩn menu */
@@ -371,36 +302,87 @@ main {
     background-color: #0056b3;
 }
 /* ========== Mini map ========== */
-#minimap {
+
+/* ========== Mini map (compact, zoom/pan, collapsible) ========== */
+
+.minimap {
     position: fixed;
-    right: 16px;
-    bottom: 16px;
-    width: 280px;                /* đổi nếu muốn lớn hơn */
-    aspect-ratio: 800 / 500;     /* khớp map gốc (đã set trong js) */
-    z-index: 1100;
-    background: rgba(255,255,255,.85);
-    backdrop-filter: blur(6px);
+    width: 360px;              /* nhỏ gọn mặc định */
+    height: 240px;
+    border: 1px solid #e3e3e3;
     border-radius: 12px;
-    box-shadow: 0 10px 30px rgba(0,0,0,.25);
-    overflow: hidden;
-    border: 1px solid rgba(0,0,0,.08);
-  }
-  #minimap > img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;           /* map.png nên đúng tỉ lệ 800x500 */
-    display: block;
-  }
-  #minimap-marker {
-    /* kích thước/position đã set bằng JS; thêm hiệu ứng pulse cho nổi bật */
-    animation: mm-pulse 1.6s infinite ease-in-out;
-  }
-  @keyframes mm-pulse {
-    0%   { box-shadow: 0 0 0 3px rgba(255,59,48,.3); transform: translate(-50%,-50%) scale(1); }
-    70%  { box-shadow: 0 0 0 10px rgba(255,59,48,0); transform: translate(-50%,-50%) scale(1.05); }
-    100% { box-shadow: 0 0 0 3px rgba(255,59,48,.3); transform: translate(-50%,-50%) scale(1); }
+    background: #fff;
+    overflow: hidden;          /* quan trọng cho pan/zoom */
+    resize: both;              /* cho phép kéo giãn khung */
+    box-shadow: 0 2px 10px rgba(0,0,0,.08);
   }
   
+  /* thanh trên cùng */
+  .minimap .mm-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 6px 8px;
+    background: #f7f7f7;
+    border-bottom: 1px solid #eee;
+    height: 34px;
+  }
+  .minimap .mm-legend { display: none; } /* ẩn legend cho gọn, cần thì bật lại */
+  .minimap .mm-route  { display: flex; gap: 6px; align-items: center; font-size: 12px; }
+  .minimap select, .minimap button { font-size: 12px; padding: 2px 6px; }
+  .minimap .mm-toggle { margin-left: auto; padding: 0 8px; line-height: 22px; }
+  .minimap .mm-toolbar { cursor: move; } /* kéo bằng thanh này */
+  .minimap.minimap--dragging { opacity: .95; cursor: grabbing; }
+  /* vùng vẽ có 2 lớp: viewport (để pan/clip) và stage (để transform scale/translate) */
+  .minimap .mm-viewport {
+    position: relative;
+    width: 100%;
+    height: calc(100% - 34px); /* trừ toolbar */
+    background: #fafafa;
+    overflow: hidden;
+    cursor: grab;
+  }
+  .minimap .mm-viewport:active { cursor: grabbing; }
+  .minimap .mm-stage {
+    position: absolute; inset: 0;
+    transform-origin: 0 0;     /* cho transform chuẩn */
+  }
+  
+  /* nút zoom nổi */
+  .minimap .mm-zoom {
+    position: absolute; right: 8px; bottom: 8px;
+    display: flex; flex-direction: column; gap: 4px;
+  }
+  .minimap .mm-zoom button { width: 26px; height: 26px; font-size: 14px; }
+  
+  /* nodes/edges */
+  .mm-dot { position:absolute; width:10px; height:10px; border-radius:50%; border:0;
+    background:#777; transform:translate(-50%,-50%); cursor:pointer; outline:none; }
+  .mm-dot:hover { box-shadow:0 0 0 6px rgba(0,0,0,.08); }
+  .mm-dot--active { background:#2e7d32; box-shadow:0 0 0 6px rgba(76,175,80,.2); }
+  .mm-dot--path { background:#1565c0; }
+  
+  .mm-label { position:absolute; font-size:11px; color:#333;
+    background:rgba(255,255,255,.85); padding:2px 6px; border-radius:8px; border:1px solid #e5e5e5; pointer-events:none; }
+  
+  .mm-edge { position:absolute; height:2px; background:#c8c8c8; transform-origin:0 50%; }
+  .mm-edge--hl { height:4px; background:#1976d2; }
+  
+  /* TRẠNG THÁI THU GỌN */
+  .minimap.minimap--collapsed {
+    height: 36px; width: 220px; resize: none;
+  }
+  .minimap.minimap--collapsed .mm-route,
+  .minimap.minimap--collapsed .mm-viewport,
+  .minimap.minimap--collapsed .mm-zoom { display: none; }
+  
+
+  
+  .route-panel{ position:absolute; right:12px; bottom:12px; z-index:51;
+    background:#fff; border-radius:10px; padding:8px 10px; box-shadow:0 6px 18px rgba(0,0,0,.15);}
+  /* cho hotspot, để click được qua overlay */
+  .hotspot, .hotspot-btn { pointer-events:auto; z-index:45; }
   /* ========== Panel chỉ đường (Nav) ========== */
   #directions {
     position: fixed;
@@ -471,9 +453,75 @@ main {
     /* đảm bảo nổi trên pano/preview */
     z-index: 1200;
   }
+/* Đảm bảo nút có độ lớn phù hợp trên thiết bị nhỏ */
+@media (max-width: 768px) {
+    #menuButton {
+        font-size: 14px; /* Giảm kích thước chữ trên thiết bị nhỏ */
+        padding: 8px 16px; /* Giảm khoảng cách bên trong */
+    }
+    
+    header h1#tieude {
+        display: none;
+        font-size: 10px; /* Kích thước chữ lớn hơn */
+        margin: 0;
+        flex: 1; /* Chiếm không gian còn lại */
+        text-align: center; /* Căn giữa nội dung */
+    }
+    #logo{
+        width: 80px;
+        height: 40px;
+        margin-right: 0px ;
+    }
+    #tenKhuVuc {
+        font-size: 10px;
+        font-weight: bold;
+        color: #007bff; /* Màu xanh nổi bật */
+        
+        text-align: center;
+        background-color: rgba(255, 255, 255, 0.8); /* Nền trắng trong suốt */
+        padding: 10px;
+        border-radius: 5px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Đổ bóng nhẹ */
+    }
+    header #header button {
+        background-color: #ad171c ; /* Màu nền xanh */
+        border: none;
+        color: white;
+        padding: 10px 20px;
+        font-size: 10px;
+        border-radius: 5px; /* Bo góc */
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+    }
+    .hotspot {
+        width: 30px !important;
+        height: 30px !important;
+    }
+    .hotspot-btn{
+        padding:6px 10px; border:0; border-radius:999px;
+        background: rgba(255,255,255,.9);
+        box-shadow: 0 2px 8px rgba(0,0,0,.2);
+        font-size: 13px; cursor: pointer;
+      }
+      
+    .hotspot-icon {
+        width: 25px !important;
+        height: 25px !important;
+    }
+
+    /* Hotspot gắn vào hotspotContainer (KHÔNG thêm position:fixed/absolute lên body) */
+.hotspot-img {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    transform: translate(-50%, -50%);  /* căn giữa tại yaw/pitch */
+    pointer-events: auto;
+    user-select: none;
+  }
+  .hotspot-img img { width: 10px; height: 10px; }
+  .hotspot-img span {
+    margin-top: 4px; font-size: 12px; color: #fff;
+    background: rgba(0,0,0,.6); padding: 2px 6px; border-radius: 6px;
+  }
   
-
-
-
-
-
+}

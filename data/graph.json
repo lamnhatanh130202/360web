@@ -1,8 +1,15 @@
 {
-    "nodes": ["congtruong","truockhoacntt","a0_cntt"],
-    "edges": [
-      {"from":"congtruong","to":"truockhoacntt","w":1},
-      {"from":"truockhoacntt","to":"a0_cntt","w":1}
-    ]
-  }
-  
+  "nodes": [
+    { "id": "congtruong", "label": "Cổng chính", "x": 120, "y": 240 },
+    { "id": "santruong",  "label": "Sân trường", "x": 260, "y": 240 },
+    { "id": "trcdaya",    "label": "Trước dãy A","x": 380, "y": 220 },
+    { "id": "b0_1",       "label": "B - Trệt",   "x": 320, "y": 300 },
+    { "id": "b1_1",       "label": "B - Tầng 1", "x": 320, "y": 360 }
+  ],
+  "edges": [
+    { "from": "congtruong", "to": "santruong", "w": 1 },
+    { "from": "santruong",  "to": "trcdaya",   "w": 1 },
+    { "from": "santruong",  "to": "b0_1",      "w": 1 },
+    { "from": "b0_1",       "to": "b1_1",      "w": 1.5 }
+  ]
+}
