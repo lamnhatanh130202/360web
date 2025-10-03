@@ -4,12 +4,19 @@ export function createMinimap(opts) {
       container,
       graph,
       onGotoScene,
-      onPathPlay
+      onPathPlay,
+      onGraphChange // (graph)=>void  // optional: gọi khi vị trí node đổi
     } = opts || {};
   
     let G = normalizeGraph(graph || { nodes:[], edges:[] });
     let activeId = null;
-  
+
+    let isMapLocked = false;          // khoá pan + khoá kéo cả minimap
+    let isNodeDragging = false;       // đang kéo 1 node
+    // đọc trạng thái đã lưu
+    try { isMapLocked = JSON.parse(localStorage.getItem('minimap_locked')||'false'); } catch {}
+    if (isMapLocked) container.classList.add('locked');
+    
     container.classList.add('minimap');
     container.innerHTML = `
       <div class="mm-toolbar">
@@ -19,6 +26,7 @@ export function createMinimap(opts) {
           <select id="mmTo"></select>
           <button id="mmGo">Tìm đường</button>
           <button id="mmClear">Xóa</button>
+          <button id="mmUnclump">Sắp xếp</button>
         </div>
         <button class="mm-toggle" id="mmToggle">Thu</button>
       </div>
@@ -28,10 +36,18 @@ export function createMinimap(opts) {
           <button id="mmZoomIn">+</button>
           <button id="mmZoomOut">−</button>
           <button id="mmZoomReset">100%</button>
+          <button id="mmLock" class="mm-btn-lock">Khoá</button>
         </div>
       </div>
     `;
-  
+    container.querySelector('#mmUnclump').addEventListener('click', () => {
+      unclumpLayout(G, { minDist: 28, edgeLen: 90, iters: 80 });
+      render();               // vẽ lại minimap
+      dot.setAttribute('draggable', 'false');           // tránh HTML5 drag
+      dot.addEventListener('click', (ev)=>{ ev.stopPropagation(); onGotoScene && onGotoScene(n.id); });
+      // nếu bạn có cơ chế lưu graph: save vào localStorage/API ở đây
+    });
+    
     const stage    = container.querySelector('#mmStage');
     const viewport = container.querySelector('#mmViewport');
     const selFrom  = container.querySelector('#mmFrom');
@@ -59,6 +75,116 @@ export function createMinimap(opts) {
     function panBy(dx, dy) { view.ox += dx; view.oy += dy; applyView(); }
     function resetView() { view = { scale: 1, ox: 0, oy: 0 }; applyView(); }
   
+/**check lỗi mini */
+    function screenToStage(clientX, clientY) {
+      const rect = viewport.getBoundingClientRect();
+      const x = (clientX - rect.left - view.ox) / view.scale;
+      const y = (clientY - rect.top  - view.oy) / view.scale;
+      return { x, y };
+    }
+    /**khóa  minimap */
+    function setLocked(v){
+      isMapLocked = !!v;
+      container.classList.toggle('locked', isMapLocked);
+      document.getElementById('mmLock')?.classList.toggle('active', isMapLocked);
+      try { localStorage.setItem('minimap_locked', JSON.stringify(isMapLocked)); } catch {}
+    }
+    const btnLock = container.querySelector('#mmLock');
+btnLock?.addEventListener('click', ()=> setLocked(!isMapLocked));
+btnLock?.classList.toggle('active', isMapLocked);
+
+    /* ===== Drag node (mouse + touch) ===== */
+(function enableNodeDrag(){
+  let draggingId = null, raf = 0;
+
+  function startDrag(id, clientX, clientY) {
+    isNodeDragging = true;    // chặn pan
+    draggingId = id;
+    container.classList.add('minimap--dragging');
+    moveTo(clientX, clientY);
+  }
+
+  function moveTo(clientX, clientY){
+    if (!draggingId) return;
+    const { x, y } = screenToStage(clientX, clientY);  // dùng view.ox/oy/scale
+    const n = node(G, draggingId); if (!n) return;
+    n.x = Math.round(x); n.y = Math.round(y);
+
+    // cập nhật nhẹ: chỉ reposition dot/label; cạnh sẽ vẽ lại theo raf
+    const dot = stage.querySelector(`.mm-dot[data-id="${css(draggingId)}"]`);
+    const lb  = dot ? dot.nextElementSibling : null;
+    if (dot){ dot.style.left = n.x + 'px'; dot.style.top = n.y + 'px'; }
+    if (lb && lb.classList.contains('mm-label')){
+      lb.style.left = (n.x + 10) + 'px'; lb.style.top = (n.y - 6) + 'px';
+    }
+    if (!raf) raf = requestAnimationFrame(()=>{ raf=0; redrawEdgesOnly(); });
+  }
+  function endDrag(){
+    if (!draggingId) return;
+    draggingId = null; isNodeDragging = false;
+    container.classList.remove('minimap--dragging');
+    try { localStorage.setItem('graph_draft', JSON.stringify(G)); } catch {}
+    onGraphChange && onGraphChange(G);
+  }
+
+  // chuột
+  stage.addEventListener('mousedown', (e) => {
+    const el = e.target.closest('.mm-dot'); if (!el) return;
+    e.preventDefault(); e.stopPropagation();           // 👈 quan trọng
+    startDrag(el.dataset.id, e.clientX, e.clientY);
+  });
+  window.addEventListener('mousemove', (e) => {
+    if (draggingId) moveTo(e.clientX, e.clientY);
+  });
+  window.addEventListener('mouseup', endDrag);
+
+  // touch
+  stage.addEventListener('touchstart', (e) => {
+    if (e.touches.length !== 1) return;
+    const el = e.target.closest('.mm-dot'); if (!el) return;
+    e.preventDefault();                                 // 👈 tránh cuộn trang
+    const t = e.touches[0];
+    startDrag(el.dataset.id, t.clientX, t.clientY);
+  }, { passive: false });
+  window.addEventListener('touchmove', (e) => {
+    if (!draggingId || e.touches.length !== 1) return;
+    const t = e.touches[0]; e.preventDefault();         // 👈
+    moveTo(t.clientX, t.clientY);
+  }, { passive: false });
+  window.addEventListener('touchend', endDrag, { passive: true });
+
+  function redrawEdgesOnly(){
+    stage.querySelectorAll('.mm-edge').forEach(el => el.remove());
+    for (const e of G.edges){
+      const a=node(G,e.from), b=node(G,e.to); if(!a||!b) continue;
+      const el=document.createElement('div'); el.className='mm-edge';
+      posEdge(el,a,b); stage.insertBefore(el, stage.firstChild);
+    }
+  }
+
+  // chỉ vẽ lại edges để nhanh
+  function redrawEdgesOnly() {
+    // xoá edges rồi vẽ lại theo vị trí mới
+    stage.querySelectorAll('.mm-edge').forEach(el => el.remove());
+    for (const e of G.edges) {
+      const a = node(G, e.from), b = node(G, e.to);
+      if (!a || !b) continue;
+      const el = document.createElement('div');
+      el.className = 'mm-edge';
+      posEdge(el, a, b);
+      stage.insertBefore(el, stage.firstChild); // edges nằm dưới dots
+    }
+    // giữ highlight path nếu có
+    // (nếu đang dùng mm-edge--hl, có thể render lại sau tương tự)
+  }
+
+  function persistGraph() {
+    try { localStorage.setItem('graph_draft', JSON.stringify(G)); } catch {}
+    if (typeof onGraphChange === 'function') onGraphChange(G);
+  }
+})();
+
+
     // wheel zoom
     viewport.addEventListener('wheel', (e) => {
       e.preventDefault();
@@ -66,27 +192,39 @@ export function createMinimap(opts) {
       zoomBy(ds, e.clientX, e.clientY);
     }, { passive: false });
   
-    // drag to pan (mouse + touch)
+    // kéo để di chuyển (chuột + chạm)
     (function enableDragPan() {
       let dragging = false, sx=0, sy=0;
-      viewport.addEventListener('mousedown', (e) => { dragging=true; sx=e.clientX; sy=e.clientY; });
+    
+      viewport.addEventListener('mousedown', (e) => {
+        if (isMapLocked || isNodeDragging) return;
+        if (e.target.closest('.mm-dot')) return;   // ⛔ đừng pan khi nhấn vào node
+        dragging = true; sx = e.clientX; sy = e.clientY;
+      });
+    
       window.addEventListener('mousemove', (e) => {
         if (!dragging) return;
         panBy(e.clientX - sx, e.clientY - sy);
         sx = e.clientX; sy = e.clientY;
       });
+    
       window.addEventListener('mouseup', () => dragging=false);
-  
+    
+      // chạm
       viewport.addEventListener('touchstart', (e) => {
-        if (e.touches.length!==1) return;
-        const t = e.touches[0]; dragging=true; sx=t.clientX; sy=t.clientY;
-      }, {passive:true});
+        if (isMapLocked || isNodeDragging) return;
+        if (e.touches.length !== 1) return;
+        if (e.target.closest('.mm-dot')) return;   // ⛔
+        const t = e.touches[0]; dragging = true; sx = t.clientX; sy = t.clientY;
+      }, { passive: true });
+
       window.addEventListener('touchmove', (e) => {
         if (!dragging || e.touches.length!==1) return;
         const t = e.touches[0]; panBy(t.clientX - sx, t.clientY - sy); sx=t.clientX; sy=t.clientY;
       }, {passive:true});
       window.addEventListener('touchend', () => dragging=false, {passive:true});
     })();
+    
   
     container.querySelector('#mmZoomIn') .addEventListener('click', e => zoomBy(+SCALE_STEP, e.clientX||0, e.clientY||0));
     container.querySelector('#mmZoomOut').addEventListener('click', e => zoomBy(-SCALE_STEP, e.clientX||0, e.clientY||0));
@@ -220,6 +358,7 @@ export function createMinimap(opts) {
     }
   
     function onDown(clientX, clientY) {
+      if (isMapLocked) return;
       // tránh xung đột: nếu click vào input/select/button trong toolbar thì không drag
       const tag = (document.activeElement || {}).tagName;
       if (/INPUT|SELECT|BUTTON|TEXTAREA/.test(tag)) return;
@@ -331,4 +470,67 @@ export function createMinimap(opts) {
       if(r<this.h.length&&this.h[r].p<this.h[s].p) s=r;
       if(s===i) break; [this.h[s],this.h[i]]=[this.h[i],this.h[s]]; i=s;}}
   }
-  
+  // Gỡ chồng node bằng force layout nhẹ
+function unclumpLayout(G, opt = {}) {
+  const R_MIN = opt.minDist ?? 28;     // khoảng cách tối thiểu giữa 2 node (px)
+  const L     = opt.edgeLen ?? 90;     // độ dài mong muốn của mỗi cạnh
+  const ITERS = opt.iters ?? 80;       // số vòng lặp
+  const K_REP = opt.kRep ?? 0.45;      // lực đẩy giữa các node
+  const K_ATT = opt.kAtt ?? 0.02;      // lực kéo theo cạnh
+  const DAMP  = opt.damp ?? 0.85;      // giảm dao động
+
+  const N = G.nodes;
+  const id2idx = new Map(N.map((n,i)=>[n.id,i]));
+  const adj = Array.from({length:N.length}, _=>[]);
+  for (const e of G.edges) {
+    const a = id2idx.get(e.from), b = id2idx.get(e.to);
+    if (a==null||b==null) continue;
+    adj[a].push(b); adj[b].push(a);
+  }
+
+  // vận tốc tạm
+  const vx = new Array(N.length).fill(0);
+  const vy = new Array(N.length).fill(0);
+
+  for (let it=0; it<ITERS; it++) {
+    // 1) Repulsion (đẩy các cặp node quá gần)
+    for (let i=0; i<N.length; i++) {
+      const ni = N[i]; if (!isFinite(ni.x) || !isFinite(ni.y)) continue;
+      for (let j=i+1; j<N.length; j++) {
+        const nj = N[j]; if (!isFinite(nj.x) || !isFinite(nj.y)) continue;
+        let dx = ni.x - nj.x, dy = ni.y - nj.y;
+        let d2 = dx*dx + dy*dy;
+        if (d2 === 0) { dx = (Math.random()-0.5)*0.01; dy = (Math.random()-0.5)*0.01; d2 = dx*dx+dy*dy; }
+        const d = Math.sqrt(d2);
+        if (d < R_MIN) {
+          const f = (R_MIN - d) * K_REP; // đẩy ra
+          const ux = dx / d, uy = dy / d;
+          vx[i] += ux * f; vy[i] += uy * f;
+          vx[j] -= ux * f; vy[j] -= uy * f;
+        }
+      }
+    }
+    // 2) Attraction (kéo theo cạnh về độ dài L)
+    for (let i=0; i<N.length; i++) {
+      const ni = N[i];
+      for (const j of adj[i]) {
+        if (j <= i) continue; // tránh lặp đôi
+        const nj = N[j];
+        let dx = nj.x - ni.x, dy = nj.y - ni.y;
+        const d = Math.hypot(dx, dy) || 0.0001;
+        const f = (d - L) * K_ATT;  // >0 kéo ra, <0 kéo vào
+        const ux = dx / d, uy = dy / d;
+        vx[i] +=  ux * f; vy[i] +=  uy * f;
+        vx[j] -=  ux * f; vy[j] -=  uy * f;
+      }
+    }
+    // 3) update + damping
+    for (let i=0; i<N.length; i++) {
+      N[i].x += vx[i]; N[i].y += vy[i];
+      vx[i] *= DAMP; vy[i] *= DAMP;
+    }
+  }
+  // làm tròn cho đẹp
+  for (const n of N) { n.x = Math.round(n.x); n.y = Math.round(n.y); }
+  return G;
+}

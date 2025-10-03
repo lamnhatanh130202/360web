@@ -137,15 +137,19 @@ function learnGraphFromScene(sceneId) {
     const s = scenes.find(x => x.id === id);
     if (!s) return console.warn("Scene không tồn tại:", id);
     if (!sceneCache[id]) sceneCache[id] = createScene(s);
-
+  
     const { scene, view } = sceneCache[id];
     scene.switchTo();
     active = { id, scene, view };
     updateTenKhuVuc(id);
-
-    // báo minimap biết scene đang active
+  
+    // 1) Học/merge graph + autoLayout + minimap.refresh(...)
+    learnGraphFromScene(id);
+  
+    // 2) Đánh dấu vị trí hiện tại trên minimap (sau refresh)
     minimap?.setActive(id);
   }
+  
 
   // === Controls: đăng ký 1 lần, luôn dùng active.view
   setupControlsOnce();

@@ -635,14 +635,14 @@
     "initialView": { "yaw": 0, "pitch": 0, "hfov": 1.2 },
     "hotspots": [
       { "target": "a1_2", "yaw": -1.5, "pitch": 0, "label": "Hành lang A1-2" },
-      { "target": "a1_l1", "yaw": 0.4, "pitch": -0.05, "label": "Phòng L1" }
+      { "target": "a1_p_AI_3", "yaw": 0.4, "pitch": -0.05, "label": "Phòng A" }
     ]
   },
   {
-    "id": "a1_l1",
-    "name": { "vi": "Phòng L1", "en": "Room L1" },
+    "id": "a1_p_AI_3",
+    "name": { "vi": "Phòng AI.3", "en": "Room AI.3" },
     "type": "equirect",
-    "url": "./assets/a1_l1.jpg",
+    "url": "./assets/a1_p_AI_3.jpg",
     "initialView": { "yaw": 0, "pitch": 0, "hfov": 1.2 },
     "hotspots": [
       { "target": "a1_3", "yaw": 3.2, "pitch": 0, "label": "Ra hành lang" }
