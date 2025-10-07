@@ -1,13 +1,23 @@
 {
   "nodes": [
     { "id": "congtruong", "label": "Cổng chính", "x": 120, "y": 240 },
+    { "id": "phongtuyensinh", "label": "Phòng Tuyển Sinh", "x": 120, "y": 240 },
+    { "id": "TrungtamPTNLS", "label": "Trung Tâm PTNLS", "x": 120, "y": 240 },
+    { "id": "loidi1", "label": "Lối đi Dãy Học Hỏi Hiếu Hành 1", "x": 100, "y": 120 },
+    { "id": "loidi2", "label": "Lối đi Dãy Học Hỏi Hiếu Hành 2", "x": 120, "y": 240 },
+    { "id": "truocphongan", "label": "Trước Phòng Ăn", "x": 120, "y": 240 },
+    { "id": "phongan", "label": "Phòng Ăn", "x": 120, "y": 240 },
     { "id": "santruong",  "label": "Sân trường", "x": 260, "y": 240 },
     { "id": "trcdaya",    "label": "Trước dãy A","x": 380, "y": 220 },
     { "id": "b0_1",       "label": "B - Trệt",   "x": 320, "y": 300 },
     { "id": "b1_1",       "label": "B - Tầng 1", "x": 320, "y": 360 }
   ],
   "edges": [
-    { "from": "congtruong", "to": "santruong", "w": 1 },
+    { "from": "congtruong", "to": "phongtuyensinh", "w": 1 },
+    { "from": "congtruong", "to": "TrungtamPTNLS", "w": 1 },
+    { "from": "congtruong", "to": "loidi1", "w": 1 },
+    { "from": "loidi1", "to": "loidi2", "w": 1 },
+    { "from": "loidi1", "to": "truocphongan", "w": 1 },
     { "from": "santruong",  "to": "trcdaya",   "w": 1 },
     { "from": "santruong",  "to": "b0_1",      "w": 1 },
     { "from": "b0_1",       "to": "b1_1",      "w": 1.5 }

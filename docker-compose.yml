@@ -1,0 +1,21 @@
+services:
+  nginx:
+    image: nginx:1.27-alpine
+    container_name: web360-nginx
+    ports: ["80:80"]
+    volumes:
+      - ./dist:/usr/share/nginx/html:ro         # Vite build output
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro   # Nginx config
+      - ./cms/data:/data:ro                      # JSON & stats đọc qua /data/*
+    depends_on: [cms]
+    restart: unless-stopped
+
+  cms:
+    build:
+      context: ./admin-api                       # Flask code nằm trong admin-api
+    container_name: web360-cms
+    env_file: [./.env]
+    volumes:
+      - ./cms/data:/data                         # Flask ghi JSON & stats
+    expose: ["5000"]
+    restart: unless-stopped

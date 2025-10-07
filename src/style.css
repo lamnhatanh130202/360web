@@ -19,11 +19,6 @@ body { min-height: 100vh; }
   color: #fff;
 }
 
-/* chặn CSS nào đó đang bó chiều rộng con bên trong pano */
-
-  
-  /* nếu có overlay (#hotspots, #minimap, #fade) */
-  #hotspots, #minimap, #fade { position: absolute; inset: 0; pointer-events: none; }
   #minimap { pointer-events: auto; } /* nếu cần click */
   
 /* Đặt header nằm đè lên hình nền */
@@ -242,52 +237,45 @@ main {
     display: block;
 }
 
+/* Hotspot tooltip */
+.hs-tip {
+  position: fixed; /* bám theo chuột */
+  z-index: 9999;
+  max-width: 280px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: rgba(20,20,20,.94);
+  color: #fff;
+  font-size: 13px;
+  line-height: 1.4;
+  box-shadow: 0 8px 24px rgba(0,0,0,.25);
+  transform: translate(8px, 8px);
+  pointer-events: none;
+  display: none;
+}
+.hs-tip h4 { margin: 0 0 6px; font-size: 14px; font-weight: 600; }
+.hs-tip .sub { opacity: .85; }
+.hs-tip .row { display:flex; gap:8px; align-items:flex-start; }
+.hs-tip img {
+  width: 84px; height: 56px; object-fit: cover; border-radius: 6px; flex: 0 0 auto;
+  background:#333;
+}
+
+.hotspot-icon {
+  width: 70px;   /* chỉnh lại kích thước mong muốn, ví dụ 24–32px */
+  height: 50px;
+  object-fit: contain;
+  pointer-events: none; /* để icon không che bắt sự kiện */
+}
 
 .hotspot {
-    width: 50px;
-    height: 50px;
-    border-radius: 50%;
-    cursor: pointer;
-    background: none; /* Loại bỏ hình nền mặc định */
-    border: none; /* Loại bỏ viền nếu có */
-}
-.hotspot-icon {
-    width: 60px;
-    height: 60px;
-    cursor: pointer;
-    transition: transform 0.0s ease;
-    background: none; /* Loại bỏ hình nền mặc định */
-    border: none; /* Loại bỏ viền nếu có */
-    pointer-events: none; /* Đảm bảo chỉ dùng để hiển thị, không chặn sự kiện */
-    
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transform: translate(-50%, -50%); /* căn giữa icon với vị trí yaw/pitch */
 }
 
-.hotspot-info {
-    position: absolute;
-    top: -80px;
-    left: 50%;
-    transform: translateX(-50%);
-    background: rgba(0, 0, 0, 0.7);
-    color: white;
-    border-radius: 5px;
-    padding: 5px;
-    display: none;
-    text-align: center;
-}
 
-.hotspot-info img {
-    width: 100px;
-    height: 60px;
-    object-fit: cover;
-    margin-bottom: 5px;
-}
-
-.hotspot:hover .hotspot-info {
-    display: block;
-}
-.toggleAutoRotate{
-    display: block;
-}
 
 #rotateLeft, #rotateRight {
     background-color: #007bff;
@@ -382,13 +370,11 @@ main {
   .minimap.minimap--collapsed .mm-route,
   .minimap.minimap--collapsed .mm-viewport,
   .minimap.minimap--collapsed .mm-zoom { display: none; }
-  
 
   
   .route-panel{ position:absolute; right:12px; bottom:12px; z-index:51;
     background:#fff; border-radius:10px; padding:8px 10px; box-shadow:0 6px 18px rgba(0,0,0,.15);}
-  /* cho hotspot, để click được qua overlay */
-  .hotspot, .hotspot-btn { pointer-events:auto; z-index:45; }
+
   /* ========== Panel chỉ đường (Nav) ========== */
   #directions {
     position: fixed;
@@ -426,10 +412,7 @@ main {
   #pano { position: relative; z-index: 1; }
   header, #menu, #hoverPreview, #controls, #minimap, #directions { z-index: 1000; }
   
-  /* ========== Tinh chỉnh hotspot hiển thị trên cùng ========== */
-  .hotspot { z-index: 900; position: relative; }
-  .hotspot .hotspot-info { z-index: 901; }
-  
+
   /* ========== Responsive cho mobile ========== */
   @media (max-width: 768px) {
     #minimap {
@@ -499,35 +482,7 @@ main {
         cursor: pointer;
         transition: background-color 0.3s ease;
     }
-    .hotspot {
-        width: 30px !important;
-        height: 30px !important;
-    }
-    .hotspot-btn{
-        padding:6px 10px; border:0; border-radius:999px;
-        background: rgba(255,255,255,.9);
-        box-shadow: 0 2px 8px rgba(0,0,0,.2);
-        font-size: 13px; cursor: pointer;
-      }
-      
-    .hotspot-icon {
-        width: 25px !important;
-        height: 25px !important;
-    }
 
-    /* Hotspot gắn vào hotspotContainer (KHÔNG thêm position:fixed/absolute lên body) */
-.hotspot-img {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    transform: translate(-50%, -50%);  /* căn giữa tại yaw/pitch */
-    pointer-events: auto;
-    user-select: none;
-  }
-  .hotspot-img img { width: 10px; height: 10px; }
-  .hotspot-img span {
-    margin-top: 4px; font-size: 12px; color: #fff;
-    background: rgba(0,0,0,.6); padding: 2px 6px; border-radius: 6px;
-  }
-  
+
+
 }

@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Tham Quan Đại Học Bình Dương 360°</title>
+
+  <!-- PWA -->
+  <link rel="manifest" href="/manifest.json" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Web360" />
+  <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
+
+  <!-- Styles -->
+
+  <!-- Marzipano UMD -->
+  <script src="/marzipano.js"></script>
+  <script type="module" crossorigin src="/assets/index-CSLajost.js"></script>
+  <link rel="stylesheet" crossorigin href="/assets/index-Lo7vx15O.css">
+</head>
+<body>
+
+  <header class="header">
+    <img id="logo" src="./assets/icon/logo BDU Eng.png" alt="Logo BDU" />
+    <div class="brand">
+      <h1 id="tieude">Tham Quan Đại Học Bình Dương 360°</h1>
+    </div>
+    <div id="tenKhuVuc" class="scene-title" aria-live="polite">Tên khu vực: Cổng Chính</div>
+    <button id="toggleAutoRotate">Dừng lại</button>
+    <div class="header-actions">
+      <select id="langSwitch" aria-label="Ngôn ngữ">
+        <option value="vi" selected>VI</option>
+        <option value="en">EN</option>
+      </select>
+      <button id="installButton" style="display:none">Cài đặt ứng dụng</button>
+      
+    </div>
+  </header>
+
+  <main class="main" role="main">
+    <!-- Viewer -->
+    <div id="pano" class="viewer" aria-label="Trình xem panorama 360°"></div>
+
+    <!-- Fade overlay for smooth transition -->
+    <div id="fade" class="fade"></div>
+
+    <!-- Floating hotspots layer (DOM hotspots will be injected by JS) -->
+    <div id="hotspots" aria-hidden="true"></div>
+
+    <!-- Minimap + toolbar -->
+    <aside class="sidebar">
+      <section class="minimap-panel">
+        <div class="minimap-toolbar">
+          <h2>Mini-map</h2>
+          <div class="route">
+            <label>
+              Từ:
+              <select id="routeFrom"></select>
+            </label>
+            <label>
+              Đến:
+              <select id="routeTo"></select>
+            </label>
+            <button id="routeBtn">Tìm đường</button>
+          </div>
+          <div class="legend">
+            <span class="dot dot--current"></span> Hiện tại
+            <span class="dot dot--next"></span> Lộ trình
+          </div>
+        </div>
+        <div id="minimap" class="minimap" aria-label="Mini-map định vị"></div>
+      </section>
+
+      <!-- Dynamic menu rendered from scenes.json -->
+      <nav id="menu" class="menu" aria-label="Điều hướng khu vực">
+        <button id="menuButton" aria-expanded="false" title="Mở menu">☰</button>
+        <ul id="menuList"></ul>
+      </nav>
+
+      <!-- Preview khi hover menu -->
+      <div id="hoverPreview" class="preview" aria-hidden="true">
+        <img id="previewImage" src="" alt="Preview" />
+      </div>
+    </aside>
+  </main>
+
+  <footer class="footer">
+    <div id="controls" class="controls" aria-label="Điều khiển góc nhìn">
+      <button id="left"  title="Quay trái">⟲ Quay trái</button>
+      <button id="right" title="Quay phải">Quay phải ⟳</button>
+      <button id="zoomIn"  title="Phóng to">＋ Phóng to</button>
+      <button id="zoomOut" title="Thu nhỏ">－ Thu nhỏ</button>
+    </div>
+  </footer>
+
+  <!-- Loader (ẩn/hiện bằng CSS/JS khi cần) -->
+  <div id="loader" class="loader" aria-hidden="true">Đang tải…</div>
+
+  <!-- Entry ESM -->
+</body>
+</html>
