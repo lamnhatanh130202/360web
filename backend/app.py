@@ -1,0 +1,227 @@
+# app.py (stable for docker + cms/data )
+from flask import Flask, jsonify, request, abort, send_from_directory
+from flask_cors import CORS
+import os
+import json
+from werkzeug.utils import secure_filename
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+# default locations we will probe (in priority order for reading)
+CANDIDATE_SCENES = [
+    os.path.join(BASE_DIR, "scenes.json"),                             # backend/scenes.json (writable)
+    os.path.normpath(os.path.join(BASE_DIR, "..", "cms", "data", "scenes.json")),  # ../cms/data/scenes.json
+    os.path.normpath(os.path.join(BASE_DIR, "..", "frontend", "dist", "scenes.json")), # frontend/dist/scenes.json
+]
+
+# the file we will WRITE to when changes occur (keep writes local to backend)
+SCENES_FILE_WRITE = os.path.join(BASE_DIR, "scenes.json")
+
+FRONTEND_DIST = os.path.normpath(os.path.join(BASE_DIR, '..', 'frontend', 'dist'))
+UPLOAD_DIR = os.path.join(BASE_DIR, 'uploads')  # local uploads (for testing)
+os.makedirs(UPLOAD_DIR, exist_ok=True)
+
+app = Flask(__name__, static_folder=FRONTEND_DIST, static_url_path='')
+CORS(app)
+
+def find_scenes_file():
+    for p in CANDIDATE_SCENES:
+        try:
+            if p and os.path.exists(p) and os.path.getsize(p) > 0:
+                return p
+        except Exception:
+            continue
+    return None
+
+# load scenes from disk (persistent between restarts)
+_scenes = {}
+loaded_from = None
+scenes_path = find_scenes_file()
+print("DEBUG: Candidate scenes paths:", CANDIDATE_SCENES)
+print("DEBUG: Selected scenes path:", scenes_path)
+if scenes_path:
+    try:
+        with open(scenes_path, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+            # support list of scenes or dict
+            if isinstance(data, list):
+                for s in data:
+                    if isinstance(s, dict) and "id" in s:
+                        _scenes[s['id']] = s
+            elif isinstance(data, dict):
+                # if it's a dict mapping id->scene or similar
+                for k, v in data.items():
+                    if isinstance(v, dict) and "id" in v:
+                        _scenes[v['id']] = v
+                    else:
+                        _scenes[k] = v
+        loaded_from = scenes_path
+        print(f"DEBUG: Loaded {_scenes.__len__()} scenes from {scenes_path}")
+    except Exception as e:
+        print("Failed to load scenes.json:", e)
+else:
+    print("DEBUG: No valid scenes.json found in candidates; starting with empty scenes.")
+
+def save_scenes():
+    try:
+        # ensure directory exists for write path
+        os.makedirs(os.path.dirname(SCENES_FILE_WRITE), exist_ok=True)
+        with open(SCENES_FILE_WRITE, 'w', encoding='utf-8') as f:
+            json.dump(list(_scenes.values()), f, ensure_ascii=False, indent=2)
+        print("DEBUG: Saved scenes to", SCENES_FILE_WRITE)
+    except Exception as e:
+        print("Failed to save scenes.json:", e)
+
+# Serve frontend (index.html + static) if dist exists
+@app.route('/', defaults={'path': ''})
+@app.route('/<path:path>')
+def serve_frontend(path):
+    # prefer static file if exists in dist
+    if app.static_folder:
+        candidate = os.path.join(app.static_folder, path)
+        if path and os.path.exists(candidate) and os.path.isfile(candidate):
+            return send_from_directory(app.static_folder, path)
+        # fallback index
+        index_path = os.path.join(app.static_folder, 'index.html')
+        if os.path.exists(index_path):
+            return send_from_directory(app.static_folder, 'index.html')
+    return jsonify({"status": "ok", "msg": "Backend running (no frontend built)"}), 200
+
+# Health
+@app.route("/health", methods=["GET"])
+def health():
+    return jsonify({"status": "ok", "msg": "Flask backend running"})
+
+
+def generate_graph_from_scenes():
+    # Sửa lại để đọc trực tiếp từ file path đã tìm thấy
+    if not scenes_path:
+        return {"nodes": [], "edges": []}
+
+    with open(scenes_path, 'r', encoding='utf-8') as f:
+        scenes_data_list = json.load(f)
+
+    nodes = []
+    for scene_data in scenes_data_list:
+        nodes.append({
+            "id": scene_data["id"],
+            "label": scene_data.get("name", {}).get("vi", scene_data["id"]),
+            "x": 0,
+            "y": 0
+        })
+
+    edges = []
+    edge_set = set()
+    for scene_data in scenes_data_list:
+        for hotspot in scene_data.get("hotspots", []):
+            target_id = hotspot.get("target")
+            if target_id:
+                pair = tuple(sorted((scene_data["id"], target_id)))
+                if pair not in edge_set:
+                    edges.append({"from": scene_data["id"], "to": target_id, "w": 1})
+                    edge_set.add(pair)
+                    
+    return {"nodes": nodes, "edges": edges}
+
+@app.route("/api/graph", methods=["GET"])
+def get_graph():
+    graph_path = os.path.normpath(os.path.join(BASE_DIR, "..", "cms", "data", "graph.json"))
+    if os.path.exists(graph_path) and os.path.getsize(graph_path) > 0:
+        with open(graph_path, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+        return jsonify(data)
+    else:
+        print("DEBUG: graph.json not found. Generating a new one.")
+        new_graph = generate_graph_from_scenes()
+        with open(graph_path, 'w', encoding='utf-8') as f:
+            json.dump(new_graph, f, ensure_ascii=False, indent=2)
+        return jsonify(new_graph)
+
+@app.route("/api/graph", methods=["POST"])
+def save_graph():
+    new_graph = request.get_json()
+    if not new_graph or "nodes" not in new_graph or "edges" not in new_graph:
+        abort(400, "Invalid graph data")
+
+    graph_path = os.path.normpath(os.path.join(BASE_DIR, "..", "cms", "data", "graph.json"))
+    try:
+        # --- THÊM DÒNG NÀY ĐỂ TỰ TẠO THƯ MỤC NẾU CHƯA CÓ ---
+        os.makedirs(os.path.dirname(graph_path), exist_ok=True)
+
+        with open(graph_path, 'w', encoding='utf-8') as f:
+            json.dump(new_graph, f, ensure_ascii=False, indent=2)
+        print("DEBUG: Successfully saved graph.json to cms/data")
+        return jsonify({"status": "ok"}), 200
+    except Exception as e:
+        print(f"ERROR: Failed to save graph.json: {e}")
+        abort(500, "Failed to save graph file.")
+# Scenes CRUD
+@app.route("/api/scenes", methods=["GET"])
+def list_scenes():
+    return jsonify(list(_scenes.values()))
+
+@app.route("/api/scenes/<scene_id>", methods=["GET"])
+def get_scene(scene_id):
+    scene = _scenes.get(scene_id)
+    if not scene:
+        abort(404)
+    return jsonify(scene)
+
+@app.route("/api/scenes", methods=["POST"])
+def create_scene():
+    data = request.get_json()
+    if not data or "id" not in data:
+        abort(400, "scene id required")
+    _scenes[data["id"]] = data
+    save_scenes()
+    return jsonify(data), 201
+
+@app.route("/api/scenes/<scene_id>", methods=["PUT"])
+def update_scene(scene_id):
+    data = request.get_json()
+    if not data:
+        abort(400)
+    if scene_id not in _scenes:
+        abort(404)
+    _scenes[scene_id].update(data)
+    save_scenes()
+    return jsonify(_scenes[scene_id])
+
+@app.route("/api/scenes/<scene_id>", methods=["DELETE"])
+def delete_scene(scene_id):
+    if scene_id in _scenes:
+        del _scenes[scene_id]
+        save_scenes()
+        return "", 204
+    abort(404)
+
+# Simple file upload for testing (stores locally). In production, upload to Firebase Storage or S3.
+ALLOWED_EXT = {'png', 'jpg', 'jpeg', 'webp', 'gif'}
+def allowed(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXT
+
+@app.route("/api/upload", methods=["POST"])
+def upload_file():
+    if 'file' not in request.files:
+        abort(400, "file field required")
+    f = request.files['file']
+    if f.filename == '':
+        abort(400, "filename empty")
+    if not allowed(f.filename):
+        abort(400, "file type not allowed")
+    filename = secure_filename(f.filename)
+    dest = os.path.join(UPLOAD_DIR, filename)
+    f.save(dest)
+    # return the path relative to frontend (you may need to expose uploads via static route)
+    url = f"/uploads/{filename}"
+    return jsonify({"url": url}), 201
+
+# expose uploads for dev (not for production without auth)
+@app.route('/uploads/<path:filename>')
+def uploaded_file(filename):
+    return send_from_directory(UPLOAD_DIR, filename)
+
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 5000))
+    # use 0.0.0.0 so container/external access works; debug True only for dev
+    app.run(host="0.0.0.0", port=port, debug=os.environ.get("FLASK_DEBUG","1") == "1")

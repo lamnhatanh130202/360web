@@ -1,0 +1,9 @@
+node_modules
+.pnpm-store
+.pnp
+.DS_Store
+.git
+.gitignore
+.vscode
+npm-debug.log
+*.log
