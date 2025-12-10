@@ -391,7 +391,7 @@ export default function ScenePreview({ apiBase = "/api" }) {
       </div>
 
       {/* Bảng hotspots luôn hiển thị */}
-      <div className="hotspots-table-container">
+          <div className="hotspots-table-container">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
               <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 600 }}>
                 Danh sách Hotspots ({hotspots.length} {hotspots.length === 1 ? 'điểm' : 'điểm'})
@@ -403,17 +403,17 @@ export default function ScenePreview({ apiBase = "/api" }) {
               )}
           </div>
           
-          <table className="hotspots-table">
-              <thead>
-                  <tr>
-                      <th style={{width: '30%'}}>Tên hiển thị</th>
-                      <th style={{width: '30%'}}>Đi đến (Target)</th>
-                      <th style={{width: '15%'}}>Yaw</th>
-                      <th style={{width: '15%'}}>Pitch</th>
-                      <th style={{width: '10%'}}>Xóa</th>
-                  </tr>
-              </thead>
-              <tbody>
+              <table className="hotspots-table">
+                  <thead>
+                      <tr>
+                          <th style={{width: '30%'}}>Tên hiển thị</th>
+                          <th style={{width: '30%'}}>Đi đến (Target)</th>
+                          <th style={{width: '15%'}}>Yaw</th>
+                          <th style={{width: '15%'}}>Pitch</th>
+                          <th style={{width: '10%'}}>Xóa</th>
+                      </tr>
+                  </thead>
+                  <tbody>
                   {hotspots.length === 0 ? (
                       <tr>
                           <td colSpan="5" style={{ textAlign: 'center', padding: '20px', color: 'var(--muted)' }}>
@@ -475,8 +475,8 @@ export default function ScenePreview({ apiBase = "/api" }) {
                           </tr>
                       ))
                   )}
-              </tbody>
-          </table>
+                  </tbody>
+              </table>
 
           {/* Các nút thao tác ở dưới bảng */}
           <div style={{ marginTop: '20px', display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>

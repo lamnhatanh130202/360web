@@ -1,0 +1,61 @@
+# Git
+.git
+.gitignore
+.gitattributes
+
+# Documentation
+*.md
+README.md
+DEPLOYMENT.md
+HUONG_DAN_CHAY_APP.md
+NGUYEN_LY_VAN_HANH.md
+
+# Node modules
+node_modules
+**/node_modules
+
+# Build artifacts (sẽ được build lại)
+frontend/dist
+cms-frontend/dist
+
+# Python
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.Python
+venv
+env
+ENV
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Test
+coverage
+.nyc_output
+
+# Misc
+*.md
+.pnpm-store
+pnpm-lock.yaml
+package-lock.json
+yarn.lock
+

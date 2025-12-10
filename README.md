@@ -4,7 +4,37 @@
 
 ## 🚀 Quick Start
 
-### Chạy bằng Docker (Khuyến nghị)
+### Deploy Production (Khuyến nghị)
+
+**Windows:**
+```powershell
+# Copy file cấu hình
+copy env.example .env
+# Chỉnh sửa .env nếu cần
+
+# Build và deploy
+.\build.ps1
+.\deploy.ps1
+```
+
+**Linux/Mac:**
+```bash
+# Copy file cấu hình
+cp env.example .env
+# Chỉnh sửa .env nếu cần
+
+# Build và deploy
+chmod +x build.sh deploy.sh
+./build.sh
+./deploy.sh
+```
+
+**Truy cập:**
+- Frontend: http://localhost:8080
+- Backend API: http://localhost:5000
+- CMS Admin: http://localhost:8080/cms
+
+### Chạy Development Mode
 
 ```bash
 # Build và chạy tất cả services
@@ -43,11 +73,9 @@ pnpm dev
 
 ## 📚 Tài liệu chi tiết
 
-Xem file **[HUONG_DAN_CHAY_APP.md](./HUONG_DAN_CHAY_APP.md)** để biết hướng dẫn chi tiết về:
-- Cài đặt và yêu cầu hệ thống
-- Cấu hình môi trường
-- Xử lý lỗi
-- Deployment
+- **[DEPLOY_QUICK.md](./DEPLOY_QUICK.md)** - Hướng dẫn deploy nhanh (3 bước)
+- **[DEPLOYMENT.md](./DEPLOYMENT.md)** - Hướng dẫn deploy chi tiết lên các platform
+- **[HUONG_DAN_CHAY_APP.md](./HUONG_DAN_CHAY_APP.md)** - Hướng dẫn chạy app và development
 
 ## 📁 Cấu trúc dự án
 
