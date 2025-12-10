@@ -4,33 +4,12 @@ import './styles/bot.css'; // Voice bot styles
 import React from "react";
 import ReactDOM from "react-dom/client";      // <- BẮT BUỘC
 import { initI18n, t, getCurrentLang, setLanguage, translations, applyTranslations } from './utils/i18n.js';
-import App from "../../cms-frontend/src/cms/AppLayout.jsx";
 import { bootstrap } from './core/app.js';    // viewer bootstrap (Marzipano)
 
-// --- Helper: mount React CMS only when admin container exists or path indicates /cms
-function shouldMountCms() {
-  // Nếu bạn serve admin ở /cms (basename) hoặc dùng hash #/admin
-  const p = location.pathname || '';
-  const hash = location.hash || '';
-  if (document.getElementById('cms-root')) return true;
-  if (p.startsWith('/cms')) return true;
-  if (hash.startsWith('#/admin') || hash.startsWith('#admin')) return true;
-  return false;
-}
-
-// --- Mount CMS react app (if present)
-if (shouldMountCms()) {
-  const cmsRoot = document.getElementById('cms-root') || document.getElementById('root');
-  if (cmsRoot) {
-    ReactDOM.createRoot(cmsRoot).render(
-      <React.StrictMode>
-        <App />
-      </React.StrictMode>
-    );
-  } else {
-    console.warn('Không tìm thấy #cms-root hay #root để mount CMS React. Tạo <div id="cms-root"></div> trong index.html nếu cần.');
-  }
-}
+// --- CMS mounting: Removed direct import because CMS is built and served separately
+// In production, CMS is served at /cms via nginx from cms-frontend/dist
+// This import was causing build errors in Docker because cms-frontend is not available during frontend build
+// If you need to mount CMS in dev mode, use dynamic import or serve CMS separately
 
 // ================= PWA install button =================
 let deferredPrompt = null;
