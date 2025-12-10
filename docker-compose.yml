@@ -1,3 +1,4 @@
+version: '3.8'
 services:
   backend:
     build:
@@ -8,23 +9,52 @@ services:
     ports:
       - "5000:5000"
     volumes:
+      # 1. Mount code để dev (Bao gồm cả file scenes.json nằm trong ./backend)
+      - ./backend:/app
+      
+      # 3. Các thư mục khác
       - ./backend/uploads:/app/uploads
-      - ./backend/scenes.json:/app/scenes.json
-      - ./cms/data:/app/cms/data
+      - ./cms/data:/app/cms/data:rw
+      - ./backend/keys/google-tts-key.json:/app/backend/keys/google-tts-key.json:ro
+      - ./backend/static/tts:/app/static/tts
+      
     environment:
+      - GOOGLE_APPLICATION_CREDENTIALS=/app/backend/keys/google-tts-key.json
       - FLASK_ENV=production
+      - FLASK_DEBUG=0
+      - GUNICORN_WORKERS=4
+      - GUNICORN_THREADS=1
       - TZ=Asia/Ho_Chi_Minh
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:5000/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 2G
+        reservations:
+          cpus: '1.0'
+          memory: 1G
     networks:
       - web360_net
 
   frontend:
     build:
-      context: ./frontend
-      dockerfile: Dockerfile
-    container_name: web360_frontend
+      context: .
+      dockerfile: ./frontend/Dockerfile
+    container_name: web360_nginx
     restart: unless-stopped
     ports:
       - "8080:80"
+    volumes:
+      - ./frontend/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./backend/static/tts:/usr/share/nginx/html/static/tts:ro
+    depends_on:
+      backend:
+        condition: service_healthy
     networks:
       - web360_net
 

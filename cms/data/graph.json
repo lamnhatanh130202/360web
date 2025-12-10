@@ -1,25 +1,1773 @@
 {
   "nodes": [
-    { "id": "congtruong", "label": "Cổng chính", "x": 120, "y": 240 },
-    { "id": "phongtuyensinh", "label": "Phòng Tuyển Sinh", "x": 120, "y": 240 },
-    { "id": "TrungtamPTNLS", "label": "Trung Tâm PTNLS", "x": 120, "y": 240 },
-    { "id": "loidi1", "label": "Lối đi Dãy Học Hỏi Hiếu Hành 1", "x": 100, "y": 120 },
-    { "id": "loidi2", "label": "Lối đi Dãy Học Hỏi Hiếu Hành 2", "x": 120, "y": 240 },
-    { "id": "truocphongan", "label": "Trước Phòng Ăn", "x": 120, "y": 240 },
-    { "id": "phongan", "label": "Phòng Ăn", "x": 120, "y": 240 },
-    { "id": "santruong",  "label": "Sân trường", "x": 260, "y": 240 },
-    { "id": "trcdaya",    "label": "Trước dãy A","x": 380, "y": 220 },
-    { "id": "b0_1",       "label": "B - Trệt",   "x": 320, "y": 300 },
-    { "id": "b1_1",       "label": "B - Tầng 1", "x": 320, "y": 360 }
+    {
+      "id": "congtruong",
+      "floor": 0,
+      "label": "Cổng Chính",
+      "positions": {
+        "0": {
+          "x": 199,
+          "y": 682
+        }
+      },
+      "x": 199,
+      "y": 682
+    },
+    {
+      "id": "congphu",
+      "floor": 0,
+      "label": "Cổng Phụ",
+      "positions": {
+        "0": {
+          "x": 2392,
+          "y": 1007
+        }
+      },
+      "x": 2392,
+      "y": 1007
+    },
+    {
+      "id": "phongtuyensinh",
+      "floor": 0,
+      "label": "Phòng Tuyển Sinh",
+      "positions": {
+        "0": {
+          "x": 350,
+          "y": 1137
+        }
+      },
+      "x": 350,
+      "y": 1137
+    },
+    {
+      "id": "TrungtamPTNLS",
+      "floor": 0,
+      "label": "Trung Tâm PTNLS",
+      "positions": {
+        "0": {
+          "x": 522,
+          "y": 981
+        }
+      },
+      "x": 522,
+      "y": 981
+    },
+    {
+      "id": "duonglencong",
+      "floor": 0,
+      "label": "Đường Lên Cổng",
+      "positions": {
+        "0": {
+          "x": 721,
+          "y": 741
+        }
+      },
+      "x": 721,
+      "y": 741
+    },
+    {
+      "id": "santruong",
+      "floor": 0,
+      "label": "Sân Trường",
+      "positions": {
+        "0": {
+          "x": 1601,
+          "y": 709
+        }
+      },
+      "x": 1601,
+      "y": 709
+    },
+    {
+      "id": "loidi1",
+      "floor": 0,
+      "label": "Khối văn phòng C1 - 1",
+      "positions": {
+        "0": {
+          "x": 826,
+          "y": 921
+        }
+      },
+      "x": 826,
+      "y": 921
+    },
+    {
+      "id": "loidi2",
+      "floor": 0,
+      "label": "Khối văn phòng C1 - 2",
+      "positions": {
+        "0": {
+          "x": 1114,
+          "y": 970
+        }
+      },
+      "x": 1114,
+      "y": 970
+    },
+    {
+      "id": "truocphongan",
+      "floor": 0,
+      "label": "Trước Phòng Ăn",
+      "positions": {
+        "0": {
+          "x": 875,
+          "y": 319
+        }
+      },
+      "x": 875,
+      "y": 319
+    },
+    {
+      "id": "phongan",
+      "floor": 0,
+      "label": "Phòng Ăn",
+      "positions": {
+        "0": {
+          "x": 1052,
+          "y": 319
+        }
+      },
+      "x": 1052,
+      "y": 319
+    },
+    {
+      "id": "b0_1",
+      "floor": 0,
+      "label": "Tầng Trệt Dãy B 1",
+      "positions": {
+        "0": {
+          "x": 1564,
+          "y": 518
+        }
+      },
+      "x": 1564,
+      "y": 518
+    },
+    {
+      "id": "b0_2",
+      "floor": 0,
+      "label": "Tầng Trệt Dãy B 2",
+      "positions": {
+        "0": {
+          "x": 1999,
+          "y": 561
+        }
+      },
+      "x": 1999,
+      "y": 561
+    },
+    {
+      "id": "b0_3",
+      "floor": 0,
+      "label": "Tầng Trệt Dãy B 3",
+      "positions": {
+        "0": {
+          "x": 2080,
+          "y": 808
+        }
+      },
+      "x": 2080,
+      "y": 808
+    },
+    {
+      "id": "b1_1",
+      "floor": 1,
+      "label": "Tầng 1 Dãy B - Giữa 2",
+      "positions": {
+        "1": {
+          "x": 1567,
+          "y": 697
+        }
+      },
+      "x": 1567,
+      "y": 697
+    },
+    {
+      "id": "b1_2",
+      "floor": 1,
+      "label": "Tầng 1 Dãy B - Giữa 1",
+      "positions": {
+        "1": {
+          "x": 1665,
+          "y": 597
+        }
+      },
+      "x": 1665,
+      "y": 597
+    },
+    {
+      "id": "b1_3",
+      "floor": 1,
+      "label": "Tầng 1 Dãy B - Hành lang",
+      "positions": {
+        "1": {
+          "x": 1727,
+          "y": 1082
+        }
+      },
+      "x": 1727,
+      "y": 1082
+    },
+    {
+      "id": "b1_4",
+      "floor": 1,
+      "label": "Tầng 1 Dãy B - Phòng máy",
+      "positions": {
+        "1": {
+          "x": 1347,
+          "y": 552
+        }
+      },
+      "x": 1347,
+      "y": 552
+    },
+    {
+      "id": "b1_5",
+      "floor": 1,
+      "label": "Tầng 1 Dãy B - Cuối",
+      "positions": {
+        "1": {
+          "x": 1062,
+          "y": 557
+        }
+      },
+      "x": 1062,
+      "y": 557
+    },
+    {
+      "id": "b1_phethong",
+      "floor": 1,
+      "label": "Phòng Trung Tâm Hệ Thống thông minh",
+      "positions": {
+        "1": {
+          "x": 1825,
+          "y": 391
+        }
+      },
+      "x": 1825,
+      "y": 391
+    },
+    {
+      "id": "b1_datalab",
+      "floor": 1,
+      "label": "Phòng DataLAB",
+      "positions": {
+        "1": {
+          "x": 1557,
+          "y": 419
+        }
+      },
+      "x": 1557,
+      "y": 419
+    },
+    {
+      "id": "b1_sejong5",
+      "floor": 1,
+      "label": "Phòng Sejong 5",
+      "positions": {
+        "1": {
+          "x": 1797,
+          "y": 727
+        }
+      },
+      "x": 1797,
+      "y": 727
+    },
+    {
+      "id": "b1_sejong4",
+      "floor": 1,
+      "label": "Phòng Sejong 4",
+      "positions": {
+        "1": {
+          "x": 1790,
+          "y": 809
+        }
+      },
+      "x": 1790,
+      "y": 809
+    },
+    {
+      "id": "b1_sejong6",
+      "floor": 1,
+      "label": "Phòng Sejong 6",
+      "positions": {
+        "1": {
+          "x": 1802,
+          "y": 629
+        }
+      },
+      "x": 1802,
+      "y": 629
+    },
+    {
+      "id": "b1_pm1",
+      "floor": 1,
+      "label": "Phòng máy 1",
+      "positions": {
+        "1": {
+          "x": 1034,
+          "y": 406
+        }
+      },
+      "x": 1034,
+      "y": 406
+    },
+    {
+      "id": "b1_pm2",
+      "floor": 1,
+      "label": "Phòng máy 2",
+      "positions": {
+        "1": {
+          "x": 1257,
+          "y": 429
+        }
+      },
+      "x": 1257,
+      "y": 429
+    },
+    {
+      "id": "b2_1",
+      "floor": 2,
+      "label": "Tầng 2 Dãy B - 1",
+      "positions": {
+        "2": {
+          "x": 1629,
+          "y": 699
+        }
+      },
+      "x": 1629,
+      "y": 699
+    },
+    {
+      "id": "b2_2",
+      "floor": 2,
+      "label": "Tầng 2 Dãy B - 2",
+      "positions": {
+        "2": {
+          "x": 1785,
+          "y": 626
+        }
+      },
+      "x": 1785,
+      "y": 626
+    },
+    {
+      "id": "b2_3",
+      "floor": 2,
+      "label": "Tầng 2 Dãy B - 3",
+      "positions": {
+        "2": {
+          "x": 1845,
+          "y": 956
+        }
+      },
+      "x": 1845,
+      "y": 956
+    },
+    {
+      "id": "b2_4",
+      "floor": 2,
+      "label": "Tầng 2 Dãy B - 4",
+      "positions": {
+        "2": {
+          "x": 1418,
+          "y": 563
+        }
+      },
+      "x": 1418,
+      "y": 563
+    },
+    {
+      "id": "b2_5",
+      "floor": 2,
+      "label": "Tầng 2 Dãy B - Cuối",
+      "positions": {
+        "2": {
+          "x": 1085,
+          "y": 553
+        }
+      },
+      "x": 1085,
+      "y": 553
+    },
+    {
+      "id": "b2_plab",
+      "floor": 2,
+      "label": "Phòng Lab",
+      "positions": {
+        "2": {
+          "x": 1964,
+          "y": 748
+        }
+      },
+      "x": 1964,
+      "y": 748
+    },
+    {
+      "id": "b2_steamlab",
+      "floor": 2,
+      "label": "Phòng SteamLab",
+      "positions": {
+        "2": {
+          "x": 1944,
+          "y": 410
+        }
+      },
+      "x": 1944,
+      "y": 410
+    },
+    {
+      "id": "b3_1",
+      "floor": 3,
+      "label": "Tầng 3 Dãy B - 1",
+      "positions": {
+        "3": {
+          "x": 1228,
+          "y": 527
+        }
+      },
+      "x": 1228,
+      "y": 527
+    },
+    {
+      "id": "b3_2",
+      "floor": 3,
+      "label": "Trước Phòng BIII.13A",
+      "positions": {
+        "3": {
+          "x": 1313,
+          "y": 444
+        }
+      },
+      "x": 1313,
+      "y": 444
+    },
+    {
+      "id": "b3_3",
+      "floor": 3,
+      "label": "Tầng 3 Dãy B - 2",
+      "positions": {
+        "3": {
+          "x": 1357,
+          "y": 597
+        }
+      },
+      "x": 1357,
+      "y": 597
+    },
+    {
+      "id": "b3_4",
+      "floor": 3,
+      "label": "Trước Khoa Xã hội và Nhân văn",
+      "positions": {
+        "3": {
+          "x": 1349,
+          "y": 962
+        }
+      },
+      "x": 1349,
+      "y": 962
+    },
+    {
+      "id": "b3_5",
+      "floor": 3,
+      "label": "Tầng 3 Dãy B - 3",
+      "positions": {
+        "3": {
+          "x": 973,
+          "y": 417
+        }
+      },
+      "x": 973,
+      "y": 417
+    },
+    {
+      "id": "b3_6",
+      "floor": 3,
+      "label": "Cuối hành lang tầng 3 Dãy B",
+      "positions": {
+        "3": {
+          "x": 789,
+          "y": 453
+        }
+      },
+      "x": 789,
+      "y": 453
+    },
+    {
+      "id": "b3_14a",
+      "floor": 3,
+      "label": "Phòng BIII.14A",
+      "positions": {
+        "3": {
+          "x": 969,
+          "y": 288
+        }
+      },
+      "x": 969,
+      "y": 288
+    },
+    {
+      "id": "trcdaya",
+      "floor": 0,
+      "label": "Trước Dãy A",
+      "positions": {
+        "0": {
+          "x": 1706,
+          "y": 1042
+        }
+      },
+      "x": 1706,
+      "y": 1042
+    },
+    {
+      "id": "truockhoacntt",
+      "floor": 0,
+      "label": "Trước Khoa CNTT",
+      "positions": {
+        "0": {
+          "x": 1561,
+          "y": 1120
+        }
+      },
+      "x": 1561,
+      "y": 1120
+    },
+    {
+      "id": "a0_1",
+      "floor": 0,
+      "label": "Hành lang Dãy A 1",
+      "positions": {
+        "0": {
+          "x": 2199,
+          "y": 1154
+        }
+      },
+      "x": 2199,
+      "y": 1154
+    },
+    {
+      "id": "a0_2",
+      "floor": 0,
+      "label": "Hành lang Dãy A 2",
+      "positions": {
+        "0": {
+          "x": 2025,
+          "y": 1140
+        }
+      },
+      "x": 2025,
+      "y": 1140
+    },
+    {
+      "id": "a0_3",
+      "floor": 0,
+      "label": "Hành lang Dãy A 3",
+      "positions": {
+        "0": {
+          "x": 1782,
+          "y": 1132
+        }
+      },
+      "x": 1782,
+      "y": 1132
+    },
+    {
+      "id": "a0_cntt",
+      "floor": 0,
+      "label": "Khoa Công Nghệ Thông Tin",
+      "positions": {
+        "0": {
+          "x": 1551,
+          "y": 1280
+        }
+      },
+      "x": 1551,
+      "y": 1280
+    },
+    {
+      "id": "a0_kientruc",
+      "floor": 0,
+      "label": "Khoa Kiến Trúc",
+      "positions": {
+        "0": {
+          "x": 1458,
+          "y": 1218
+        }
+      },
+      "x": 1458,
+      "y": 1218
+    },
+    {
+      "id": "a0_ktoto",
+      "floor": 0,
+      "label": "Khoa Kỹ Thuật Ô Tô",
+      "positions": {
+        "0": {
+          "x": 1709,
+          "y": 1177
+        }
+      },
+      "x": 1709,
+      "y": 1177
+    },
+    {
+      "id": "a0_luat",
+      "floor": 0,
+      "label": "Khoa Luật",
+      "positions": {
+        "0": {
+          "x": 1880,
+          "y": 1234
+        }
+      },
+      "x": 1880,
+      "y": 1234
+    },
+    {
+      "id": "a0_phongkebencntt",
+      "floor": 0,
+      "label": "Khoa điện điện tử",
+      "positions": {
+        "0": {
+          "x": 1640,
+          "y": 1227
+        }
+      },
+      "x": 1640,
+      "y": 1227
+    },
+    {
+      "id": "a0_qtcn_logistic",
+      "floor": 0,
+      "label": "Khoa Quản Trị CN & Logistics",
+      "positions": {
+        "0": {
+          "x": 1801,
+          "y": 1277
+        }
+      },
+      "x": 1801,
+      "y": 1277
+    },
+    {
+      "id": "a0_xahoihoc",
+      "floor": 0,
+      "label": "Xã hội học & Truyền thông",
+      "positions": {
+        "0": {
+          "x": 2124,
+          "y": 1215
+        }
+      },
+      "x": 2124,
+      "y": 1215
+    },
+    {
+      "id": "a0_kinhte",
+      "floor": 0,
+      "label": "Khoa Kinh Tế",
+      "positions": {
+        "0": {
+          "x": 1975,
+          "y": 1258
+        }
+      },
+      "x": 1975,
+      "y": 1258
+    },
+    {
+      "id": "a1_1",
+      "floor": 1,
+      "label": "Hành lang Dãy A1 - Tầng 1",
+      "positions": {
+        "1": {
+          "x": 1710,
+          "y": 1465
+        }
+      },
+      "x": 1710,
+      "y": 1465
+    },
+    {
+      "id": "a1_2",
+      "floor": 1,
+      "label": "Hành lang Dãy A3 - Tầng 1",
+      "positions": {
+        "1": {
+          "x": 857,
+          "y": 1555
+        }
+      },
+      "x": 857,
+      "y": 1555
+    },
+    {
+      "id": "a1_3",
+      "floor": 1,
+      "label": "Hành lang Dãy A2 - Tầng 1",
+      "positions": {
+        "1": {
+          "x": 1257,
+          "y": 1545
+        }
+      },
+      "x": 1257,
+      "y": 1545
+    },
+    {
+      "id": "a1_p_AI_3",
+      "floor": 1,
+      "label": "Phòng AI.3",
+      "positions": {
+        "1": {
+          "x": 1232,
+          "y": 1712
+        }
+      },
+      "x": 1232,
+      "y": 1712
+    },
+    {
+      "id": "a1_al4",
+      "floor": 1,
+      "label": "Phòng AL4",
+      "positions": {
+        "1": {
+          "x": 1495,
+          "y": 1647
+        }
+      },
+      "x": 1495,
+      "y": 1647
+    },
+    {
+      "id": "a1_hocvienkingsejong",
+      "floor": 1,
+      "label": "Học viện King Sejong",
+      "positions": {
+        "1": {
+          "x": 1832,
+          "y": 1372
+        }
+      },
+      "x": 1832,
+      "y": 1372
+    },
+    {
+      "id": "a2_1",
+      "floor": 2,
+      "label": "Hành lang Dãy A1 - Tầng 2",
+      "positions": {
+        "2": {
+          "x": 845,
+          "y": 1635
+        }
+      },
+      "x": 845,
+      "y": 1635
+    },
+    {
+      "id": "a2_2",
+      "floor": 2,
+      "label": "Hành lang Dãy A2 - Tầng 2",
+      "positions": {
+        "2": {
+          "x": 1301,
+          "y": 1630
+        }
+      },
+      "x": 1301,
+      "y": 1630
+    },
+    {
+      "id": "a2_3",
+      "floor": 2,
+      "label": "Hành lang Dãy A3 - Tầng 2",
+      "positions": {
+        "2": {
+          "x": 1806,
+          "y": 1516
+        }
+      },
+      "x": 1806,
+      "y": 1516
+    },
+    {
+      "id": "a3_trcthuvien",
+      "floor": 3,
+      "label": "Trước Thư Viện - Tầng 3",
+      "positions": {
+        "3": {
+          "x": 1315,
+          "y": 1123
+        }
+      },
+      "x": 1315,
+      "y": 1123
+    },
+    {
+      "id": "a3_thuvien1",
+      "floor": 3,
+      "label": "Thư Viện - Tầng 3",
+      "positions": {
+        "3": {
+          "x": 1204,
+          "y": 1354
+        }
+      },
+      "x": 1204,
+      "y": 1354
+    },
+    {
+      "id": "a3_thuvien2",
+      "floor": 3,
+      "label": "Thư Viện 2 - Tầng 3",
+      "positions": {
+        "3": {
+          "x": 1452,
+          "y": 1068
+        }
+      },
+      "x": 1452,
+      "y": 1068
+    },
+    {
+      "id": "a4_1",
+      "floor": 4,
+      "label": "Hành lang Dãy A1 - Tầng 4",
+      "positions": {
+        "4": {
+          "x": 508,
+          "y": 782
+        }
+      },
+      "x": 508,
+      "y": 782
+    },
+    {
+      "id": "a4_2",
+      "floor": 4,
+      "label": "Hành lang Dãy A2 - Tầng 4",
+      "positions": {
+        "4": {
+          "x": 930,
+          "y": 774
+        }
+      },
+      "x": 930,
+      "y": 774
+    },
+    {
+      "id": "a4_3",
+      "floor": 4,
+      "label": "Hành lang Dãy A3 - Tầng 4",
+      "positions": {
+        "4": {
+          "x": 1325,
+          "y": 798
+        }
+      },
+      "x": 1325,
+      "y": 798
+    },
+    {
+      "id": "a5_1",
+      "floor": 5,
+      "label": "Hành lang Dãy A1 - Tầng 5",
+      "positions": {
+        "5": {
+          "x": 1630,
+          "y": 1029
+        }
+      },
+      "x": 1630,
+      "y": 1029
+    },
+    {
+      "id": "a5_2",
+      "floor": 5,
+      "label": "Hành lang Dãy A2 - Tầng 5",
+      "positions": {
+        "5": {
+          "x": 1290,
+          "y": 1137
+        }
+      },
+      "x": 1290,
+      "y": 1137
+    },
+    {
+      "id": "a5_3",
+      "floor": 5,
+      "label": "Hành lang Dãy A3 - Tầng 5",
+      "positions": {
+        "5": {
+          "x": 896,
+          "y": 1050
+        }
+      },
+      "x": 896,
+      "y": 1050
+    },
+    {
+      "id": "a6_1",
+      "floor": 6,
+      "label": "Hành lang Dãy A1 - Tầng 6",
+      "positions": {
+        "6": {
+          "x": 0,
+          "y": 0
+        }
+      },
+      "x": 0,
+      "y": 0
+    },
+    {
+      "id": "a6_3",
+      "floor": 6,
+      "label": "Hành lang Dãy A3 - Tầng 6",
+      "positions": {
+        "6": {
+          "x": 0,
+          "y": 0
+        }
+      },
+      "x": 0,
+      "y": 0
+    },
+    {
+      "id": "khue",
+      "floor": 0,
+      "label": "khu e",
+      "positions": {
+        "0": {
+          "x": 2510,
+          "y": 1021
+        }
+      },
+      "x": 2510,
+      "y": 1021
+    },
+    {
+      "id": "test",
+      "floor": 6,
+      "label": "test",
+      "positions": {
+        "6": {
+          "x": 0,
+          "y": 0
+        }
+      },
+      "x": 0,
+      "y": 0
+    }
   ],
   "edges": [
-    { "from": "congtruong", "to": "phongtuyensinh", "w": 1 },
-    { "from": "congtruong", "to": "TrungtamPTNLS", "w": 1 },
-    { "from": "congtruong", "to": "loidi1", "w": 1 },
-    { "from": "loidi1", "to": "loidi2", "w": 1 },
-    { "from": "loidi1", "to": "truocphongan", "w": 1 },
-    { "from": "santruong",  "to": "trcdaya",   "w": 1 },
-    { "from": "santruong",  "to": "b0_1",      "w": 1 },
-    { "from": "b0_1",       "to": "b1_1",      "w": 1.5 }
+    {
+      "from": "congtruong",
+      "label": "Đường Lên Cổng",
+      "to": "duonglencong"
+    },
+    {
+      "from": "congtruong",
+      "label": "Trung Tâm PTNLS",
+      "to": "TrungtamPTNLS"
+    },
+    {
+      "from": "congtruong",
+      "label": "Phòng Tuyển Sinh",
+      "to": "phongtuyensinh"
+    },
+    {
+      "from": "congphu",
+      "label": "cổng khu E",
+      "to": "khue"
+    },
+    {
+      "from": "phongtuyensinh",
+      "label": "Cổng Chính",
+      "to": "congtruong"
+    },
+    {
+      "from": "TrungtamPTNLS",
+      "label": "Cổng Chính",
+      "to": "congtruong"
+    },
+    {
+      "from": "duonglencong",
+      "label": "Quay lại Cổng Chính",
+      "to": "congtruong"
+    },
+    {
+      "from": "duonglencong",
+      "label": "Khối văn phòng C1- 1",
+      "to": "loidi1"
+    },
+    {
+      "from": "santruong",
+      "label": "Trước dãy A",
+      "to": "trcdaya"
+    },
+    {
+      "from": "santruong",
+      "label": "Trước Thư Viện",
+      "to": "a3_trcthuvien"
+    },
+    {
+      "from": "santruong",
+      "label": "Dãy Học Hỏi Hiếu Hành",
+      "to": "loidi2"
+    },
+    {
+      "from": "santruong",
+      "label": "Tầng Trệt Dãy B",
+      "to": "b0_1"
+    },
+    {
+      "from": "santruong",
+      "label": "Tầng Trệt Dãy B 1",
+      "to": "b0_2"
+    },
+    {
+      "from": "santruong",
+      "label": "Tầng 1 Dãy B 1",
+      "to": "b1_1"
+    },
+    {
+      "from": "santruong",
+      "label": "Tầng 2 Dãy B 1",
+      "to": "b2_1"
+    },
+    {
+      "from": "santruong",
+      "label": "Tầng 3 Dãy B 1",
+      "to": "b3_1"
+    },
+    {
+      "from": "santruong",
+      "label": "Tầng 2 dãy A",
+      "to": "a2_1"
+    },
+    {
+      "from": "santruong",
+      "label": "Tầng 4 dãy A",
+      "to": "a4_1"
+    },
+    {
+      "from": "santruong",
+      "label": "Tầng 5 dãy A",
+      "to": "a5_1"
+    },
+    {
+      "from": "santruong",
+      "label": "Tầng 6 dãy A",
+      "to": "a6_1"
+    },
+    {
+      "from": "loidi1",
+      "label": "Đường Lên Cổng",
+      "to": "duonglencong"
+    },
+    {
+      "from": "loidi1",
+      "label": "Khối văn phòng C1- 2",
+      "to": "loidi2"
+    },
+    {
+      "from": "loidi1",
+      "label": "Trước Phòng Ăn",
+      "to": "truocphongan"
+    },
+    {
+      "from": "loidi2",
+      "label": "Khối văn phòng C1- 1",
+      "to": "loidi1"
+    },
+    {
+      "from": "loidi2",
+      "label": "Trước Dãy A",
+      "to": "trcdaya"
+    },
+    {
+      "from": "loidi2",
+      "label": "Sân Trường",
+      "to": "santruong"
+    },
+    {
+      "from": "truocphongan",
+      "label": "Dãy Học Hỏi Hiếu Hành",
+      "to": "loidi1"
+    },
+    {
+      "from": "truocphongan",
+      "label": "Phòng Ăn",
+      "to": "phongan"
+    },
+    {
+      "from": "phongan",
+      "label": "Rời Phòng Ăn",
+      "to": "truocphongan"
+    },
+    {
+      "from": "b0_1",
+      "label": "Tầng Trệt Dãy B 1",
+      "to": "b0_2"
+    },
+    {
+      "from": "b0_1",
+      "label": "Sân Trường",
+      "to": "santruong"
+    },
+    {
+      "from": "b0_2",
+      "label": "Tầng Trệt Dãy B 1",
+      "to": "b0_1"
+    },
+    {
+      "from": "b0_2",
+      "label": "Sân Trường",
+      "to": "santruong"
+    },
+    {
+      "from": "b0_2",
+      "label": "Lên tầng 2 Dãy B",
+      "to": "b1_1"
+    },
+    {
+      "from": "b0_2",
+      "label": "Tầng Trệt Dãy B 3",
+      "to": "b0_3"
+    },
+    {
+      "from": "b0_3",
+      "label": "Cổng Phụ",
+      "to": "congphu"
+    },
+    {
+      "from": "b1_1",
+      "label": "Phòng Sejong 4",
+      "to": "b1_sejong4"
+    },
+    {
+      "from": "b1_1",
+      "label": "Phòng Sejong 5",
+      "to": "b1_sejong5"
+    },
+    {
+      "from": "b1_1",
+      "label": "Trung tâm Nghiên cứu HTTM",
+      "to": "b1_2"
+    },
+    {
+      "from": "b1_1",
+      "label": "Phòng DataLAB",
+      "to": "b1_datalab"
+    },
+    {
+      "from": "b1_1",
+      "label": "Lên tầng 2 Dãy B",
+      "to": "b2_1"
+    },
+    {
+      "from": "b1_1",
+      "label": "Tầng 1 Dãy B - 3",
+      "to": "b1_4"
+    },
+    {
+      "from": "b1_2",
+      "label": "Tầng 1 Dãy B",
+      "to": "b1_1"
+    },
+    {
+      "from": "b1_2",
+      "label": "Tầng 1 Dãy B - 2",
+      "to": "b1_3"
+    },
+    {
+      "from": "b1_2",
+      "label": "Tầng 1 Dãy B - 3",
+      "to": "b1_4"
+    },
+    {
+      "from": "b1_2",
+      "label": "Phòng HTTM",
+      "to": "b1_phethong"
+    },
+    {
+      "from": "b1_2",
+      "label": "Phòng DataLAB",
+      "to": "b1_datalab"
+    },
+    {
+      "from": "b1_2",
+      "label": "Phòng Sejong 6",
+      "to": "b1_sejong6"
+    },
+    {
+      "from": "b1_3",
+      "label": "Tầng 1 Dãy B - 1",
+      "to": "b1_2"
+    },
+    {
+      "from": "b1_4",
+      "label": "Tầng 1 Dãy B - 1",
+      "to": "b1_2"
+    },
+    {
+      "from": "b1_4",
+      "label": "Tầng 1 Dãy B - 4",
+      "to": "b1_5"
+    },
+    {
+      "from": "b1_4",
+      "label": "Phòng máy 2",
+      "to": "b1_pm2"
+    },
+    {
+      "from": "b1_4",
+      "label": "Phòng máy 1",
+      "to": "b1_pm1"
+    },
+    {
+      "from": "b1_5",
+      "label": "Tầng 1 Dãy B - 3",
+      "to": "b1_4"
+    },
+    {
+      "from": "b1_phethong",
+      "label": "Ra phòng",
+      "to": "b1_2"
+    },
+    {
+      "from": "b1_datalab",
+      "label": "Ra phòng",
+      "to": "b1_1"
+    },
+    {
+      "from": "b1_sejong5",
+      "label": "Ra phòng",
+      "to": "b1_1"
+    },
+    {
+      "from": "b1_sejong4",
+      "label": "Ra phòng",
+      "to": "b1_1"
+    },
+    {
+      "from": "b1_sejong6",
+      "label": "Ra phòng",
+      "to": "b1_2"
+    },
+    {
+      "from": "b1_pm1",
+      "label": "Ra phòng",
+      "to": "b1_4"
+    },
+    {
+      "from": "b1_pm2",
+      "label": "Ra phòng",
+      "to": "b1_4"
+    },
+    {
+      "from": "b2_1",
+      "label": "Tầng 2 Dãy B - 2",
+      "to": "b2_3"
+    },
+    {
+      "from": "b2_1",
+      "label": "Lên tầng 3",
+      "to": "b3_1"
+    },
+    {
+      "from": "b2_1",
+      "label": "Xuống tầng 1",
+      "to": "b1_1"
+    },
+    {
+      "from": "b2_1",
+      "label": "Smart LAB",
+      "to": "b2_2"
+    },
+    {
+      "from": "b2_1",
+      "label": "Tầng 2 Dãy B - 3",
+      "to": "b2_4"
+    },
+    {
+      "from": "b2_2",
+      "label": "Tầng 2 Dãy B",
+      "to": "b2_1"
+    },
+    {
+      "from": "b2_2",
+      "label": "Phòng Lab",
+      "to": "b2_plab"
+    },
+    {
+      "from": "b2_2",
+      "label": "Phòng SteamLab",
+      "to": "b2_steamlab"
+    },
+    {
+      "from": "b2_2",
+      "label": "Tầng 2 Dãy B - 2",
+      "to": "b2_3"
+    },
+    {
+      "from": "b2_2",
+      "label": "Tầng 2 Dãy B - 3",
+      "to": "b2_4"
+    },
+    {
+      "from": "b2_3",
+      "label": "Tầng 2 Dãy A - 3",
+      "to": "a2_3"
+    },
+    {
+      "from": "b2_3",
+      "label": "Tầng 2 Dãy B - 1",
+      "to": "b2_2"
+    },
+    {
+      "from": "b2_4",
+      "label": "Tầng 2 Dãy B - 1",
+      "to": "b2_2"
+    },
+    {
+      "from": "b2_4",
+      "label": "Tầng 2 Dãy B - 1",
+      "to": "b2_5"
+    },
+    {
+      "from": "b2_5",
+      "label": "Tầng 2 Dãy B - 3",
+      "to": "b2_4"
+    },
+    {
+      "from": "b2_plab",
+      "label": "Rời phòng",
+      "to": "b2_2"
+    },
+    {
+      "from": "b2_steamlab",
+      "label": "Rời phòng",
+      "to": "b2_2"
+    },
+    {
+      "from": "b3_1",
+      "label": "Tầng 3 Dãy B - 2",
+      "to": "b3_3"
+    },
+    {
+      "from": "b3_1",
+      "label": "BIII.13A",
+      "to": "b3_2"
+    },
+    {
+      "from": "b3_1",
+      "label": "Xuống tầng 2",
+      "to": "b2_1"
+    },
+    {
+      "from": "b3_1",
+      "label": "BIII.14A",
+      "to": "b3_5"
+    },
+    {
+      "from": "b3_2",
+      "label": "Tầng 3 Dãy B",
+      "to": "b3_1"
+    },
+    {
+      "from": "b3_2",
+      "label": "BIII.11",
+      "to": "b3_3"
+    },
+    {
+      "from": "b3_2",
+      "label": "BIII.14A",
+      "to": "b3_5"
+    },
+    {
+      "from": "b3_3",
+      "label": "Tầng 3 Dãy B - 3",
+      "to": "b3_4"
+    },
+    {
+      "from": "b3_3",
+      "label": "Trước Phòng BIII.13A",
+      "to": "b3_2"
+    },
+    {
+      "from": "b3_4",
+      "label": "Trước phòng BIII.11",
+      "to": "b3_3"
+    },
+    {
+      "from": "b3_4",
+      "label": "Thư viện",
+      "to": "a3_trcthuvien"
+    },
+    {
+      "from": "b3_5",
+      "label": "BIII.13A",
+      "to": "b3_2"
+    },
+    {
+      "from": "b3_5",
+      "label": "Phòng BIII.14A",
+      "to": "b3_14a"
+    },
+    {
+      "from": "b3_5",
+      "label": "Cuối hành lang tầng 3",
+      "to": "b3_6"
+    },
+    {
+      "from": "b3_6",
+      "label": "BIII.14A",
+      "to": "b3_5"
+    },
+    {
+      "from": "b3_14a",
+      "label": "Ra phòng",
+      "to": "b3_5"
+    },
+    {
+      "from": "trcdaya",
+      "label": "Khối văn phòng C1 - 1",
+      "to": "loidi2"
+    },
+    {
+      "from": "trcdaya",
+      "label": "Hành lang Dãy A",
+      "to": "a0_3"
+    },
+    {
+      "from": "trcdaya",
+      "label": "Cổng Phụ",
+      "to": "congphu"
+    },
+    {
+      "from": "trcdaya",
+      "label": "Sân Trường",
+      "to": "santruong"
+    },
+    {
+      "from": "truockhoacntt",
+      "label": "Khoa Công Nghệ Thông Tin",
+      "to": "a0_cntt"
+    },
+    {
+      "from": "truockhoacntt",
+      "label": "Khoa điện tử",
+      "to": "a0_phongkebencntt"
+    },
+    {
+      "from": "truockhoacntt",
+      "label": "Hành lang Dãy A",
+      "to": "a0_2"
+    },
+    {
+      "from": "truockhoacntt",
+      "label": "Khoa Kiến Trúc",
+      "to": "a0_kientruc"
+    },
+    {
+      "from": "truockhoacntt",
+      "label": "Lên tầng 1",
+      "to": "a1_1"
+    },
+    {
+      "from": "truockhoacntt",
+      "label": "Trước Dãy A",
+      "to": "trcdaya"
+    },
+    {
+      "from": "truockhoacntt",
+      "label": "Cổng Phụ",
+      "to": "congphu"
+    },
+    {
+      "from": "a0_1",
+      "label": "Hành lang Dãy A 2",
+      "to": "a0_2"
+    },
+    {
+      "from": "a0_1",
+      "label": "Xã hội học & Truyền thông",
+      "to": "a0_xahoihoc"
+    },
+    {
+      "from": "a0_1",
+      "label": "Cổng Phụ",
+      "to": "congphu"
+    },
+    {
+      "from": "a0_2",
+      "label": "Hành lang Dãy A 3",
+      "to": "a0_3"
+    },
+    {
+      "from": "a0_2",
+      "label": "Khoa Kinh Tế",
+      "to": "a0_kinhte"
+    },
+    {
+      "from": "a0_2",
+      "label": "Hành lang Dãy A 1",
+      "to": "a0_1"
+    },
+    {
+      "from": "a0_3",
+      "label": "Khoa CNTT",
+      "to": "a0_cntt"
+    },
+    {
+      "from": "a0_3",
+      "label": "Trước phòng CNTT",
+      "to": "truockhoacntt"
+    },
+    {
+      "from": "a0_3",
+      "label": "Khoa Kỹ Thuật Ô Tô",
+      "to": "a0_ktoto"
+    },
+    {
+      "from": "a0_3",
+      "label": "Khoa Quản Trị CN & Logistics",
+      "to": "a0_qtcn_logistic"
+    },
+    {
+      "from": "a0_3",
+      "label": "Khoa Luật",
+      "to": "a0_luat"
+    },
+    {
+      "from": "a0_3",
+      "label": "Trước Dãy A",
+      "to": "trcdaya"
+    },
+    {
+      "from": "a0_3",
+      "label": "Hành lang Dãy A 2",
+      "to": "a0_2"
+    },
+    {
+      "from": "a0_cntt",
+      "label": "Rời Phòng",
+      "to": "truockhoacntt"
+    },
+    {
+      "from": "a0_kientruc",
+      "label": "Rời Phòng",
+      "to": "truockhoacntt"
+    },
+    {
+      "from": "a0_ktoto",
+      "label": "Rời Phòng",
+      "to": "a0_3"
+    },
+    {
+      "from": "a0_luat",
+      "label": "Rời Phòng",
+      "to": "a0_3"
+    },
+    {
+      "from": "a0_phongkebencntt",
+      "label": "Trước Khoa CNTT",
+      "to": "truockhoacntt"
+    },
+    {
+      "from": "a0_qtcn_logistic",
+      "label": "Rời Phòng",
+      "to": "a0_3"
+    },
+    {
+      "from": "a0_xahoihoc",
+      "label": "Rời Phòng",
+      "to": "a0_1"
+    },
+    {
+      "from": "a0_kinhte",
+      "label": "Rời Phòng",
+      "to": "a0_2"
+    },
+    {
+      "from": "a1_1",
+      "label": "Hành lang Dãy A3 - Tầng 1",
+      "to": "a1_2"
+    },
+    {
+      "from": "a1_1",
+      "label": "Học viện King Sejong",
+      "to": "a1_hocvienkingsejong"
+    },
+    {
+      "from": "a1_1",
+      "label": "Hành lang Dãy A1 - Tầng 2",
+      "to": "a2_1"
+    },
+    {
+      "from": "a1_2",
+      "label": "Hành lang Dãy A1 - Tầng 1",
+      "to": "a1_1"
+    },
+    {
+      "from": "a1_2",
+      "label": "Hành lang Dãy A2 - Tầng 1",
+      "to": "a1_3"
+    },
+    {
+      "from": "a1_2",
+      "label": "Phòng AL4",
+      "to": "a1_al4"
+    },
+    {
+      "from": "a1_3",
+      "label": "Hành lang Dãy A23 - Tầng 1",
+      "to": "a1_2"
+    },
+    {
+      "from": "a1_3",
+      "label": "Phòng AI.3",
+      "to": "a1_p_AI_3"
+    },
+    {
+      "from": "a1_p_AI_3",
+      "label": "Ra hành lang",
+      "to": "a1_3"
+    },
+    {
+      "from": "a1_al4",
+      "label": "Ra hành lang",
+      "to": "a1_2"
+    },
+    {
+      "from": "a1_hocvienkingsejong",
+      "label": "Ra hành lang",
+      "to": "a1_1"
+    },
+    {
+      "from": "a2_1",
+      "label": "Xuống tầng 1",
+      "to": "a1_1"
+    },
+    {
+      "from": "a2_1",
+      "label": "Hành lang A2-2",
+      "to": "a2_2"
+    },
+    {
+      "from": "a2_2",
+      "label": "Hành lang A2-1",
+      "to": "a2_1"
+    },
+    {
+      "from": "a2_2",
+      "label": "Hành lang A2-3",
+      "to": "a2_3"
+    },
+    {
+      "from": "a2_3",
+      "label": "Hành lang A2-2",
+      "to": "a2_2"
+    },
+    {
+      "from": "a3_trcthuvien",
+      "label": "Xuống tầng 2",
+      "to": "a2_1"
+    },
+    {
+      "from": "a3_trcthuvien",
+      "label": "Thư viện",
+      "to": "a3_thuvien1"
+    },
+    {
+      "from": "a3_trcthuvien",
+      "label": "Thư viện",
+      "to": "a3_thuvien2"
+    },
+    {
+      "from": "a3_trcthuvien",
+      "label": "Lên tầng 4",
+      "to": "a4_1"
+    },
+    {
+      "from": "a3_thuvien1",
+      "label": "Trước Thư Viện",
+      "to": "a3_trcthuvien"
+    },
+    {
+      "from": "a3_thuvien2",
+      "label": "Trước Thư Viện",
+      "to": "a3_trcthuvien"
+    },
+    {
+      "from": "a4_1",
+      "label": "Hành lang A4-2",
+      "to": "a4_2"
+    },
+    {
+      "from": "a4_1",
+      "label": "Lên tầng 5",
+      "to": "a5_1"
+    },
+    {
+      "from": "a4_2",
+      "label": "Hành lang A4-1",
+      "to": "a4_1"
+    },
+    {
+      "from": "a4_2",
+      "label": "Hành lang A4-3",
+      "to": "a4_3"
+    },
+    {
+      "from": "a4_3",
+      "label": "Hành lang A4-2",
+      "to": "a4_2"
+    },
+    {
+      "from": "a5_1",
+      "label": "Xuống tầng 4",
+      "to": "a4_1"
+    },
+    {
+      "from": "a5_1",
+      "label": "Hành lang A5-2",
+      "to": "a5_2"
+    },
+    {
+      "from": "a5_2",
+      "label": "Hành lang A5-1",
+      "to": "a5_1"
+    },
+    {
+      "from": "a5_2",
+      "label": "Hành lang A5-3",
+      "to": "a5_3"
+    },
+    {
+      "from": "a5_3",
+      "label": "Hành lang A5-2",
+      "to": "a5_2"
+    },
+    {
+      "from": "a6_1",
+      "label": "Xuống tầng 5",
+      "to": "a5_1"
+    },
+    {
+      "from": "khue",
+      "label": "Cổng Phụ",
+      "to": "congphu"
+    },
+    {
+      "from": "a1_2",
+      "to": "a2_1",
+      "w": 1
+    }
   ]
 }

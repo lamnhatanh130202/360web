@@ -1,0 +1,269 @@
+/* File: /src/styles/bot.css */
+/* ========== VOICE BOT BUTTON & BUBBLE ========== */
+
+/* Voice Bot Button - Thiết kế đẹp, chỉ có text */
+#voice-bot-btn,
+#voice-command-btn,
+.voice-bot-button {
+  position: fixed;
+  right: 20px;
+  bottom: 100px; /* Đặt cao hơn footer để không bị che */
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  border: none;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25), 0 2px 8px rgba(0, 0, 0, 0.15);
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: #fff;
+  font-weight: 700;
+  font-size: 16px;
+  letter-spacing: 0.5px;
+  z-index: 10020 !important; /* Cao hơn footer (10000) và controls (10001-10002) */
+  cursor: pointer;
+  pointer-events: auto !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  isolation: isolate; /* Tạo stacking context mới */
+}
+
+#voice-bot-btn:hover,
+#voice-command-btn:hover,
+.voice-bot-button:hover {
+  transform: scale(1.08) translateY(-2px);
+  box-shadow: 0 6px 24px rgba(102, 126, 234, 0.4), 0 4px 12px rgba(0, 0, 0, 0.2);
+  background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+}
+
+#voice-bot-btn:active,
+#voice-command-btn:active,
+.voice-bot-button:active {
+  transform: scale(0.95) translateY(0);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Ẩn hình ảnh nếu có */
+#voice-command-btn img {
+  display: none;
+}
+
+/* Voice Bot Bubble */
+#voice-bot-bubble,
+.voice-bot-bubble {
+  position: fixed;
+  right: 18px;
+  bottom: 84px;
+  z-index: 10001;
+  min-width: 220px;
+  max-width: 320px;
+  padding: 10px;
+  border-radius: 8px;
+  background: rgba(255,255,255,0.97);
+  box-shadow: 0 6px 18px rgba(0,0,0,0.12);
+  font-size: 13px;
+  color: #222;
+  display: none;
+  pointer-events: auto !important;
+}
+
+/* Voice Command Button (alternative style) */
+
+/* ========== BOT CONTAINER (Chat UI) ========== */
+#bot-container {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  width: 320px;
+  height: 450px;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+  display: flex;
+  flex-direction: column;
+  z-index: 2000;
+  font-family: Arial, sans-serif;
+  transition: all 0.3s;
+}
+#bot-container.hidden {
+  display: none;
+}
+.bot-header {
+  padding: 10px;
+  background: #f1f1f1;
+  border-bottom: 1px solid #ddd;
+  border-radius: 8px 8px 0 0;
+  font-weight: bold;
+  display: flex;
+  justify-content: space-between;
+}
+#bot-close-btn {
+  background: none; border: none; cursor: pointer; font-weight: bold;
+}
+#bot-messages {
+  flex-grow: 1;
+  padding: 10px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.bot-message {
+  padding: 8px 12px;
+  border-radius: 18px;
+  max-width: 80%;
+  word-wrap: break-word;
+}
+.bot-message.bot {
+  background: #eee;
+  align-self: flex-start;
+  border-top-left-radius: 0;
+}
+.bot-message.user {
+  background: #007bff;
+  color: white;
+  align-self: flex-end;
+  border-top-right-radius: 0;
+  margin-left: auto;
+}
+.bot-input-area {
+  display: flex;
+  border-top: 1px solid #ddd;
+  padding: 10px;
+  gap: 5px;
+}
+#bot-input {
+  flex-grow: 1;
+  border: 1px solid #ccc;
+  border-radius: 15px;
+  padding: 0 12px;
+  font-size: 14px;
+}
+#bot-mic-btn, #bot-send-btn {
+  width: 35px;
+  height: 35px;
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+  flex-shrink: 0;
+  font-size: 16px;
+}
+#bot-mic-btn { background: #f0f0f0; }
+#bot-mic-btn:disabled { background: #ffcdd2; }
+#bot-send-btn { background: #007bff; color: white; }
+
+/* ========== RESPONSIVE - VOICE BOT ========== */
+
+/* Tablet và Mobile (max-width: 768px) */
+@media (max-width: 768px) {
+    /* Voice Bot Button */
+    #voice-command-btn,
+    #voice-bot-btn,
+    .voice-bot-button {
+        width: 60px;
+        height: 60px;
+        bottom: 110px; /* Tránh footer controls - tăng lên cao hơn */
+        right: 15px;
+        font-size: 14px;
+        z-index: 10020 !important; /* Đảm bảo cao hơn footer */
+    }
+    
+    /* Bot Container */
+    #bot-container {
+        width: calc(100vw - 40px);
+        max-width: 400px;
+        height: 60vh;
+        max-height: 500px;
+        bottom: 100px; /* Tránh footer controls */
+        right: 20px;
+        left: auto;
+    }
+    
+    .bot-header {
+        padding: 8px;
+        font-size: 14px;
+    }
+    
+    #bot-messages {
+        padding: 8px;
+        font-size: 13px;
+    }
+    
+    .bot-message {
+        padding: 6px 10px;
+        font-size: 13px;
+    }
+    
+    .bot-input-area {
+        padding: 8px;
+    }
+    
+    #bot-input {
+        font-size: 13px;
+        padding: 0 10px;
+    }
+    
+    #bot-mic-btn, #bot-send-btn {
+        width: 32px;
+        height: 32px;
+        font-size: 14px;
+    }
+}
+
+/* Mobile nhỏ (max-width: 480px) */
+@media (max-width: 480px) {
+    /* Voice Bot Button */
+    #voice-command-btn,
+    #voice-bot-btn,
+    .voice-bot-button {
+        width: 64px;
+        height: 64px;
+        bottom: 110px; /* Tránh footer controls - tăng lên cao hơn */
+        right: 12px;
+        font-size: 15px;
+        z-index: 10020 !important; /* Đảm bảo cao hơn footer */
+    }
+    
+    /* Bot Container */
+    #bot-container {
+        width: calc(100vw - 20px);
+        height: 55vh;
+        max-height: 400px;
+        bottom: 90px;
+        right: 10px;
+    }
+    
+    .bot-header {
+        padding: 6px;
+        font-size: 13px;
+    }
+    
+    #bot-messages {
+        padding: 6px;
+        font-size: 12px;
+    }
+    
+    .bot-message {
+        padding: 5px 8px;
+        font-size: 12px;
+        max-width: 85%;
+    }
+    
+    .bot-input-area {
+        padding: 6px;
+        gap: 4px;
+    }
+    
+    #bot-input {
+        font-size: 12px;
+        padding: 0 8px;
+    }
+    
+    #bot-mic-btn, #bot-send-btn {
+        width: 30px;
+        height: 30px;
+        font-size: 13px;
+    }
+}

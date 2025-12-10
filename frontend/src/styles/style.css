@@ -1,0 +1,958 @@
+/*  layout cơ bản */
+html, body { 
+  height: 100%; 
+  margin: 0; 
+  padding: 0;
+  overflow: hidden; /* Không cho scroll toàn trang */
+  width: 100%;
+  position: fixed; /* Cố định để không scroll */
+}
+body { 
+  min-height: 100vh; 
+  max-height: 100vh; /* Giới hạn chiều cao */
+  overflow: hidden; /* Không cho scroll */
+  position: relative;
+  width: 100%;
+}
+
+/* Pulse animation for online indicator */
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+/*  cho pano phủ kín toàn bộ viewport - KHÔNG bị ảnh hưởng bởi header */
+#pano {
+  position: fixed;
+  top: 0;           /* Bắt đầu từ đầu màn hình */
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100vw;     /* Viewport width - không bị ảnh hưởng */
+  height: 100vh;    /* Viewport height - không bị ảnh hưởng */
+  z-index: 1;
+  overflow: hidden; /* Tránh scroll */
+  margin: 0;
+  padding: 0;
+}
+
+/* header/footer nổi trên pano  */
+.header {
+  position: relative;    /* Sẽ được override bởi header selector bên dưới */
+  z-index: 2;
+  background: rgba(80,80,80,.8); /* để nhìn xuyên được pano */
+  color: #fff;
+}
+
+/* Footer cố định ở dưới cùng - OVERLAY hoàn toàn, background trong suốt */
+footer.footer {
+  position: fixed; /* Fixed để overlay, không chiếm không gian layout */
+  bottom: 0;       /* Đặt ở dưới cùng */
+  left: 0;
+  right: 0;
+  width: 100vw;    /* Viewport width - không ảnh hưởng đến ảnh */
+  z-index: 10000;  /* Z-index rất cao để đảm bảo nằm trên cùng */
+  background-color: transparent; /* Background trong suốt hoàn toàn */
+  color: white;
+  margin: 0;
+  padding: 14px 0; /* Tăng padding từ 10px lên 14px */
+  box-sizing: border-box;
+  display: flex;
+  justify-content: center; /* Căn giữa controls */
+  align-items: center;
+  pointer-events: auto; /* Đảm bảo có thể tương tác */
+}
+
+  #minimap { pointer-events: auto; } /* nếu cần click */
+  
+/* Đặt header nằm đè lên hình nền - OVERLAY hoàn toàn, không ảnh hưởng layout */
+header {
+    position: fixed; /* Fixed để overlay, không chiếm không gian layout */
+    top: 0;
+    left: 0;
+    right: 0;
+    width: 100vw; /* Viewport width - không ảnh hưởng đến ảnh */
+    z-index: 1000; /* Đặt z-index cao để nằm trên cùng */
+    background-color: rgba(0, 0, 0, 0.7); /* Nền đen với độ trong suốt 70% */
+    color: white; /* Màu chữ trắng để tương phản với nền */
+    
+    display: flex; /* Bố cục flex để sắp xếp nội dung */
+    align-items: center; /* Căn giữa nội dung theo chiều dọc */
+    justify-content: space-between; /* Dãn cách giữa các phần tử */
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2); /* Tạo hiệu ứng bóng cho header */
+    padding: 12px 24px; /* Tăng padding từ 10px 20px lên 12px 24px */
+    transition: transform 0.3s ease; /* Smooth transition chỉ cho transform */
+    backdrop-filter: blur(8px); /* Làm mờ nền phía sau */
+    transform: translateY(0); /* Mặc định hiển thị */
+    will-change: transform; /* Tối ưu performance */
+    margin: 0; /* Không có margin */
+    box-sizing: border-box; /* Padding tính trong width */
+}
+
+/* Trạng thái header bị ẩn (tự động ẩn khi không hover) */
+header.header-hidden {
+    transform: translateY(-100%); /* Chỉ trượt lên trên, không ảnh hưởng ngang */
+    pointer-events: none; /* Không thể click khi ẩn */
+}
+
+/* Vùng trigger để hiện header khi hover lên trên */
+.header-trigger {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0; /* Đảm bảo chiếm toàn bộ chiều ngang */
+    width: 100%;
+    height: 60px; /* Vùng nhạy cảm ở trên cùng */
+    z-index: 999; /* Thấp hơn header một chút */
+    pointer-events: auto; /* Cho phép hover */
+}
+
+
+/* Tiêu đề căn giữa */
+header h1#tieude {
+    font-size: 28px; /* Tăng từ 24px lên 28px */
+    margin: 0;
+    flex: 1; /* Chiếm không gian còn lại */
+    text-align: center; /* Căn giữa nội dung */
+}
+.brand {
+    display: flex;
+    align-items: center;
+    gap: 12px; /* Tăng gap từ 10px lên 12px */
+    margin: 0 auto; /* đẩy ra giữa */
+  }
+
+@keyframes rotate {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+#tenKhuVuc {
+    font-size: 20px; /* Tăng từ 18px lên 20px */
+    font-weight: bold;
+    color: #007bff; /* Màu xanh nổi bật */
+    
+    text-align: center;
+    background-color: rgba(255, 255, 255, 0.8); /* Nền trắng trong suốt */
+    padding: 12px 16px; /* Tăng padding từ 10px lên 12px 16px */
+    border-radius: 6px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Đổ bóng nhẹ */
+}
+
+main {
+    position: fixed; /* Fixed để không ảnh hưởng layout */
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+    margin: 0;
+    padding: 0;
+}
+#logo{
+    width: 240px; /* Tăng từ 200px lên 240px */
+    height: 120px; /* Tăng từ 100px lên 120px */
+    margin-right: 30px ;
+}
+#controls {
+    position: relative; /* Relative trong footer */
+    display: flex;
+    gap: 12px; /* Tăng gap từ 10px lên 12px */
+    margin: 0; /* Không có margin */
+    pointer-events: auto !important; /* Đảm bảo có thể click - force override */
+    z-index: 10001; /* Cao hơn footer một chút */
+}
+
+#controls button {
+    padding: 14px 28px; /* Tăng từ 12px 24px lên 14px 28px */
+    font-size: 18px; /* Tăng từ 16px lên 18px */
+    font-weight: 600;
+    cursor: pointer;
+    background-color: #ad171c;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    pointer-events: auto !important; /* Đảm bảo có thể click - force override */
+    user-select: none;
+    white-space: nowrap;
+    position: relative; /* Đảm bảo nằm trong stacking context */
+    z-index: 10002; /* Cao nhất trong controls */
+    min-height: 48px; /* Đảm bảo chiều cao tối thiểu */
+}
+
+#controls button:hover {
+    background-color: #931116;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+#controls button:active {
+    transform: translateY(0);
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+}
+
+
+
+#hoverPreview {
+    position: absolute;
+    display: none;
+    z-index: 1000;
+    pointer-events: none;
+    border: 1px solid #ccc;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    background-color: white;
+    padding: 5px;
+    border-radius: 5px;
+}
+
+#previewImage {
+    max-width: 200px;
+    max-height: 150px;
+    display: block;
+}
+
+/* Hotspot tooltip - TĂNG KÍCH THƯỚC CHO DESKTOP */
+.hs-tip {
+  position: fixed; /* bám theo chuột */
+  z-index: 9999;
+  max-width: 320px; /* Tăng từ 280px lên 320px */
+  padding: 12px 16px; /* Tăng từ 10px 12px lên 12px 16px */
+  border-radius: 10px;
+  background: rgba(20,20,20,.94);
+  color: #fff;
+  font-size: 15px; /* Tăng từ 13px lên 15px */
+  line-height: 1.5;
+  box-shadow: 0 8px 24px rgba(0,0,0,.25);
+  transform: translate(8px, 8px);
+  pointer-events: none;
+  display: none;
+}
+.hs-tip h4 { margin: 0 0 8px; font-size: 17px; font-weight: 600; } /* Tăng từ 14px lên 17px */
+.hs-tip .sub { opacity: .85; font-size: 14px; } /* Tăng sub text */
+.hs-tip .row { display:flex; gap:10px; align-items:flex-start; } /* Tăng gap */
+.hs-tip img {
+  width: 100px; height: 70px; /* Tăng từ 84x56 lên 100x70 */
+  object-fit: cover; 
+  border-radius: 6px; 
+  flex: 0 0 auto;
+  background:#333;
+}
+
+.hotspot-icon {
+  width: 80px;   /* Tăng từ 70px lên 80px */
+  height: 60px;  /* Tăng từ 50px lên 60px */
+  object-fit: contain;
+  pointer-events: none; /* để icon không che bắt sự kiện */
+  display: block; /* Đảm bảo không có spacing */
+  margin: 0;
+  padding: 0;
+}
+
+.hotspot {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transform: translate(-50%, -50%); /* căn giữa icon với vị trí yaw/pitch - giống CMS */
+  transform-origin: center center; /* Đảm bảo căn giữa từ tâm */
+  touch-action: manipulation; /* Cho phép tap và scroll, nhưng cải thiện responsiveness */
+  cursor: pointer;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  line-height: 0; /* Loại bỏ line-height ảnh hưởng */
+  /* Không có kích thước cố định để phù hợp với icon */
+}
+
+
+
+#rotateLeft, #rotateRight {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+#rotateLeft:hover, #rotateRight:hover {
+    background-color: #0056b3;
+}
+/* ==================== Language Switcher ==================== */
+.lang-switcher {
+  display: flex;
+  gap: 6px; /* Tăng từ 4px lên 6px */
+}
+
+.lang-btn {
+  padding: 8px 16px; /* Tăng từ 6px 12px lên 8px 16px */
+  border: 1px solid #ccc;
+  background: white;
+  cursor: pointer;
+  border-radius: 4px;
+  font-size: 16px; /* Tăng từ 14px lên 16px */
+  transition: all 0.2s;
+  min-height: 40px; /* Đảm bảo chiều cao tối thiểu */
+}
+
+.lang-btn:hover {
+  background: #f0f0f0;
+}
+
+.lang-btn.active {
+  background: #007bff;
+  color: white;
+  border-color: #007bff;
+}
+
+/* ========== Mini map ========== */
+
+.minimap {
+  position: fixed; /* Keep it fixed on the screen */
+  width: 700px; /* Fixed width to match CMS */
+  height: 550px; /* Fixed height to match CMS (toolbar 36px + viewport 464px) */
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  background: #fff;
+  overflow: auto;
+  /* overflow: hidden; */ /* REMOVED: Allow controls to be visible if needed */
+  resize: none; /* Disable resizing to ensure consistent viewport size with CMS */
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  z-index: 1000; /* Ensure it's above pano */
+  /* Default position (adjust as needed) */
+  right: 15px;
+  bottom: 15px;
+  display: flex; /* Use flex for internal layout */
+  flex-direction: column; /* Stack toolbar, controls, viewport vertically */
+}
+
+/* Thanh toolbar trên cùng */
+.minimap .mm-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 6px 10px;
+  background: #f1f3f5; /* Lighter background */
+  border-bottom: 1px solid #dee2e6;
+  height: 36px; /* Fixed height */
+  flex-shrink: 0; /* Prevent toolbar from shrinking */
+  cursor: move; /* Allow dragging by the toolbar */
+}
+.minimap .mm-route {
+    display: flex;
+    gap: 5px;
+    align-items: center;
+    font-size: 11px; /* Slightly smaller */
+    overflow: hidden; /* Prevent route controls from overflowing */
+}
+.minimap select,
+.minimap .mm-toolbar button { /* Target buttons only in toolbar */
+    padding: 3px 6px;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    background-color: #fff;
+}
+.minimap .mm-toggle {
+    margin-left: auto; /* Push toggle button to the right */
+    padding: 0 8px;
+    line-height: 22px;
+}
+.minimap.minimap--dragging { opacity: .95; cursor: grabbing; }
+.minimap.locked .mm-toolbar { cursor: default; }
+
+/* Khung chứa nút tầng và zoom (BÊN TRÁI) - Compact để không che map */
+.mm-controls {
+  position: absolute; /* Position relative to the .minimap container */
+  top: 5px; /* Closer to top */
+  left: 5px;
+  z-index: 10; /* Ensure controls are above the stage */
+  display: flex;
+  pointer-events: none; /* Allow clicks to pass through to viewport */
+  flex-direction: column;
+  gap: 4px; /* Reduced gap */
+  background: rgba(255, 255, 255, 0.92); /* More opaque for better visibility */
+  padding: 4px; /* Reduced padding */
+  border-radius: 4px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+  border: 1px solid rgba(0,0,0,0.1);
+  max-width: 50px; /* Limit width to avoid covering map */
+}
+
+/* Khối nút tầng - Compact */
+.floor-selector {
+  display: flex;
+  flex-direction: column;
+  gap: 2px; /* Reduced gap */
+  max-height: 200px; /* Limit height */
+  overflow-y: auto; /* Scroll if too many floors */
+  scrollbar-width: thin;
+}
+.floor-selector button {
+  padding: 2px 4px; /* Reduced padding */
+  border: 1px solid #ccc;
+  background-color: #f8f9fa;
+  cursor: pointer;
+  border-radius: 2px;
+  font-size: 0.75em; /* Smaller font */
+  text-align: center;
+  transition: background-color 0.2s;
+  min-width: 32px; /* Fixed width */
+  width: 100%;
+  pointer-events: auto; /* Enable clicks on buttons */
+}
+.floor-selector button.active {
+  background-color: #007bff;
+  color: white;
+  border-color: #0056b3;
+  font-weight: bold;
+}
+.floor-selector button:hover:not(.active) {
+  background-color: #e9ecef;
+}
+
+/* Khối nút zoom - Compact */
+.minimap .mm-zoom {
+  display: flex;
+  flex-direction: column;
+  gap: 2px; /* Reduced gap */
+  z-index: 10;
+}
+.minimap .mm-zoom button {
+    width: 32px; /* Fixed width to match floor buttons */
+    height: 24px;
+    font-size: 11px; /* Smaller font */
+    padding: 0;
+    line-height: 22px;
+    border: 1px solid #ccc;
+    border-radius: 2px;
+    background-color: #fff;
+    pointer-events: auto; /* Enable clicks on buttons */
+}
+.minimap .mm-btn-lock { /* Style the lock button */
+    margin-top: 4px; /* Space above lock button */
+    /* Add specific lock icon styling if needed */
+}
+.mm-btn-lock.active { background:#ffe08a; } /* Locked state */
+
+
+.mm-viewport {
+    position: relative;
+    overflow: hidden;
+    background-color: #e5e5e5; /* Màu nền xám thống nhất */
+    user-select: none;
+    height: 100%; /* Quan trọng: chiếm toàn bộ chiều cao minimap */
+}
+
+.mm-stage {
+    position: absolute;
+    top: 0; left: 0;
+    transform-origin: 0 0;
+    will-change: transform;
+}
+
+/* 2. Chấm tròn (Node) */
+.mm-dot {
+  position: absolute;
+  width: 40px;   /* to hơn để dễ thấy */
+  height: 40px;
+
+  background-color: #2563eb; /* Xanh dương đậm hơn */
+  border: 2px solid #ffffff;
+  border-radius: 50%;
+  transform: translate(-50%, -50%); /* Căn giữa tâm tuyệt đối */
+  cursor: pointer;
+
+  z-index: 10;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.25);
+  transition: transform 0.1s;
+}
+
+/* Khi đang chọn hoặc active */
+.mm-dot.active, .mm-dot.mm-dot--active {
+    background-color: #ef4444; /* Đỏ */
+    z-index: 20;
+    transform: translate(-50%, -50%) scale(1.2);
+    border-color: #fff;
+}
+
+/* 3. Nhãn tên (Label) */
+.mm-label {
+  position: absolute;
+  transform: translate(-50%, -150%); /* Luôn nằm trên đầu chấm */
+  background-color: rgba(255, 255, 255, 0.95);
+  padding: 4px 10px;
+  border-radius: 4px;
+  border: 1px solid #94a3b8;
+  font-size: 35px;   /* chữ to hơn nữa */
+  font-weight: 600;
+  color: #0f172a;
+  white-space: nowrap;
+  pointer-events: none;
+  z-index: 15;
+  text-align: center;
+}
+
+/* 4. Đường nối (Edge) */
+.mm-edge {
+    position: absolute;
+    height: 3px; /* dày hơn để dễ nhìn */
+    background-color: rgba(59, 130, 246, 0.65);
+    transform-origin: 0 50%;
+
+    pointer-events: none;
+    z-index: 5;
+}
+
+/* Đường nối của lộ trình đang đi (highlight path) */
+.mm-edge.mm-edge--hl {
+  height: 4px; /* dày hơn đường thường */
+  background-color: rgba(220, 38, 38, 0.9); /* đỏ đậm, nổi bật */
+  z-index: 6;
+}
+
+/* Trạng thái thu gọn (Giữ nguyên) */
+.minimap.minimap--collapsed {
+  height: 38px !important; /* Match toolbar height + borders */
+  width: 50px  !important; /* Adjust width automatically? Or set a fixed min-width */
+  min-width: 50px;
+  resize: none;
+  right: 15px;
+  overflow: hidden; /* Hide everything when collapsed */
+}
+.minimap.minimap--collapsed .mm-controls,
+.minimap.minimap--collapsed .mm-route { display: none; } /* Hide route when collapsed */
+.minimap.minimap--collapsed .mm-toggle { margin-left: 0; } /* Adjust toggle button position */
+
+.mm-dot {
+    transition: opacity 0.3s ease, transform 0.3s ease; /* Thêm transition mượt */
+}
+
+/* Khi đang có đường đi, Node không liên quan sẽ mờ đi */
+.mm-stage.has-path .mm-dot:not(.on-path) {
+    opacity: 0.2;
+    transform: translate(-50%, -50%) scale(0.8);
+}
+
+/* Node trên đường đi sẽ nổi bật */
+.mm-stage.has-path .mm-dot.on-path {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1.2);
+    z-index: 20;
+    background-color: #ef4444; /* Đỏ */
+    border-color: #fff;
+    box-shadow: 0 0 8px rgba(239, 68, 68, 0.6);
+}
+
+/* Label cũng mờ đi */
+.mm-label {
+    transition: opacity 0.3s ease;
+}
+.mm-stage.has-path .mm-label:not(.on-path) {
+    opacity: 0.1;
+}
+.mm-stage.has-path .mm-label.on-path {
+    font-weight: bold;
+    z-index: 21;
+    color: #ef4444;
+}
+
+/* Edge highlight */
+.mm-edge {
+    transition: opacity 0.3s ease;
+}
+.mm-stage.has-path .mm-edge:not(.mm-edge--hl) {
+    opacity: 0.1;
+}
+.mm-edge--hl {
+    background-color: #ef4444;
+    height: 3px; /* Dày hơn chút */
+    z-index: 15;
+    box-shadow: 0 0 5px rgba(239, 68, 68, 0.5);
+}
+  /* ========== Panel chỉ đường (Nav) ========== */
+  #directions {
+    position: fixed;
+    left: 16px;
+    bottom: 16px;
+    max-width: 320px;
+    z-index: 1100;
+    background: rgba(255,255,255,.94);
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0,0,0,.25);
+    padding: 12px;
+    font-size: 14px;
+    color: #111;
+    border: 1px solid rgba(0,0,0,.08);
+  }
+  #directions ol {
+    margin: 0;
+    padding-left: 18px;
+  }
+  #directions button {
+    appearance: none;
+    border: 0;
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-size: 14px;
+    cursor: pointer;
+    background: #ad171c;         /* màu đỏ chủ đạo đang dùng */
+    color: #fff;
+    transition: transform .06s ease, opacity .2s ease;
+  }
+  #directions button:hover { transform: translateY(-1px); }
+  #directions button + button { margin-left: 8px; }
+  
+  /* ========== Ưu tiên tương tác trên pano/overlay ========== */
+  #pano { position: relative; z-index: 1; }
+  header, #menu, #hoverPreview, #controls, #minimap, #directions { z-index: 1000; }
+  
+
+  
+  /* ========== (Tùy chọn) Nút menu nổi khi cuộn ========== */
+  #menu {
+    backdrop-filter: blur(6px);
+  }
+  
+  /* Menu Button - TĂNG KÍCH THƯỚC CHO DESKTOP */
+  #menuButton {
+    font-size: 24px; /* Tăng kích thước */
+    padding: 14px 18px; /* Tăng padding */
+    width: 56px; /* Tăng width */
+    height: 56px; /* Tăng height */
+    min-width: 56px;
+    min-height: 56px;
+    border-radius: 8px;
+    cursor: pointer;
+    background: rgba(173, 23, 28, 0.9);
+    color: white;
+    border: none;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  }
+  
+  #menuButton:hover {
+    background: rgba(147, 17, 22, 0.95);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  }
+  
+  /* Menu List - TĂNG KÍCH THƯỚC CHO DESKTOP */
+  #menuList {
+    /* đảm bảo nổi trên pano/preview */
+    z-index: 1200;
+    font-size: 16px; /* Tăng font size */
+    padding: 12px; /* Tăng padding */
+    max-width: 400px; /* Tăng max-width */
+    max-height: 70vh;
+  }
+  
+  #menuList li {
+    padding: 14px 20px; /* Tăng padding */
+    font-size: 16px; /* Tăng font size */
+    line-height: 1.6;
+    cursor: pointer;
+    transition: background-color 0.2s;
+  }
+  
+  #menuList li:hover {
+    background-color: rgba(173, 23, 28, 0.1);
+  }
+  
+  /* Directions Panel - TĂNG KÍCH THƯỚC CHO DESKTOP */
+  #directions {
+    font-size: 16px; /* Tăng từ 14px lên 16px */
+    padding: 16px; /* Tăng từ 12px lên 16px */
+    max-width: 360px; /* Tăng từ 320px lên 360px */
+  }
+  
+  #directions button {
+    padding: 10px 16px; /* Tăng từ 8px 12px lên 10px 16px */
+    font-size: 16px; /* Tăng từ 14px lên 16px */
+    min-height: 42px;
+  }
+  
+  /* Preview - TĂNG KÍCH THƯỚC CHO DESKTOP */
+  #hoverPreview {
+    max-width: 240px; /* Tăng từ 200px */
+    padding: 8px; /* Tăng padding */
+  }
+  
+  #previewImage {
+    max-width: 240px; /* Tăng từ 200px */
+    max-height: 180px; /* Tăng từ 150px */
+  }
+  
+  
+/* ========== RESPONSIVE DESIGN - MOBILE ========== */
+
+/* Tablet và Mobile (max-width: 768px) */
+@media (max-width: 768px) {
+    /* Header responsive - TĂNG KÍCH THƯỚC */
+    header {
+        padding: 10px 14px;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+    
+    header h1#tieude {
+        font-size: 16px;
+        margin: 0;
+        flex: 1 1 100%;
+        text-align: center;
+        order: 3;
+    }
+    
+    #logo {
+        width: 80px;
+        height: 40px;
+        margin-right: 10px;
+    }
+    
+    .brand {
+        flex: 0 0 auto;
+    }
+    
+    #tenKhuVuc {
+        font-size: 13px;
+        padding: 8px 10px;
+        flex: 1 1 auto;
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+    
+    .header-actions {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+    }
+    
+    .lang-switcher {
+        gap: 4px;
+    }
+    
+    .lang-btn {
+        padding: 6px 12px;
+        font-size: 14px;
+        min-width: 44px;
+        min-height: 36px;
+    }
+    
+    #installButton {
+        font-size: 13px;
+        padding: 8px 12px;
+        min-height: 36px;
+    }
+    
+    /* Footer và Controls responsive - TĂNG KÍCH THƯỚC */
+    footer.footer {
+        padding: 10px 6px;
+    }
+    
+    #controls {
+        gap: 8px;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+    
+    #controls button {
+        padding: 12px 20px;
+        font-size: 15px;
+        font-weight: 600;
+        flex: 1 1 auto;
+        min-width: 90px;
+        min-height: 44px;
+    }
+    
+    /* Ẩn minimap trên mobile vì quá nhỏ không sử dụng được */
+    .minimap,
+    .minimap-panel,
+    #minimap {
+        display: none !important;
+    }
+    
+    /* Menu responsive - TĂNG KÍCH THƯỚC */
+    #menuButton {
+        font-size: 20px;
+        padding: 12px 16px;
+        width: 48px;
+        height: 48px;
+        min-width: 48px;
+        min-height: 48px;
+    }
+    
+    #menuList {
+        max-width: 90vw;
+        max-height: 60vh;
+        font-size: 15px;
+        padding: 12px;
+    }
+    
+    #menuList li {
+        padding: 12px 16px;
+        font-size: 15px;
+    }
+    
+    /* Hotspot tooltip responsive - TĂNG KÍCH THƯỚC */
+    .hs-tip {
+        max-width: 280px;
+        font-size: 14px;
+        padding: 10px 12px;
+    }
+    
+    .hs-tip h4 {
+        font-size: 16px;
+        margin-bottom: 8px;
+    }
+    
+    .hs-tip img {
+        width: 70px;
+        height: 50px;
+    }
+    
+    /* Preview responsive */
+    #hoverPreview {
+        max-width: 180px;
+    }
+    
+    #previewImage {
+        max-width: 180px;
+        max-height: 120px;
+    }
+    
+    /* Directions panel responsive - TĂNG KÍCH THƯỚC */
+    #directions {
+        left: 8px;
+        bottom: 8px;
+        max-width: calc(100vw - 16px);
+        font-size: 14px;
+        padding: 12px;
+    }
+    
+    #directions button {
+        padding: 10px 16px;
+        font-size: 14px;
+        min-height: 40px;
+    }
+    
+}
+
+/* Mobile nhỏ (max-width: 480px) - TĂNG KÍCH THƯỚC */
+@media (max-width: 480px) {
+    /* Header - VẪN ĐỦ LỚN ĐỂ ĐỌC */
+    header {
+        padding: 8px 10px;
+    }
+    
+    header h1#tieude {
+        font-size: 14px;
+        display: block; /* Hiển thị để dễ đọc */
+    }
+    
+    #logo {
+        width: 70px;
+        height: 35px;
+        margin-right: 8px;
+    }
+    
+    #tenKhuVuc {
+        font-size: 12px;
+        padding: 6px 8px;
+    }
+    
+    .lang-btn {
+        padding: 6px 10px;
+        font-size: 13px;
+        min-width: 42px;
+        min-height: 34px;
+    }
+    
+    /* Controls - VẪN ĐỦ LỚN ĐỂ BẤM */
+    #controls {
+        gap: 6px;
+        padding: 6px;
+    }
+    
+    #controls button {
+        padding: 10px 16px;
+        font-size: 14px;
+        min-width: 85px;
+        min-height: 42px;
+    }
+    
+    /* Menu - VẪN ĐỦ LỚN */
+    #menuButton {
+        font-size: 18px;
+        padding: 10px 14px;
+        width: 46px;
+        height: 46px;
+        min-width: 46px;
+        min-height: 46px;
+    }
+    
+    #menuList {
+        font-size: 14px;
+        padding: 10px;
+    }
+    
+    #menuList li {
+        padding: 10px 14px;
+        font-size: 14px;
+    }
+    
+    /* Hotspot tooltip - VẪN ĐỦ LỚN */
+    .hs-tip {
+        max-width: 260px;
+        font-size: 13px;
+        padding: 8px 10px;
+    }
+    
+    .hs-tip h4 {
+        font-size: 15px;
+    }
+    
+    .hotspot-icon {
+        width: 60px;
+        height: 42px;
+    }
+    
+    
+    /* Directions panel full width */
+    #directions {
+        left: 4px;
+        right: 4px;
+        bottom: 4px;
+        max-width: none;
+        width: calc(100vw - 8px);
+    }
+}
+
+/* Landscape mobile (max-height: 500px và width > 480px) */
+@media (max-height: 500px) and (min-width: 481px) {
+    /* Header luôn hiển thị trên landscape */
+    header.header-hidden {
+        transform: translateY(0);
+        pointer-events: auto;
+    }
+    
+    /* Footer compact */
+    footer.footer {
+        padding: 6px 0;
+    }
+    
+    #controls button {
+        padding: 8px 14px;
+        font-size: 13px;
+    }
+    
+    /* Minimap vẫn ẩn trên landscape mobile */
+    .minimap,
+    .minimap-panel,
+    #minimap {
+        display: none !important;
+    }
+}

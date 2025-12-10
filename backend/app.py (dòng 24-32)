@@ -1,0 +1,6 @@
+
+candidate_tours_paths = [
+    os.path.join(BASE_DIR, 'cms', 'data', 'tours.json'),  # ❌ Sai! Tìm ở backend/cms/data/
+    os.path.join(os.path.dirname(__file__), '../cms/data/tours.json'),  # ❌ Sai! Tìm ở ../cms/data/
+    os.path.normpath(os.path.join(BASE_DIR, '..', 'cms', 'data', 'tours.json')),  # ✅ Đúng nhưng thứ tự sai
+]

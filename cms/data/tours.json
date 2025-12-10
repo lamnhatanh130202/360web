@@ -1,0 +1,37 @@
+[
+  {
+    "id": "tour_cntt",
+    "name": "Khoa Công nghệ Thông tin",
+    "keywords": [
+      "khoa công nghệ thông tin",
+      "khoa cntt",
+      "tham quan cntt",
+      "tour cntt",
+      "các phòng khoa công nghệ thông tin",
+      "phòng IT",
+      "tham quan phòng Công nghệ thông tin"
+    ],
+    "scenes": [
+      "a0_cntt",
+      "b1_phethong",
+      "b1_datalab",
+      "b2_plab",
+      "b2_steamlab"
+    ]
+  },
+  {
+    "id": "tour_kinhte",
+    "name": "Tour Khoa Kinh tế",
+    "keywords": [
+      "khoa kinh tế",
+      "tham quan kinh tế",
+      "tour kinh tế"
+    ],
+    "scenes": [
+      "congtruong",
+      "santruong",
+      "b0_1",
+      "b0_2"
+    ]
+  }
+]

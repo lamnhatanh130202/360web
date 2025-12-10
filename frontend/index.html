@@ -15,19 +15,19 @@
 </head>
 <body>
 
-  <header class="header">
+  <div class="header-trigger" id="headerTrigger"></div>
+  <header class="header" id="mainHeader">
     <img id="logo" src="/assets/icon/logo BDU Eng.png" alt="Logo BDU" />
     <div class="brand">
       <h1 id="tieude">Tham Quan Đại Học Bình Dương 360°</h1>
     </div>
     <div id="tenKhuVuc" class="scene-title" aria-live="polite">Tên khu vực: Cổng Chính</div>
-    <button id="toggleAutoRotate">Dừng lại</button>
     <div class="header-actions">
-      <button id="voiceControlBtn" title="Điều khiển bằng giọng nói">🎤</button>
-      <select id="langSwitch" aria-label="Ngôn ngữ">
-        <option value="vi" selected>VI</option>
-        <option value="en">EN</option>
-      </select>
+      
+      <div class="lang-switcher">
+        <button id="lang-vi" class="lang-btn active" data-lang="vi">VI</button>
+        <button id="lang-en" class="lang-btn" data-lang="en">EN</button>
+      </div>
       <button id="installButton" style="display:none">Cài đặt ứng dụng</button>
     </div>
   </header>
@@ -42,28 +42,29 @@
     <aside class="sidebar">
       <section class="minimap-panel">
         <div class="minimap-toolbar">
-          <h2>Mini-map</h2>
+          <h2 data-i18n="minimapTitle">Mini-map</h2>
           <div class="route">
             <label>
-              Từ:
+              <span data-i18n="routeFrom">Từ</span>:
               <select id="routeFrom"></select>
             </label>
             <label>
-              Đến:
+              <span data-i18n="routeTo">Đến</span>:
               <select id="routeTo"></select>
             </label>
-            <button id="routeBtn">Tìm đường</button>
+            <button id="routeBtn" data-i18n="routeBtn">Tìm đường</button>
           </div>
           <div class="legend">
-            <span class="dot dot--current"></span> Hiện tại
-            <span class="dot dot--next"></span> Lộ trình
+            <span class="dot dot--current"></span> <span data-i18n="minimapCurrent">Hiện tại</span>
+            <span class="dot dot--next"></span> <span data-i18n="minimapRoute">Lộ trình</span>
           </div>
         </div>
         <div id="minimap" class="minimap" aria-label="Mini-map định vị"></div>
+        <button id="voice-command-btn" data-i18n-title="voiceBotTitle" title="Hỏi Bot 360">BOT</button>
       </section>
 
       <nav id="menu" class="menu" aria-label="Điều hướng khu vực">
-        <button id="menuButton" aria-expanded="false" title="Mở menu">☰</button>
+        <button id="menuButton" aria-expanded="false" data-i18n-title="menuButton" title="Mở menu">☰</button>
         <ul id="menuList"></ul>
       </nav>
 
@@ -75,15 +76,16 @@
 
   <footer class="footer">
     <div id="controls" class="controls" aria-label="Điều khiển góc nhìn">
-      <button id="left"  title="Quay trái">⟲ Quay trái</button>
-      <button id="right" title="Quay phải">Quay phải ⟳</button>
-      <button id="zoomIn"  title="Phóng to">＋ Phóng to</button>
-      <button id="zoomOut" title="Thu nhỏ">－ Thu nhỏ</button>
+      <button id="left" data-i18n="controlsLeft" data-i18n-title="controlsLeft" title="Quay trái">⟲ Quay trái</button>
+      <button id="right" data-i18n="controlsRight" data-i18n-title="controlsRight" title="Quay phải">Quay phải ⟳</button>
+      <button id="zoomIn" data-i18n="controlsZoomIn" data-i18n-title="controlsZoomIn" title="Phóng to">＋ Phóng to</button>
+      <button id="zoomOut" data-i18n="controlsZoomOut" data-i18n-title="controlsZoomOut" title="Thu nhỏ">－ Thu nhỏ</button>
     </div>
   </footer>
 
-  <div id="loader" class="loader" aria-hidden="true">Đang tải…</div>
-
-  <script type="module" src="/src/main.js"></script>
+ <!-- <div id="loader" class="loader" aria-hidden="true">Đang tải…</div>-->
+<!-- CMS mount point (hidden by default) -->
+<div id="cms-root" style="display:none"></div>
+  <script type="module" src="/src/main.jsx"></script>
 </body>
 </html>

@@ -1,0 +1,197 @@
+/* src/styles/MinimapEditor.css */
+
+.mm-editor-layout {
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+  background-color: #f8fafc;
+}
+
+/* Sidebar */
+.mm-editor-sidebar {
+  width: 320px;
+  background: #ffffff;
+  border-right: 1px solid #e2e8f0;
+  padding: 24px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  box-shadow: 2px 0 8px rgba(0,0,0,0.02);
+}
+
+.mm-editor-title {
+  margin-top: 0;
+  margin-bottom: 0;
+  font-size: 1.5rem;
+  color: #0f172a;
+}
+
+.mm-section-label {
+  display: block;
+  margin-bottom: 12px;
+  font-weight: 600;
+  color: #334155;
+  font-size: 0.9rem;
+}
+
+/* Floor Selector */
+.mm-floor-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.mm-floor-btn {
+  padding: 8px 16px;
+  border: 1px solid #e2e8f0;
+  background: white;
+  color: #64748b;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.2s;
+  flex: 1 0 auto;
+  text-align: center;
+}
+
+.mm-floor-btn:hover {
+  border-color: #cbd5e1;
+  background: #f1f5f9;
+}
+
+.mm-floor-btn.active {
+  background: #3b82f6;
+  color: white;
+  border-color: #3b82f6;
+  box-shadow: 0 2px 4px rgba(59, 130, 246, 0.3);
+}
+
+/* Controls */
+.mm-control-select {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  font-size: 14px;
+  color: #1e293b;
+  background-color: #fff;
+}
+
+.mm-node-info {
+  padding: 16px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 0.9rem;
+}
+
+.mm-node-info h3 {
+  margin-top: 0;
+  margin-bottom: 12px;
+  font-size: 1rem;
+  color: #0f172a;
+}
+
+.mm-node-info-row {
+  margin-bottom: 8px;
+  display: flex;
+  justify-content: space-between;
+}
+
+/* Action Buttons */
+.mm-zoom-group {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.mm-btn-action {
+  flex: 1;
+  padding: 8px;
+  border: 1px solid #e2e8f0;
+  background: white;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+  color: #475569;
+}
+
+.mm-btn-action:hover {
+  background: #f1f5f9;
+}
+
+.mm-btn-block {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 12px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+  transition: opacity 0.2s;
+}
+
+.mm-btn-reset {
+  background: #e2e8f0;
+  color: #475569;
+}
+
+.mm-btn-fit {
+  background: #10b981;
+  color: white;
+}
+
+.mm-btn-center {
+  background: #3b82f6;
+  color: white;
+}
+
+.mm-btn-save {
+  background: #2563eb;
+  color: white;
+  padding: 14px;
+  font-size: 1rem;
+  margin-top: 0; /* Sát với các nút trên */
+  margin-bottom: 12px; /* Đồng nhất với các nút khác */
+}
+
+.mm-btn-save:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.mm-help-text {
+  font-size: 0.8rem;
+  color: #94a3b8;
+  margin-top: 20px;
+  line-height: 1.5;
+}
+
+/* Main Viewport Container */
+.mm-main-content {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+  background: #f1f5f9; /* Darker bg to distinguish canvas */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+/* Override minimap styles for Editor context */
+.minimap-editor-container {
+  width: 100%;
+  height: 100%;
+  max-width: 1200px;
+  max-height: 90vh;
+  position: relative;
+  background: #fff;
+  border: 1px solid #cbd5e1;
+  border-radius: 12px;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
