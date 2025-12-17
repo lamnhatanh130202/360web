@@ -9,17 +9,21 @@ services:
     ports:
       - "5000:5000"
     volumes:
-      # 1. Mount code để dev (Bao gồm cả file scenes.json nằm trong ./backend)
+      # 1. Mount toàn bộ code vào /app (File key sẽ nằm ở /app/keys/google-tts-key.json)
       - ./backend:/app
       
-      # 3. Các thư mục khác
+      # 2. Mount thư mục uploads và cms data (giữ nguyên)
       - ./backend/uploads:/app/uploads
       - ./cms/data:/app/cms/data:rw
-      - ./backend/keys/google-tts-key.json:/app/backend/keys/google-tts-key.json:ro
+      
+      # 3. XÓA DÒNG MOUNT FILE KEY RIÊNG LẺ ĐỂ TRÁNH LỖI CACHE CŨ
+      # Docker sẽ tự đọc key từ volume dòng số 1
+      
       - ./backend/static/tts:/app/static/tts
       
     environment:
-      - GOOGLE_APPLICATION_CREDENTIALS=/app/backend/keys/google-tts-key.json
+      # SỬA ĐƯỜNG DẪN NÀY CHO KHỚP VỚI CẤU TRÚC CONTAINER (/app/keys/...)
+      - GOOGLE_APPLICATION_CREDENTIALS=/app/keys/google-tts-key.json
       - FLASK_ENV=production
       - FLASK_DEBUG=0
       - GUNICORN_WORKERS=4

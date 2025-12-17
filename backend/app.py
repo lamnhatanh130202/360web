@@ -86,23 +86,43 @@ def get_month_key(date=None):
     if date is None: date = datetime.now()
     return date.strftime('%Y-%m')
 
+# Tìm hàm load_stats_from_file cũ và thay bằng hàm này
 def load_stats_from_file():
-    try:
-        if os.path.exists(STATS_FILE):
-            with open(STATS_FILE, 'r', encoding='utf-8') as f:
-                data = json.load(f)
-                print(f"[Analytics] Loaded stats from file: {len(data.get('daily', {}))} daily entries, peak: {data.get('peak_concurrent', 0)}")
-                return data
-        else:
-            print(f"[Analytics] Stats file not found: {STATS_FILE}")
-    except Exception as e:
-        print(f"[Analytics] Error loading stats from file: {e}")
-        import traceback
-        traceback.print_exc()
-    return {
+    default_stats = {
         "daily": {}, "weekly": {}, "monthly": {},
         "peak_concurrent": 0, "peak_concurrent_date": None
     }
+    
+    if not os.path.exists(STATS_FILE):
+        print(f"[Analytics] Stats file not found, creating new: {STATS_FILE}")
+        return default_stats
+
+    try:
+        with open(STATS_FILE, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+            # Validate sơ bộ
+            if not isinstance(data, dict):
+                raise ValueError("JSON root is not a dictionary")
+            
+            print(f"[Analytics] ✓ Loaded stats: {len(data.get('daily', {}))} days recorded")
+            return data
+            
+    except Exception as e:
+        print(f"[Analytics] ☠ CRITICAL ERROR loading stats: {e}")
+        
+        # --- CƠ CHẾ BẢO VỆ: BACKUP FILE LỖI ---
+        try:
+            timestamp = int(time.time())
+            backup_path = f"{STATS_FILE}.corrupt.{timestamp}.bak"
+            import shutil
+            shutil.copy(STATS_FILE, backup_path)
+            print(f"[Analytics] ⚠ Backed up corrupted file to: {backup_path}")
+        except Exception as backup_err:
+            print(f"[Analytics] ✗ Failed to backup corrupted file: {backup_err}")
+            
+        # Vẫn trả về default để server chạy được, nhưng file cũ đã được backup
+        # để bạn có thể khôi phục thủ công nếu cần.
+        return default_stats
 
 stats_data = load_stats_from_file() # Load lần đầu
 
@@ -303,27 +323,21 @@ def auth_login():
 
 
 def periodic_cleanup():
-    """
-    Background task to periodically clean up inactive sessions
-    and save stats to disk.
-    Runs every 5 minutes.
-    """
     while True:
-        time.sleep(300)  # 5 minutes
-        
+        time.sleep(300)  # 5 phút
         try:
             with stats_lock:
                 cleanup_inactive_sessions()
                 
-                # Save stats to disk
-                try:
-                    with open(STATS_FILE, 'w', encoding='utf-8') as f:
-                        json.dump(stats_data, f, ensure_ascii=False, indent=2)
-                except Exception as e:
-                    print(f"[Cleanup] Error saving stats: {e}")
+                # --- KIỂM TRA AN TOÀN TRƯỚC KHI LƯU ---
+                # Chỉ lưu nếu có dữ liệu thực tế (tránh ghi đè file trắng do lỗi logic)
+                if len(stats_data.get('daily', {})) > 0 or stats_data.get('peak_concurrent', 0) > 0:
+                    save_stats(stats_data, lock_acquired=True)
+                else:
+                    print("[Analytics] ⚠ Stats data is empty, skipping auto-save to prevent data loss.")
                     
         except Exception as e:
-            print(f"[Cleanup] Error in periodic cleanup: {e}")
+            print(f"[Cleanup] ✗ Error in periodic cleanup: {e}")
 
 # Start background cleanup thread
 cleanup_thread = threading.Thread(target=periodic_cleanup, daemon=True)
@@ -1136,23 +1150,73 @@ def cleanup_graph():
 
 @app.route("/api/graph/regenerate", methods=["POST"])
 def regenerate_graph():
-    """Regenerate graph from scenes - khôi phục dữ liệu graph từ scenes"""
+    """Regenerate graph from scenes - MERGE với dữ liệu hiện có, KHÔNG ghi đè vị trí x, y"""
     global graph_data, graph_path
     
     try:
-        # Generate graph từ scenes
+        # Load graph hiện có để giữ lại vị trí x, y
+        existing_graph = {"nodes": [], "edges": []}
+        save_path = find_graph_path()
+        if save_path and os.path.exists(save_path):
+            try:
+                with open(save_path, 'r', encoding='utf-8') as f:
+                    existing_graph = json.load(f)
+                print(f"✓ Loaded existing graph: {len(existing_graph.get('nodes', []))} nodes with positions")
+            except Exception as e:
+                print(f"⚠ Could not load existing graph: {e}")
+        
+        # Tạo map để tìm node cũ nhanh
+        old_nodes_map = {}
+        if existing_graph.get('nodes'):
+            for node in existing_graph['nodes']:
+                old_nodes_map[str(node.get('id'))] = node
+        
+        # Generate graph mới từ scenes
         new_graph = generate_graph_from_scenes(_scenes)
         
+        # MERGE: Giữ lại vị trí x, y, positions từ graph cũ
+        merged_nodes = []
+        for new_node in new_graph.get('nodes', []):
+            node_id = str(new_node.get('id'))
+            old_node = old_nodes_map.get(node_id)
+            
+            if old_node:
+                # MERGE: Giữ lại tất cả thông tin từ node cũ, chỉ cập nhật thông tin mới
+                merged_node = {
+                    **old_node,  # Giữ nguyên node cũ (bao gồm x, y, positions)
+                    **new_node,  # Cập nhật thông tin mới (id, label, floor)
+                    # Đặc biệt: Ưu tiên giữ lại x, y, positions từ node cũ
+                    'x': new_node.get('x') if new_node.get('x') is not None else old_node.get('x'),
+                    'y': new_node.get('y') if new_node.get('y') is not None else old_node.get('y'),
+                    'positions': new_node.get('positions') if new_node.get('positions') else old_node.get('positions')
+                }
+                merged_nodes.append(merged_node)
+            else:
+                # Node mới, không có trong graph cũ
+                merged_nodes.append(new_node)
+        
+        # Thêm các nodes cũ không có trong scenes mới (giữ lại nodes đã bị xóa khỏi scenes)
+        for old_node in existing_graph.get('nodes', []):
+            node_id = str(old_node.get('id'))
+            if not any(str(n.get('id')) == node_id for n in merged_nodes):
+                merged_nodes.append(old_node)
+                print(f"⚠ Preserved old node not in scenes: {node_id}")
+        
+        # Tạo graph đã merge
+        merged_graph = {
+            "nodes": merged_nodes,
+            "edges": new_graph.get('edges', [])  # Edges luôn lấy mới từ hotspots
+        }
+        
         # Update memory
-        graph_data = new_graph
+        graph_data = merged_graph
         
         # Save to file
-        save_path = find_graph_path()
         os.makedirs(os.path.dirname(save_path), exist_ok=True)
         
         temp_path = save_path + '.tmp'
         with open(temp_path, 'w', encoding='utf-8') as f:
-            json.dump(new_graph, f, ensure_ascii=False, indent=2)
+            json.dump(merged_graph, f, ensure_ascii=False, indent=2)
             f.flush()
             os.fsync(f.fileno())
         
@@ -1163,13 +1227,15 @@ def regenerate_graph():
         
         graph_path = save_path
         
-        print(f"✓ Regenerated graph: {len(new_graph.get('nodes', []))} nodes, {len(new_graph.get('edges', []))} edges")
+        nodes_with_pos = sum(1 for n in merged_nodes if n.get('x') is not None or n.get('y') is not None or n.get('positions'))
+        print(f"✓ Regenerated graph: {len(merged_nodes)} nodes ({nodes_with_pos} with positions), {len(merged_graph.get('edges', []))} edges")
         
         return jsonify({
             "status": "ok",
-            "message": "Graph regenerated from scenes",
-            "nodes": len(new_graph.get('nodes', [])),
-            "edges": len(new_graph.get('edges', []))
+            "message": "Graph regenerated from scenes (positions preserved)",
+            "nodes": len(merged_nodes),
+            "edges": len(merged_graph.get('edges', [])),
+            "nodes_with_positions": nodes_with_pos
         }), 200
         
     except Exception as e:
@@ -1180,7 +1246,7 @@ def regenerate_graph():
 
 @app.route("/api/graph", methods=["POST", "PUT"])
 def save_graph():
-    """Save graph data - unified handler for both POST and PUT"""
+    """Save graph data - MERGE với dữ liệu hiện có, KHÔNG ghi đè hoàn toàn"""
     clear_cache("/api/graph")  # Clear cache khi save graph
     global graph_data, graph_path
     
@@ -1191,6 +1257,47 @@ def save_graph():
     # Find the correct graph file path
     save_path = find_graph_path()
     
+    # Load graph hiện có để merge (nếu có)
+    existing_graph = {"nodes": [], "edges": []}
+    if save_path and os.path.exists(save_path):
+        try:
+            with open(save_path, 'r', encoding='utf-8') as f:
+                existing_graph = json.load(f)
+        except Exception:
+            pass  # Nếu không load được, dùng graph mới
+    
+    # MERGE nodes: Giữ lại thông tin từ nodes cũ nếu node mới không có
+    old_nodes_map = {str(n.get('id')): n for n in existing_graph.get('nodes', [])}
+    merged_nodes = []
+    
+    for new_node in new_graph.get('nodes', []):
+        node_id = str(new_node.get('id'))
+        old_node = old_nodes_map.get(node_id)
+        
+        if old_node:
+            # MERGE: Giữ lại thông tin cũ, cập nhật thông tin mới
+            merged_node = {
+                **old_node,
+                **new_node,
+                # Ưu tiên giữ lại x, y, positions nếu node mới không có
+                'x': new_node.get('x') if new_node.get('x') is not None else old_node.get('x'),
+                'y': new_node.get('y') if new_node.get('y') is not None else old_node.get('y'),
+                'positions': new_node.get('positions') if new_node.get('positions') else old_node.get('positions')
+            }
+            merged_nodes.append(merged_node)
+        else:
+            # Node mới
+            merged_nodes.append(new_node)
+    
+    # Giữ lại các nodes cũ không có trong graph mới (nếu cần)
+    # (Tùy chọn: có thể bỏ qua nếu muốn xóa nodes không có trong graph mới)
+    
+    # Graph cuối cùng: nodes đã merge + edges mới
+    final_graph = {
+        "nodes": merged_nodes,
+        "edges": new_graph.get('edges', [])
+    }
+    
     # Ensure directory exists
     try:
         os.makedirs(os.path.dirname(save_path), exist_ok=True)
@@ -1198,12 +1305,51 @@ def save_graph():
         print(f"⚠ Warning: Could not create directory for graph: {e}")
     
     try:
+        # MERGE với graph hiện có trước khi save
+        # Load graph hiện có để merge (nếu có)
+        existing_graph = {"nodes": [], "edges": []}
+        if save_path and os.path.exists(save_path):
+            try:
+                with open(save_path, 'r', encoding='utf-8') as f:
+                    existing_graph = json.load(f)
+            except Exception:
+                pass  # Nếu không load được, dùng graph mới
+        
+        # MERGE nodes: Giữ lại thông tin từ nodes cũ nếu node mới không có
+        old_nodes_map = {str(n.get('id')): n for n in existing_graph.get('nodes', [])}
+        merged_nodes = []
+        
+        for new_node in new_graph.get('nodes', []):
+            node_id = str(new_node.get('id'))
+            old_node = old_nodes_map.get(node_id)
+            
+            if old_node:
+                # MERGE: Giữ lại thông tin cũ, cập nhật thông tin mới
+                merged_node = {
+                    **old_node,
+                    **new_node,
+                    # Ưu tiên giữ lại x, y, positions nếu node mới không có
+                    'x': new_node.get('x') if new_node.get('x') is not None else old_node.get('x'),
+                    'y': new_node.get('y') if new_node.get('y') is not None else old_node.get('y'),
+                    'positions': new_node.get('positions') if new_node.get('positions') else old_node.get('positions')
+                }
+                merged_nodes.append(merged_node)
+            else:
+                # Node mới
+                merged_nodes.append(new_node)
+        
+        # Graph cuối cùng: nodes đã merge + edges mới
+        final_graph = {
+            "nodes": merged_nodes,
+            "edges": new_graph.get('edges', [])
+        }
+        
         # Atomic write: write to temp file first, then rename
         import tempfile
         temp_path = save_path + '.tmp'
         
         with open(temp_path, 'w', encoding='utf-8') as f:
-            json.dump(new_graph, f, ensure_ascii=False, indent=2)
+            json.dump(final_graph, f, ensure_ascii=False, indent=2)
             f.flush()
             os.fsync(f.fileno())
         
@@ -1219,14 +1365,15 @@ def save_graph():
                 graph_data = json.load(f)
             print(f"✓ Reloaded graph_data from file after save")
         except Exception as e:
-            # Nếu không reload được, dùng new_graph
-            graph_data = new_graph
-            print(f"⚠ Could not reload from file, using new_graph: {e}")
+            # Nếu không reload được, dùng final_graph
+            graph_data = final_graph
+            print(f"⚠ Could not reload from file, using final_graph: {e}")
         
         graph_path = save_path
         
+        nodes_with_pos = sum(1 for n in merged_nodes if n.get('x') is not None or n.get('y') is not None or n.get('positions'))
         print(f"✓ Successfully saved graph.json to {save_path}")
-        print(f"✓ Saved {len(new_graph.get('nodes', []))} nodes and {len(new_graph.get('edges', []))} edges")
+        print(f"✓ Saved {len(merged_nodes)} nodes ({nodes_with_pos} with positions) and {len(final_graph.get('edges', []))} edges")
         
         return jsonify({
             "status": "ok", 
@@ -1326,6 +1473,11 @@ def create_scene():
             load_scenes_from_file(scenes_path)
         
         print(f"[Create Scene] Successfully created scene {scene_id}")
+        # Regenerate graph so graph.json includes the new scene
+        try:
+            regenerate_graph()
+        except Exception as e:
+            print(f"⚠ Could not regenerate graph after create_scene: {e}")
         return jsonify(data), 201
     except Exception as e:
         print(f"[Create Scene] Error: {e}")
@@ -1401,6 +1553,11 @@ def update_scene(scene_id):
         scene_response = dict(_scenes[scene_id])
         print(f"[Update Scene] Returning scene data with URL: {scene_response.get('url', 'N/A')}")
         print(f"[Update Scene] Final response keys: {list(scene_response.keys())}")
+        # Regenerate graph so graph.json reflects the updated scenes
+        try:
+            regenerate_graph()
+        except Exception as e:
+            print(f"⚠ Could not regenerate graph after update_scene: {e}")
         
         return jsonify(scene_response)
     except Exception as e:
@@ -1465,6 +1622,11 @@ def delete_scene(scene_id):
             print(f"[Delete Scene] Verified: Scene {actual_scene_id} no longer in _scenes")
         
         print(f"[Delete Scene] Successfully deleted scene {actual_scene_id}")
+        # Regenerate graph so graph.json no longer contains deleted node
+        try:
+            regenerate_graph()
+        except Exception as e:
+            print(f"⚠ Could not regenerate graph after delete_scene: {e}")
         return "", 204
     except Exception as e:
         print(f"[Delete Scene] Error: {e}")

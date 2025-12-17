@@ -321,9 +321,9 @@ pip install -r requirements.txt
 
 ### Lỗi: Google TTS không hoạt động
 
-- Kiểm tra file `backend/keys/google-tts-key.json` có tồn tại
-- Kiểm tra biến môi trường `GOOGLE_APPLICATION_CREDENTIALS`
-- Đảm bảo Google Cloud credentials hợp lệ
+- File key `backend/keys/google-tts-key.json` **KHÔNG** được upload lên GitHub vì lý do bảo mật.
+- Khi triển khai, cần copy file này thủ công vào thư mục `backend/keys/`.
+- Nếu chạy Docker, cần restart container sau khi chép key:
 
 ### Lỗi: Frontend không kết nối được Backend
 
@@ -424,5 +424,4 @@ Nếu gặp vấn đề, kiểm tra:
 
 ---
 
-**Chúc bạn code vui vẻ! 🎉**
 

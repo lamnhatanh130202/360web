@@ -64,8 +64,8 @@ export default function ScenesList({ apiBase = "/api" }) {
   }
 
   return (
-    <div>
-      <div className="scenes-list-header">
+    <div >
+      <div className="scenes-list-header1">
         <h1 className="scenes-list-title">Danh sách Scenes</h1>
         <a 
           href="/cms/scenes/create" 

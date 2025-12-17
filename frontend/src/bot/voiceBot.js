@@ -27,6 +27,20 @@ export function createVoiceBot(opts = {}) {
   let recognition = null;
   let recognitionState = 'idle'; // 'idle', 'starting', 'listening', 'stopping'
   let isRestarting = false;
+  let cachedTours = null;
+
+  async function refreshTours() {
+    try {
+      if (typeof getTours === 'function') {
+        const t = await getTours();
+        cachedTours = Array.isArray(t) ? t : (t && typeof t === 'object' ? Object.values(t) : []);
+        console.log('[VoiceBot] Refreshed tours via broadcast, count:', cachedTours.length);
+        try { showBubble('Danh sách tours đã cập nhật', 2000); } catch (e) {}
+      }
+    } catch (e) {
+      console.warn('[VoiceBot] refreshTours failed:', e);
+    }
+  }
 
   // ---- Utilities ----
   function normalize(s) {
@@ -1287,6 +1301,23 @@ function getSafeName(item) {
     
     mountUI(); 
     console.log('[VoiceBot] UI mounted, button:', btnEl ? 'OK' : 'FAILED');
+    // Listen for cross-tab tour updates (BroadcastChannel preferred, fallback to storage event)
+    try {
+      if (window.BroadcastChannel) {
+        const bc = new BroadcastChannel('cms_updates');
+        bc.addEventListener('message', (ev) => {
+          if (ev && ev.data === 'tours-updated') refreshTours();
+        });
+      }
+    } catch (e) { console.warn('BroadcastChannel not available', e); }
+
+    window.addEventListener('storage', (e) => {
+      if (e.key === 'tours-updated') refreshTours();
+    });
+    window.addEventListener('tours-updated', () => refreshTours());
+
+    // Preload tours once
+    try { refreshTours(); } catch (e) {}
     
     // Load voices for browser TTS (some browsers need this)
     if ('speechSynthesis' in window) {

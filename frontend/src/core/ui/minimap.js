@@ -77,12 +77,166 @@ export function createMinimap(opts) {
             if (res.ok) {
                 const data = await res.json();
                 scenes = Array.isArray(data) ? data : [];
+                // Merge fetched scenes into current graph G so new scenes/nodes appear immediately
+                try {
+                    const scenesById = new Map();
+                    scenes.forEach(s => { if (s && s.id) scenesById.set(String(s.id), s); });
+
+                    const oldNodesMap = new Map();
+                    if (G && G.nodes) G.nodes.forEach(n => oldNodesMap.set(String(n.id), n));
+
+                    // Update existing nodes and add new ones from scenes
+                    const merged = [];
+                    scenesById.forEach((scene, idStr) => {
+                        const old = oldNodesMap.get(idStr);
+                        const nodeFromScene = {
+                            id: scene.id,
+                            name: scene.name || scene.title || scene.id,
+                            floor: scene.floor ?? (old ? old.floor : 0),
+                            positions: scene.positions || (old ? old.positions : undefined),
+                        };
+                        if (old) {
+                            // preserve existing x/y unless scene provides positions with coordinates
+                            nodeFromScene.x = old.x !== undefined && old.x !== null ? old.x : scene.x;
+                            nodeFromScene.y = old.y !== undefined && old.y !== null ? old.y : scene.y;
+                            // merge other props
+                            Object.assign(nodeFromScene, old, scene);
+                        } else {
+                            // new node
+                            if (scene.x !== undefined) nodeFromScene.x = scene.x;
+                            if (scene.y !== undefined) nodeFromScene.y = scene.y;
+                        }
+                        merged.push(nodeFromScene);
+                        // remove from oldNodesMap so we can keep nodes that are not in scenes as well
+                        oldNodesMap.delete(idStr);
+                    });
+
+                    // Keep any old nodes not present in scenes (avoid losing nodes)
+                    oldNodesMap.forEach(v => merged.push(v));
+
+                    // Keep edges as before
+                    G = { nodes: merged, edges: G.edges || [] };
+                } catch (e) {
+                    console.warn('[Minimap] Failed to merge scenes into graph:', e);
+                }
+
                 // Load xong thì cập nhật lại tên trên UI ngay
                 fillSelects();
                 renderNodes();
             }
         } catch (e) {
             console.warn('[Minimap] Failed to load scenes:', e);
+        }
+    }
+
+    // --- Graph loader & auto-positioning ---
+    async function ensureNodePositions() {
+        // Find nodes missing positions (x/y and positions)
+        const missing = G.nodes.filter(n => (n.x === undefined || n.x === null) && (n.positions === undefined || Object.keys(n.positions || {}).length === 0));
+        if (!missing || missing.length === 0) return false;
+
+        console.log('[Minimap] Auto-placing', missing.length, 'nodes');
+
+        // Group by floor
+        const byFloor = {};
+        missing.forEach(n => {
+            const f = (n.floor ?? 0);
+            byFloor[f] = byFloor[f] || [];
+            byFloor[f].push(n);
+        });
+
+        Object.keys(byFloor).forEach(fk => {
+            const nodes = byFloor[fk];
+            const floor = parseFloat(fk);
+
+            // Use current stage dimensions (fallback to defaults)
+            const w = stageWidth || 1000;
+            const h = stageHeight || 1000;
+
+            const n = nodes.length;
+            const cols = Math.ceil(Math.sqrt(n));
+            const rows = Math.ceil(n / cols);
+            const padX = Math.max(80, Math.floor(w * 0.08));
+            const padY = Math.max(80, Math.floor(h * 0.08));
+            const spacingX = (w - padX * 2) / (cols + 1);
+            const spacingY = (h - padY * 2) / (rows + 1);
+
+            nodes.forEach((node, idx) => {
+                const col = idx % cols;
+                const row = Math.floor(idx / cols);
+                const x = Math.round(padX + spacingX * (col + 1));
+                const y = Math.round(padY + spacingY * (row + 1));
+                node.x = node.x !== undefined && node.x !== null ? node.x : x;
+                node.y = node.y !== undefined && node.y !== null ? node.y : y;
+                // also add positions object keyed by floor for compatibility
+                if (!node.positions || Object.keys(node.positions || {}).length === 0) {
+                    node.positions = {};
+                    node.positions[String(floor)] = { x: node.x, y: node.y };
+                }
+            });
+        });
+
+        // Persist merged graph to backend so positions are kept
+        try {
+            const payload = { nodes: G.nodes, edges: G.edges };
+            const res = await fetch('/api/graph', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+            if (res.ok) {
+                console.log('[Minimap] Persisted auto-generated positions to /api/graph');
+                return true;
+            } else {
+                console.warn('[Minimap] Failed to persist graph:', res.statusText);
+            }
+        } catch (e) {
+            console.warn('[Minimap] Error persisting graph:', e);
+        }
+
+        return false;
+    }
+
+    async function loadGraph() {
+        try {
+            const res = await fetch('/api/graph?t=' + Date.now());
+            if (!res.ok) throw new Error('Failed to load graph');
+            const data = await res.json();
+            // Normalize
+            const newGraph = normalizeGraph(data || { nodes: [], edges: [] });
+
+            // Merge: keep existing node props if present
+            const oldMap = new Map();
+            if (G && G.nodes) G.nodes.forEach(n => oldMap.set(String(n.id), n));
+
+            const mergedNodes = newGraph.nodes.map(n => {
+                const id = String(n.id);
+                const old = oldMap.get(id);
+                if (old) return { ...old, ...n };
+                return n;
+            });
+
+            // Add any old nodes not present in new graph
+            oldMap.forEach((v, k) => {
+                if (!mergedNodes.find(n => String(n.id) === k)) mergedNodes.push(v);
+            });
+
+            G = { nodes: mergedNodes, edges: newGraph.edges };
+
+            // If some nodes missing positions, auto-generate and persist
+            const hadMissing = await ensureNodePositions();
+            if (hadMissing) {
+                // reload graph from server to get authoritative saved data
+                try { await new Promise(r => setTimeout(r, 220)); } catch {}
+                return loadGraph();
+            }
+
+            // Update scenes list (for names) as well
+            await loadScenes();
+            renderNodes();
+            return true;
+        } catch (e) {
+            console.warn('[Minimap] loadGraph failed:', e);
+            // fallback to loading scenes only
+            await loadScenes();
+            renderNodes();
+            return false;
         }
     }
 
@@ -195,14 +349,184 @@ export function createMinimap(opts) {
         return { x: node.x || 0, y: node.y || 0 };
     }
 
+    // Tìm các node có kết nối với nodeId (qua edges)
+    function findConnectedNodes(nodeId) {
+        const connected = [];
+        const nodeIdStr = String(nodeId);
+        G.edges.forEach(edge => {
+            if (String(edge.from) === nodeIdStr) {
+                connected.push(edge.to);
+            } else if (String(edge.to) === nodeIdStr) {
+                connected.push(edge.from);
+            }
+        });
+        return connected;
+    }
+
+    // Hiện label của node
+    function showNodeLabel(nodeId) {
+        const nodeIdStr = String(nodeId);
+        const label = content.querySelector(`.mm-label[data-node-id="${nodeIdStr}"]`);
+        if (label) {
+            label.style.opacity = '1';
+            label.style.transition = 'opacity 0.2s ease';
+        }
+    }
+
+    // Ẩn label của node
+    function hideNodeLabel(nodeId) {
+        const nodeIdStr = String(nodeId);
+        const label = content.querySelector(`.mm-label[data-node-id="${nodeIdStr}"]`);
+        if (label) {
+            // Không ẩn nếu là node đang active hoặc trong active path
+            const isActiveNode = String(activeId) === nodeIdStr;
+            const isInActivePath = activePath && activePath.includes(nodeIdStr);
+            if (!isActiveNode && !isInActivePath) {
+                label.style.opacity = '0';
+                label.style.transition = 'opacity 0.2s ease';
+            }
+        }
+    }
+
+    // Voice: đọc tên node (text-to-speech)
+    let currentSpeech = null;
+    let lastSpokenNodeId = null; // Tránh đọc lại cùng một node liên tục
+    function speakNodeName(nodeId, name) {
+        // Tránh đọc lại cùng một node
+        if (lastSpokenNodeId === nodeId) return;
+        lastSpokenNodeId = nodeId;
+        
+        // Dừng speech trước đó nếu có
+        if (currentSpeech && window.speechSynthesis) {
+            window.speechSynthesis.cancel();
+        }
+        
+        // Kiểm tra xem có hỗ trợ speech synthesis không
+        if (!window.speechSynthesis) {
+            console.log('[Minimap] Speech synthesis not supported');
+            return;
+        }
+
+        // Tạo utterance
+        const utterance = new SpeechSynthesisUtterance(name);
+        
+        // Cài đặt ngôn ngữ dựa trên currentLang
+        if (currentLang === 'vi') {
+            utterance.lang = 'vi-VN';
+        } else {
+            utterance.lang = 'en-US';
+        }
+        
+        utterance.rate = 1.0;
+        utterance.pitch = 1.0;
+        utterance.volume = 0.8;
+        
+        currentSpeech = utterance;
+        window.speechSynthesis.speak(utterance);
+    }
+
+    // Chuyển đổi tọa độ chuột (clientX, clientY) sang tọa độ stage (x, y)
+    function getStageCoords(clientX, clientY) {
+        const vpRect = viewport.getBoundingClientRect();
+        const mouseX = clientX - vpRect.left;
+        const mouseY = clientY - vpRect.top;
+        
+        // Chuyển đổi sang tọa độ stage (tính đến transform)
+        const stageX = (mouseX - view.x) / view.scale;
+        const stageY = (mouseY - view.y) / view.scale;
+        
+        return { x: stageX, y: stageY };
+    }
+
+    // Tìm node gần nhất tại vị trí chuột (chỉ tìm node gần nhất, không phải tất cả trong bán kính)
+    function findClosestNode(stageX, stageY, radius = 50) {
+        let closest = null;
+        let minDistance = radius;
+        const visibleNodes = G.nodes.filter(n => (n.floor ?? 0) === currentFloor);
+        
+        visibleNodes.forEach(n => {
+            const pos = getNodePosition(n, currentFloor);
+            const dx = stageX - pos.x;
+            const dy = stageY - pos.y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            
+            if (distance <= minDistance) {
+                minDistance = distance;
+                closest = n;
+            }
+        });
+        
+        return closest;
+    }
+
+    // Chỉ hiện labels của các node có liên kết với node gần vị trí chuột (không hiện node gần nhất)
+    let currentlyShowingLabels = new Set(); // Track các node đang hiện label
+    function showNearbyLabels(stageX, stageY) {
+        // Ẩn tất cả labels trước đó (trừ active node và active path)
+        currentlyShowingLabels.forEach(nodeId => {
+            const nodeIdStr = String(nodeId);
+            const isActiveNode = String(activeId) === nodeIdStr;
+            const isInActivePath = activePath && activePath.includes(nodeIdStr);
+            if (!isActiveNode && !isInActivePath) {
+                hideNodeLabel(nodeId);
+            }
+        });
+        currentlyShowingLabels.clear();
+        
+        // Tìm node gần nhất (để xác định các node kết nối)
+        const closestNode = findClosestNode(stageX, stageY, 50);
+        
+        if (closestNode) {
+            // KHÔNG hiện label của node gần nhất, chỉ hiện label của các node có kết nối trực tiếp
+            const connectedNodes = findConnectedNodes(closestNode.id);
+            connectedNodes.forEach(nodeId => {
+                showNodeLabel(nodeId);
+                currentlyShowingLabels.add(String(nodeId));
+            });
+        } else {
+            // Không có node gần nào -> đảm bảo ẩn tất cả labels (trừ active node)
+            // Có thể có labels từ node/edge hover đang hiện, cần ẩn chúng
+            const allLabels = content.querySelectorAll('.mm-label');
+            allLabels.forEach(label => {
+                const nodeId = label.dataset.nodeId;
+                if (nodeId) {
+                    const nodeIdStr = String(nodeId);
+                    const isActiveNode = String(activeId) === nodeIdStr;
+                    const isInActivePath = activePath && activePath.includes(nodeIdStr);
+                    if (!isActiveNode && !isInActivePath) {
+                        hideNodeLabel(nodeId);
+                    }
+                }
+            });
+        }
+    }
+
+    // Ẩn tất cả labels khi rời khỏi minimap (trừ node active)
+    function hideAllLabels() {
+        currentlyShowingLabels.forEach(nodeId => {
+            const nodeIdStr = String(nodeId);
+            const isActiveNode = String(activeId) === nodeIdStr;
+            const isInActivePath = activePath && activePath.includes(nodeIdStr);
+            if (!isActiveNode && !isInActivePath) {
+                hideNodeLabel(nodeId);
+            }
+        });
+        currentlyShowingLabels.clear();
+        lastSpokenNodeId = null; // Reset để có thể đọc lại sau này
+    }
+
     function renderNodes() {
+        console.log('[Minimap] renderNodes called, G.nodes.length:', G.nodes?.length || 0, 'currentFloor:', currentFloor);
         content.innerHTML = '';
+        currentlyShowingLabels.clear(); // Reset labels khi render lại
+        lastSpokenNodeId = null; // Reset voice
 
         const hasActivePath = Array.isArray(activePath) && activePath.length > 1;
         const activeSet = hasActivePath ? new Set(activePath) : null;
         
         const visibleNodes = G.nodes.filter(n => (n.floor ?? 0) === currentFloor);
         const visibleIds = new Set(visibleNodes.map(n => n.id));
+        console.log('[Minimap] Visible nodes on floor', currentFloor, ':', visibleNodes.length);
 
         // Vẽ đường nối
         G.edges.forEach(e => {
@@ -227,7 +551,27 @@ export function createMinimap(opts) {
                 }
             }
             
-            drawEdge(p1.x, p1.y, p2.x, p2.y, edgeOpacity, isInPath);
+            const edge = drawEdge(p1.x, p1.y, p2.x, p2.y, edgeOpacity, isInPath);
+            // Lưu thông tin edge để có thể hover
+            if (edge) {
+                edge.dataset.edgeFrom = e.from;
+                edge.dataset.edgeTo = e.to;
+                // Hover vào edge: hiện label của 2 node kết nối
+                edge.addEventListener('mouseenter', () => {
+                    showNodeLabel(e.from);
+                    showNodeLabel(e.to);
+                });
+                edge.addEventListener('mouseleave', (e) => {
+                    // Chỉ ẩn nếu không có node/edge nào đang được hover
+                    const relatedElement = e.relatedTarget;
+                    if (!relatedElement || (!relatedElement.closest('.mm-dot') && !relatedElement.closest('.mm-edge'))) {
+                        hideNodeLabel(e.from);
+                        hideNodeLabel(e.to);
+                        currentlyShowingLabels.delete(String(e.from));
+                        currentlyShowingLabels.delete(String(e.to));
+                    }
+                });
+            }
         });
 
         // Vẽ nodes
@@ -260,15 +604,62 @@ export function createMinimap(opts) {
             label.style.left = `${pos.x}px`;
             label.style.top = `${pos.y}px`;
             label.style.transform = 'translate(-50%, -150%)';
+            label.style.opacity = '0'; // Ẩn label mặc định
+            label.style.pointerEvents = 'none';
+            label.dataset.nodeId = n.id; // Lưu node ID để dễ tìm
 
-            if (hasActivePath && !activeSet.has(String(n.id))) {
+            // Nếu là node đang active, luôn hiện label
+            const isActiveNode = String(n.id) === String(activeId);
+            
+            // Ưu tiên: node active > active path > ẩn
+            if (isActiveNode) {
+                label.style.opacity = '1'; // Luôn hiện label của node đang active
+                label.style.transition = 'opacity 0.2s ease';
+            } else if (hasActivePath && activeSet.has(String(n.id))) {
+                label.style.opacity = '1'; // Hiện label nếu trong path
+            } else if (hasActivePath && !activeSet.has(String(n.id))) {
                 label.style.opacity = '0.2'; // Làm mờ labels không trong path
+            } else {
+                label.style.opacity = '0'; // Ẩn hoàn toàn nếu không trong path và không phải active
             }
+
+            // Hover vào node: hiện label của node đó và các node kết nối
+            let isHovered = false;
+            dot.addEventListener('mouseenter', (e) => {
+                e.stopPropagation();
+                isHovered = true;
+                showNodeLabel(n.id);
+                // Tìm các node kết nối và hiện label của chúng
+                const connectedNodes = findConnectedNodes(n.id);
+                connectedNodes.forEach(nodeId => {
+                    showNodeLabel(nodeId);
+                });
+                // Voice đã tắt theo yêu cầu
+            });
+
+            dot.addEventListener('mouseleave', (e) => {
+                e.stopPropagation();
+                // Khi rời khỏi node, kiểm tra xem có đang hover vào node/edge khác không
+                const relatedElement = e.relatedTarget;
+                if (!relatedElement || (!relatedElement.closest('.mm-dot') && !relatedElement.closest('.mm-edge'))) {
+                    // Không hover vào node/edge nào khác, ẩn labels
+                    hideNodeLabel(n.id);
+                    const connectedNodes = findConnectedNodes(n.id);
+                    connectedNodes.forEach(nodeId => {
+                        hideNodeLabel(nodeId);
+                    });
+                    currentlyShowingLabels.delete(String(n.id));
+                    connectedNodes.forEach(nodeId => {
+                        currentlyShowingLabels.delete(String(nodeId));
+                    });
+                }
+            });
 
             content.appendChild(dot);
             content.appendChild(label);
         });
 
+        console.log('[Minimap] renderNodes completed, dots rendered:', visibleNodes.length, 'activeId:', activeId);
         // KHÔNG vẽ path highlight riêng nữa vì đã được vẽ trong phần edges ở trên
         // Path highlight đã được xử lý trong logic vẽ edges với opacity khác nhau
     }
@@ -287,8 +678,11 @@ export function createMinimap(opts) {
         line.style.top = `${y1}px`;
         line.style.transform = `rotate(${angle}deg)`;
         line.style.opacity = opacity;
+        line.style.pointerEvents = 'auto'; // Cho phép hover trên edge
+        line.style.cursor = 'pointer';
         
         content.appendChild(line);
+        return line; // Trả về element để có thể thêm event listeners
     }
 
 
@@ -349,10 +743,9 @@ export function createMinimap(opts) {
         const scaleH = vpRect.height / contentH;
         let bboxScale = Math.min(scaleW, scaleH);
 
-        // Zoom to hơn - tăng scale
-        const baseScale = (savedView && savedView.scale) ? savedView.scale : view.scale;
-        let newScale = Math.max(bboxScale * 1.2, baseScale * 1.3); // Tăng zoom level
-        newScale = Math.max(0.5, Math.min(2.0, newScale)); // Cho phép zoom to hơn
+        // Compute absolute target scale (do NOT multiply current scale to avoid accumulation)
+        let newScale = Math.max(bboxScale * 1.2, view.scale);
+        newScale = Math.max(0.5, Math.min(2.0, newScale));
 
         const newX = vpRect.width / 2 - cx * newScale;
         const newY = vpRect.height / 2 - cy * newScale;
@@ -380,6 +773,50 @@ export function createMinimap(opts) {
             }
         }
         
+        requestAnimationFrame(animate);
+    }
+
+    // Focus a single node (center + optional zoom)
+    function focusNode(nodeId, opts = { zoom: true }) {
+        if (!nodeId) return;
+        const n = G.nodes.find(node => String(node.id) === String(nodeId));
+        if (!n) return;
+
+        const pos = getNodePosition(n, currentFloor);
+        if (!pos) return;
+
+        // Compute target scale (slightly zoomed in) or keep current
+        let newScale = view.scale;
+        if (opts.zoom) {
+            // Use an absolute target scale instead of multiplying to avoid accumulation
+            const vpRect = viewport.getBoundingClientRect();
+            const fitScale = Math.min(vpRect.width / stageWidth, vpRect.height / stageHeight) * 0.95;
+            // Aim for a moderate zoom (at least fitScale*1.2, but not less than current view.scale)
+            newScale = Math.max(view.scale, Math.max(fitScale * 1.2, 0.6));
+            newScale = Math.max(SCALE_MIN, Math.min(SCALE_MAX, newScale));
+        }
+
+        const vpRect = viewport.getBoundingClientRect();
+        const newX = vpRect.width / 2 - pos.x * newScale;
+        const newY = vpRect.height / 2 - pos.y * newScale;
+
+        // Smooth animation to the target
+        const startScale = view.scale;
+        const startX = view.x;
+        const startY = view.y;
+        const duration = 350;
+        const startTime = performance.now();
+
+        function animate(now) {
+            const elapsed = now - startTime;
+            const t = Math.min(1, elapsed / duration);
+            const ease = 1 - Math.pow(1 - t, 3);
+            view.scale = startScale + (newScale - startScale) * ease;
+            view.x = startX + (newX - startX) * ease;
+            view.y = startY + (newY - startY) * ease;
+            updateTransform();
+            if (t < 1) requestAnimationFrame(animate);
+        }
         requestAnimationFrame(animate);
     }
 
@@ -463,6 +900,41 @@ export function createMinimap(opts) {
     }, { passive: true });
     
     window.addEventListener('touchend', () => isDragging = false);
+
+    // Khi di chuyển chuột trên minimap: hiện labels của các node gần đó
+    let mouseMoveTimeout = null;
+    viewport.addEventListener('mousemove', (e) => {
+        // Bỏ qua nếu đang drag
+        if (isDragging) {
+            // Khi đang drag, ẩn tất cả labels
+            hideAllLabels();
+            return;
+        }
+        
+        // Nếu đang hover trực tiếp vào node/edge, để logic hover riêng xử lý
+        if (e.target.closest('.mm-dot') || e.target.closest('.mm-edge')) {
+            return;
+        }
+        
+        // Debounce để tránh quá nhiều tính toán
+        if (mouseMoveTimeout) {
+            clearTimeout(mouseMoveTimeout);
+        }
+        
+        mouseMoveTimeout = setTimeout(() => {
+            const stageCoords = getStageCoords(e.clientX, e.clientY);
+            showNearbyLabels(stageCoords.x, stageCoords.y);
+        }, 50); // Delay 50ms để mượt hơn
+    });
+
+    // Khi rời khỏi viewport: ẩn tất cả labels
+    viewport.addEventListener('mouseleave', () => {
+        if (mouseMoveTimeout) {
+            clearTimeout(mouseMoveTimeout);
+            mouseMoveTimeout = null;
+        }
+        hideAllLabels();
+    });
 
 
     // --- 6. CONTROLS EVENTS ---
@@ -647,9 +1119,21 @@ export function createMinimap(opts) {
             setFloor(n.floor ?? 0);
         } else {
             renderNodes();
+            // Đảm bảo label của node active được hiển thị sau khi render
+            setTimeout(() => {
+                if (activeId) {
+                    showNodeLabel(activeId);
+                    currentlyShowingLabels.add(String(activeId));
+                }
+            }, 0);
         }
         // Chọn giá trị trong select nếu có
         if (selFrom && selFrom.querySelector(`option[value="${id}"]`)) selFrom.value = id;
+        // Focus the active node so editor can pan to it
+        try {
+            // Do not automatically zoom when setting active from editor/clicks — only pan to center
+            setTimeout(() => { focusNode(id, { zoom: false }); }, 150);
+        } catch (e) { }
     }
     
     function highlightPath(path) {
@@ -715,31 +1199,129 @@ export function createMinimap(opts) {
 
     // --- Init ---
     updateUIText();
-    loadScenes().then(() => {
-        console.log('[Minimap] Scenes loaded, count:', scenes.length);
+    // Load graph (will also load scenes and auto-generate positions if needed)
+    loadGraph().then(() => {
+        console.log('[Minimap] Graph loaded, nodes:', G.nodes?.length || 0);
         setTimeout(() => {
             setFloor(currentFloor);
-            // Đảm bảo render nodes sau khi set floor
             if (G.nodes && G.nodes.length > 0) {
                 renderNodes();
                 console.log('[Minimap] Initial render completed, nodes:', G.nodes.length);
+                if (activeId) {
+                    setTimeout(() => {
+                        showNodeLabel(activeId);
+                        currentlyShowingLabels.add(String(activeId));
+                    }, 100);
+                }
             }
         }, 50);
     });
     window.addEventListener('resize', fitToScreen);
 
+    // Allow external code (CMS/editor) to notify minimap about changes
+    window.addEventListener('scene-updated', async (e) => {
+        const id = e && e.detail && e.detail.id;
+        // Regenerate graph on server and reload
+        try {
+            await fetch('/api/graph/regenerate', { method: 'POST' });
+        } catch (err) { /* ignore */ }
+        await loadGraph();
+        if (id) {
+            try { setActive(id); } catch (err) {}
+            setTimeout(() => { try { focusNode(id); } catch (err) {} }, 200);
+        }
+    });
+
+    window.addEventListener('scenes-updated', async () => {
+        try {
+            await fetch('/api/graph/regenerate', { method: 'POST' });
+        } catch (err) { /* ignore */ }
+        await loadGraph();
+    });
+
+    // Allow passing a new graph object directly
+    window.addEventListener('minimap-refresh', (e) => {
+        if (e && e.detail && e.detail.graph) {
+            try { const graph = e.detail.graph; G = normalizeGraph(graph); renderNodes(); } catch (err) { console.warn(err); }
+        } else {
+            // fallback to reloading graph
+            loadGraph();
+        }
+    });
+
     // Return API
     return { 
         setActive, 
         refresh: (g) => { 
-            G = normalizeGraph(g); 
-            console.log('[Minimap] Refreshed with graph:', { 
+            // KHÔNG BAO GIỜ reset hoàn toàn - MERGE với dữ liệu hiện có
+            if (!g || (!g.nodes && !g.edges)) {
+                console.warn('[Minimap] refresh called with invalid or empty graph, keeping current data');
+                return; // Giữ nguyên dữ liệu hiện tại, không reset
+            }
+            
+            const newGraph = normalizeGraph(g);
+            if (newGraph.nodes.length === 0 && newGraph.edges.length === 0) {
+                console.warn('[Minimap] New graph is empty, keeping current data');
+                return; // Giữ nguyên dữ liệu hiện tại
+            }
+            
+            // MERGE: Giữ lại vị trí x, y từ graph cũ nếu graph mới không có
+            const oldNodesMap = new Map();
+            if (G && G.nodes) {
+                G.nodes.forEach(node => {
+                    oldNodesMap.set(String(node.id), node);
+                });
+            }
+            
+            // Merge nodes: Giữ lại x, y, positions từ node cũ nếu node mới không có
+            const mergedNodes = newGraph.nodes.map(newNode => {
+                const oldNode = oldNodesMap.get(String(newNode.id));
+                if (oldNode) {
+                    // MERGE: Giữ lại tất cả thông tin từ node cũ, chỉ cập nhật những gì mới có
+                    return {
+                        ...oldNode,  // Giữ nguyên node cũ (bao gồm x, y, positions)
+                        ...newNode,  // Cập nhật thông tin mới
+                        // Đặc biệt: Nếu node mới không có x, y nhưng node cũ có, giữ lại
+                        x: newNode.x !== undefined && newNode.x !== null ? newNode.x : (oldNode.x !== undefined ? oldNode.x : undefined),
+                        y: newNode.y !== undefined && newNode.y !== null ? newNode.y : (oldNode.y !== undefined ? oldNode.y : undefined),
+                        // Giữ lại positions nếu node mới không có
+                        positions: newNode.positions || oldNode.positions
+                    };
+                }
+                return newNode; // Node mới, không có trong graph cũ
+            });
+            
+            // Thêm các nodes cũ không có trong graph mới (tránh mất nodes)
+            newGraph.nodes.forEach(node => {
+                oldNodesMap.delete(String(node.id)); // Đánh dấu đã xử lý
+            });
+            // Thêm lại các nodes cũ không có trong graph mới (giữ lại nodes đã bị xóa khỏi graph mới)
+            oldNodesMap.forEach((oldNode) => {
+                mergedNodes.push(oldNode);
+            });
+            
+            // Cập nhật graph với dữ liệu đã merge
+            G = {
+                nodes: mergedNodes,
+                edges: newGraph.edges // Edges luôn lấy mới (kết nối có thể thay đổi)
+            };
+            
+            console.log('[Minimap] Refreshed with MERGED graph:', { 
                 nodeCount: G.nodes.length, 
                 edgeCount: G.edges.length,
                 currentFloor: currentFloor,
-                visibleNodes: G.nodes.filter(n => (n.floor ?? 0) === currentFloor).length
+                visibleNodes: G.nodes.filter(n => (n.floor ?? 0) === currentFloor).length,
+                preservedPositions: mergedNodes.filter(n => (n.x !== undefined || n.y !== undefined || n.positions)).length
             });
-            renderNodes(); 
+            
+            renderNodes();
+            // Đảm bảo label của node active được hiển thị sau khi refresh
+            if (activeId) {
+                setTimeout(() => {
+                    showNodeLabel(activeId);
+                    currentlyShowingLabels.add(String(activeId));
+                }, 50);
+            }
         }, 
         highlightPath, 
         updateSelectsWithScenes,

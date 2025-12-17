@@ -91,6 +91,16 @@ export default function Tours() {
         throw new Error(error.error || "Xóa thất bại");
       }
       await loadTours();
+      try {
+        if (window.BroadcastChannel) {
+          const bc = new BroadcastChannel('cms_updates');
+          bc.postMessage('tours-updated');
+          bc.close();
+        } else {
+          localStorage.setItem('tours-updated', Date.now().toString());
+        }
+        window.dispatchEvent(new CustomEvent('tours-updated'));
+      } catch (err) { console.warn('Broadcast error', err); }
     } catch (e) {
       alert(e.message);
     }
@@ -122,23 +132,45 @@ export default function Tours() {
       ? `${apiBase}/tours/${editingTour.id}`
       : `${apiBase}/tours`;
     const method = isEdit ? "PUT" : "POST";
+    (async () => {
+      try {
+        const res = await fetch(url, {
+          method,
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(editingTour)
+        });
 
-    fetch(url, {
-      method,
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(editingTour)
-    })
-      .then(res => res.json())
-      .then(data => {
-        if (data.error) {
-          alert(data.error);
-        } else {
-          setShowCreateModal(false);
-          setEditingTour(null);
-          loadTours();
+        let data = null;
+        try { data = await res.json(); } catch (e) { data = null; }
+
+        if (!res.ok) {
+          const msg = data && data.error ? data.error : `Lỗi server: ${res.status} ${res.statusText}`;
+          alert(msg);
+          return;
         }
-      })
-      .catch(e => alert("Lỗi: " + e.message));
+
+        // Success
+        setShowCreateModal(false);
+        setEditingTour(null);
+        await loadTours();
+
+        try {
+          // Broadcast update to other tabs/windows
+          if (window.BroadcastChannel) {
+            const bc = new BroadcastChannel('cms_updates');
+            bc.postMessage('tours-updated');
+            bc.close();
+          } else {
+            localStorage.setItem('tours-updated', Date.now().toString());
+          }
+          // Also dispatch same-tab event
+          window.dispatchEvent(new CustomEvent('tours-updated'));
+        } catch (e) { console.warn('Broadcast tours-updated failed', e); }
+
+      } catch (e) {
+        alert("Lỗi: " + (e && e.message ? e.message : e));
+      }
+    })();
   }
 
   function handleAddKeyword() {

@@ -311,8 +311,8 @@ main {
 
 .minimap {
   position: fixed; /* Keep it fixed on the screen */
-  width: 700px; /* Fixed width to match CMS */
-  height: 550px; /* Fixed height to match CMS (toolbar 36px + viewport 464px) */
+  width: 750px; /* Fixed width to match CMS */
+  height: 600px; /* Fixed height to match CMS (toolbar 36px + viewport 464px) */
   border: 1px solid #ccc;
   border-radius: 8px;
   background: #fff;
@@ -347,6 +347,25 @@ main {
     align-items: center;
     font-size: 11px; /* Slightly smaller */
     overflow: hidden; /* Prevent route controls from overflowing */
+}
+/* Make the scene select boxes compact so there's room for toolbar buttons */
+.minimap .mm-route { min-width: 0; }
+.minimap .mm-route select {
+  max-width: 48%;
+  min-width: 110px;     /* avoid collapsing too small */
+  padding: 5px 8px;
+  font-size: 13px;
+  box-sizing: border-box;
+}
+.minimap .mm-route span {
+  flex: 0 0 auto;
+  padding: 0 6px;
+}
+.minimap .mm-route button {
+  flex: 0 0 auto; /* keep buttons their intrinsic size */
+}
+@media (max-width: 900px) {
+  .minimap .mm-route select { width: 140px; max-width: 45%; }
 }
 .minimap select,
 .minimap .mm-toolbar button { /* Target buttons only in toolbar */
@@ -548,12 +567,14 @@ main {
 
 /* Label cũng mờ đi */
 .mm-label {
-    transition: opacity 0.3s ease;
+    transition: opacity 0.2s ease;
+    opacity: 0; /* Ẩn mặc định */
 }
 .mm-stage.has-path .mm-label:not(.on-path) {
     opacity: 0.1;
 }
 .mm-stage.has-path .mm-label.on-path {
+    opacity: 1 !important; /* Hiện rõ nếu trong path */
     font-weight: bold;
     z-index: 21;
     color: #ef4444;
@@ -561,7 +582,7 @@ main {
 
 /* Edge highlight */
 .mm-edge {
-    transition: opacity 0.3s ease;
+    transition: opacity 0.3s ease, background-color 0.2s ease;
 }
 .mm-stage.has-path .mm-edge:not(.mm-edge--hl) {
     opacity: 0.1;
@@ -571,6 +592,12 @@ main {
     height: 3px; /* Dày hơn chút */
     z-index: 15;
     box-shadow: 0 0 5px rgba(239, 68, 68, 0.5);
+}
+/* Hover vào edge: làm nổi bật */
+.mm-edge:hover {
+    background-color: rgba(59, 130, 246, 0.9) !important;
+    height: 4px;
+    z-index: 16;
 }
   /* ========== Panel chỉ đường (Nav) ========== */
   #directions {
@@ -730,6 +757,31 @@ main {
         gap: 8px;
         align-items: center;
     }
+
+  /* Concurrent users badge inserted by JS (#concurrent-users) */
+  #concurrent-users {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 10px;
+    background: rgba(0,0,0,0.22);
+    color: rgba(255,255,255,0.95);
+    border-radius: 8px;
+    margin-right: 8px;
+    font-size: 14px; /* base size */
+    line-height: 1;
+  }
+
+  /* Make the numeric part more prominent (second child span) */
+  #concurrent-users span:nth-child(2) {
+    font-weight: 700;
+    font-size: 16px;
+  }
+
+  @media (max-width: 900px) {
+    #concurrent-users { font-size: 13px; padding: 5px 8px; }
+    #concurrent-users span:nth-child(2) { font-size: 14px; }
+  }
     
     .lang-switcher {
         gap: 4px;
