@@ -1,8 +1,7 @@
 flask
 flask-cors
 gunicorn
-werkzeug
-firebase-admin  
+werkzeug  
 google-cloud-texttospeech
 PyJWT==2.9.0
 Pillow==10.1.0

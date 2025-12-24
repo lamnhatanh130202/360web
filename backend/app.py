@@ -48,7 +48,7 @@ print(f"[DEBUG] CMS_DATA_DIR exists: {os.path.exists(CMS_DATA_DIR)}")
 print(f"[DEBUG] scenes.json exists: {os.path.exists(os.path.join(CMS_DATA_DIR, 'scenes.json'))}")
 print(f"[DEBUG] graph.json exists: {os.path.exists(os.path.join(CMS_DATA_DIR, 'graph.json'))}")
 app = Flask(__name__, static_folder=FRONTEND_DIST, static_url_path='')
-CORS(app) # Enable CORS toàn cục
+CORS(app, resources={r"/api/*": {"origins": "*"}})
 
 # Giới hạn file upload 32MB
 app.config['MAX_CONTENT_LENGTH'] = 32 * 1024 * 1024 
