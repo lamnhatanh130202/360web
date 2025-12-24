@@ -4,9 +4,17 @@
       "src": "package.json",
       "use": "@vercel/static-build",
       "config": { "distDir": "dist" }
+    },
+    {
+      "src": "app.py",
+      "use": "@vercel/python"
     }
   ],
   "rewrites": [
+    {
+      "source": "/api/(.*)",
+      "destination": "app.py"
+    },
     {
       "source": "/(.*)",
       "destination": "/index.html"
