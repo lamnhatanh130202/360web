@@ -122,6 +122,8 @@ export async function authFetch(endpoint, options = {}) {
       console.warn("Phiên đăng nhập hết hạn. Đang đăng xuất...");
       logout(); // Xóa token cũ ngay lập tức
       window.location.href = '/login'; // Đá về trang login
+      // window.location.reload(); 
+      console.log("Đã chặn reload để sửa lỗi");
       return null; // Dừng xử lý
     }
 
