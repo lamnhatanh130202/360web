@@ -20,10 +20,10 @@ except ImportError:
 
 # --- Cấu hình Server & Đường dẫn ---
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-CMS_DATA_DIR = os.path.join(BASE_DIR, "..", "cms", "data") # Sửa lại cho đúng cấu trúc backend/cms/data
+CMS_DATA_DIR = os.path.join(BASE_DIR, "data") # Sửa lại cho đúng cấu trúc backend/cms/data
 UPLOAD_DIR = os.path.join(BASE_DIR, 'uploads')
 STATS_FILE = os.path.join(BASE_DIR, 'stats.json')
-SCENES_FILE_WRITE = os.path.join(BASE_DIR, "scenes.json")
+SCENES_FILE_WRITE = os.path.join(CMS_DATA_DIR, "scenes.json")
 
 # Frontend paths
 FRONTEND_DIST = os.path.normpath(os.path.join(BASE_DIR, '..', 'frontend', 'dist'))
@@ -2109,7 +2109,7 @@ def tts_generate():
         "volumeGainDb": volume_gain_db,
         "sampleRateHertz": sample_rate_hz
     }), 201
-
+app = app
 if __name__ == "__main__":
     # Get port from environment variable or default to 5000
     port = int(os.environ.get("PORT", 5000))
