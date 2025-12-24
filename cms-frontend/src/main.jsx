@@ -18,10 +18,9 @@ function App() {
     <BrowserRouter>
       <AppLayout>
         <Routes>
-          <Route path="/cms/login" element={<Login />} />
-          <Route path="/login" element={<Navigate to="/cms/login" replace />} />
+          <Route path="/login" element={<Login />} />
           <Route
-            path="/cms/dashboard"
+            path="/dashboard"
             element={
               <ProtectedRoute>
                 <Dashboard />
@@ -29,7 +28,7 @@ function App() {
             }
           />
           <Route
-            path="/cms/scenes/*"
+            path="/scenes/*"
             element={
               <ProtectedRoute>
                 <ScenesPage />
@@ -37,7 +36,7 @@ function App() {
             }
           />
           <Route
-            path="/cms/hotspots"
+            path="/hotspots"
             element={
               <ProtectedRoute>
                 <Hotspots />
@@ -45,7 +44,7 @@ function App() {
             }
           />
           <Route
-            path="/cms/tours"
+            path="/tours"
             element={
               <ProtectedRoute>
                 <Tours />
@@ -53,14 +52,14 @@ function App() {
             }
           />
           <Route
-            path="/cms/minimap"
+            path="/minimap"
             element={
               <ProtectedRoute>
                 <MinimapEditor />
               </ProtectedRoute>
             }
           />
-          <Route path="/" element={<Navigate to="/cms/dashboard" replace />} />
+          <Route path="/" element={<Navigate to="/dashboard" replace />} />
         </Routes>
       </AppLayout>
     </BrowserRouter>
