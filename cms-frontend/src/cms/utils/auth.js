@@ -11,7 +11,7 @@ export function isAuthenticated() {
   
   try {
     const authData = JSON.parse(auth);
-    // Check if token is expired (24 hours)
+    // Check if token is expired (24 hours client-side check)
     if (authData.expires && authData.expires < Date.now()) {
       logout();
       return false;
@@ -60,6 +60,8 @@ export async function login(username, password) {
 export function logout() {
   localStorage.removeItem(AUTH_KEY);
   localStorage.removeItem(AUTH_USER_KEY);
+  // Optional: Redirect về login ngay lập tức nếu cần
+  // window.location.href = '/login'; 
 }
 
 export function getCurrentUser() {
@@ -76,9 +78,56 @@ export function getAuthData() {
   }
 }
 
-// Lấy JWT token (tiện dùng cho api.js nếu cần)
 export function getToken() {
   const data = getAuthData();
   return data?.token || null;
 }
 
+// ==========================================
+// PHẦN THÊM MỚI: Wrapper gọi API an toàn
+// ==========================================
+
+/**
+ * Dùng hàm này thay cho fetch thông thường khi gọi API cần đăng nhập.
+ * Nó tự động thêm Header Authorization và xử lý lỗi 401.
+ */
+export async function authFetch(endpoint, options = {}) {
+  // 1. Lấy token hiện tại
+  const token = getToken();
+
+  // 2. Chuẩn bị headers mặc định
+  const headers = {
+    'Content-Type': 'application/json',
+    ...options.headers // Cho phép ghi đè headers nếu cần
+  };
+
+  // 3. Nếu có token, gắn vào Header Authorization
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+
+  // Xử lý URL (nếu endpoint chưa có /api thì tự thêm vào, tùy logic dự án của bạn)
+  // Nếu bạn truyền full URL thì giữ nguyên, nếu truyền path thì nối với API_BASE
+  const url = endpoint.startsWith('http') ? endpoint : `${API_BASE}${endpoint}`;
+
+  try {
+    const response = await fetch(url, {
+      ...options,
+      headers
+    });
+
+    // 4. QUAN TRỌNG: Chặn đứng vòng lặp Redirect
+    // Nếu server trả về 401 (Unauthorized) -> Token hết hạn hoặc sai
+    if (response.status === 401) {
+      console.warn("Phiên đăng nhập hết hạn. Đang đăng xuất...");
+      logout(); // Xóa token cũ ngay lập tức
+      window.location.href = '/login'; // Đá về trang login
+      return null; // Dừng xử lý
+    }
+
+    return response;
+  } catch (error) {
+    console.error("Lỗi kết nối API:", error);
+    throw error;
+  }
+}
