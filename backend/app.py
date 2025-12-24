@@ -20,7 +20,7 @@ except ImportError:
 
 # --- Cấu hình Server & Đường dẫn ---
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-CMS_DATA_DIR = os.path.join(BASE_DIR, "data") # Sửa lại cho đúng cấu trúc backend/cms/data
+CMS_DATA_DIR = os.path.join(BASE_DIR, "cms", "data") # Sửa lại cho đúng cấu trúc backend/cms/data
 UPLOAD_DIR = os.path.join(BASE_DIR, 'uploads')
 STATS_FILE = os.path.join(BASE_DIR, 'stats.json')
 SCENES_FILE_WRITE = os.path.join(CMS_DATA_DIR, "scenes.json")
