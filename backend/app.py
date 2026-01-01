@@ -1989,12 +1989,73 @@ def get_concurrent():
     return jsonify({"concurrent": concurrent}), 200
 
 # --- Google Cloud TTS ---
+def _ensure_gcp_credentials():
+    """Ensure GOOGLE_APPLICATION_CREDENTIALS is set and points to a valid file.
+    Supports:
+    - Render Secret Files at /etc/secrets/google-tts-key.json
+    - GOOGLE_CREDENTIALS_JSON (raw JSON)
+    - GOOGLE_CREDENTIALS_JSON_BASE64 (base64 of JSON)
+    """
+    # If already set and file exists, keep
+    cred = os.environ.get("GOOGLE_APPLICATION_CREDENTIALS")
+    if cred and os.path.exists(cred):
+        # Validate JSON structure; if invalid, ignore and continue
+        try:
+            with open(cred, 'r', encoding='utf-8') as f:
+                json.load(f)
+            print(f"[GCP] Using existing credentials: {cred}")
+            return cred
+        except Exception as e:
+            print(f"[GCP] Existing credentials invalid ({cred}): {e}; attempting fallbacks...")
+
+    # Render Secret Files default path
+    secret_path = "/etc/secrets/google-tts-key.json"
+    if os.path.exists(secret_path):
+        os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = secret_path
+        print(f"[GCP] Using Render secret file: {secret_path}")
+        return secret_path
+
+    # Raw JSON via env
+    raw_json = os.environ.get("GOOGLE_CREDENTIALS_JSON") or os.environ.get("GOOGLE_TTS_KEY_JSON")
+    raw_b64 = os.environ.get("GOOGLE_CREDENTIALS_JSON_BASE64")
+    if not raw_json and not raw_b64:
+        print("[GCP] No credentials found in env; expecting file on disk.")
+        return None
+
+    try:
+        if not raw_json and raw_b64:
+            raw_json = base64.b64decode(raw_b64).decode("utf-8")
+    except Exception as e:
+        print(f"[GCP] Failed to decode base64 credentials: {e}")
+        return None
+
+    # Write to /tmp which is writable on Render
+    tmp_path = "/tmp/google-tts-key.json"
+    try:
+        with open(tmp_path, "w", encoding="utf-8") as f:
+            f.write(raw_json)
+        os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = tmp_path
+        print(f"[GCP] Wrote credentials to {tmp_path}")
+        return tmp_path
+    except Exception as e:
+        print(f"[GCP] Failed to write credentials: {e}")
+        return None
+
+_ensure_gcp_credentials()
 try:
     tts_client = texttospeech.TextToSpeechClient()
     print("DEBUG: Google TTS client initialized")
 except Exception as e:
     tts_client = None
     print("WARNING: Google TTS client NOT initialized:", e)
+
+@app.route("/health/tts", methods=["GET"])
+def health_tts():
+    return jsonify({
+        "initialized": tts_client is not None,
+        "GOOGLE_APPLICATION_CREDENTIALS": os.environ.get("GOOGLE_APPLICATION_CREDENTIALS"),
+        "exists": bool(os.environ.get("GOOGLE_APPLICATION_CREDENTIALS") and os.path.exists(os.environ.get("GOOGLE_APPLICATION_CREDENTIALS")))
+    }), 200
 
 def _clamp(val, lo, hi):
     try:
