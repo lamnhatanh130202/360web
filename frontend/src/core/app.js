@@ -741,6 +741,34 @@ function scheduleAutoResume() {
     return Promise.resolve();
   }
 
+  // ===== Global navigation throttle (3s) =====
+  const NAV_DELAY_MS = 3000;
+  let lastNavigateAt = 0;
+  let pendingNavigateId = null;
+  let pendingNavigateTimer = null;
+
+  async function navigateThrottled(id) {
+    const now = Date.now();
+    const elapsed = now - lastNavigateAt;
+    if (elapsed < NAV_DELAY_MS) {
+      pendingNavigateId = id;
+      const waitMs = NAV_DELAY_MS - elapsed;
+      if (pendingNavigateTimer) clearTimeout(pendingNavigateTimer);
+      return new Promise(resolve => {
+        pendingNavigateTimer = setTimeout(async () => {
+          const runId = pendingNavigateId;
+          pendingNavigateId = null;
+          lastNavigateAt = Date.now();
+          try { await navigateTo(runId); } catch (e) { console.error('navigateThrottled failed', e); }
+          resolve();
+        }, Math.max(150, waitMs));
+      });
+    } else {
+      lastNavigateAt = now;
+      return navigateTo(id);
+    }
+  }
+
   // Inject Google Maps API key to window for minimap (if available)
   // Frontend có thể nhận API key từ window hoặc config
   // Có thể set từ backend config hoặc environment variable
@@ -780,22 +808,24 @@ function scheduleAutoResume() {
     return createMinimap({
       container: minimapEl,
       graph: currentGraph,
-      onGotoScene: (id) => { userActivity(); return safeNavigateTo(id); },
+      onGotoScene: (id) => { userActivity(); return navigateThrottled(id); },
       onPathPlay: (path) => {
         if (!Array.isArray(path) || !path.length) return Promise.resolve();
-        const STEP_MS = 600, FADE_MS = 80, MAX_STEPS = 200;
+        const FADE_MS = 100, MAX_STEPS = 200;
         const ids = path.slice(0, MAX_STEPS).map(p => String(p));
-        ids.forEach((id, idx) => {
-          const delay = idx * STEP_MS;
-          setTimeout(() => {
+        (async () => {
+          for (let idx = 0; idx < ids.length; idx++) {
+            const id = ids[idx];
+            // Delay 3s giữa các bước (bỏ qua bước đầu tiên nếu đang ở đúng scene)
+            if (idx > 0) { await new Promise(r => setTimeout(r, NAV_DELAY_MS)); }
             try {
               userActivity();
-              (async () => {
-                try { await fade(1, FADE_MS); await safeNavigateTo(id); await fade(0, FADE_MS); } catch (e) { console.error('onPathPlay step failed for', id, e); }
-              })();
-            } catch (e) { console.error('onPathPlay scheduler error', e); }
-          }, delay);
-        });
+              await fade(1, FADE_MS);
+              await navigateThrottled(id);
+              await fade(0, FADE_MS);
+            } catch (e) { console.error('onPathPlay step failed for', id, e); }
+          }
+        })();
         return Promise.resolve();
       },
       onGraphChange: (updatedGraph) => { currentGraph = updatedGraph; handleGraphChange(updatedGraph); }
@@ -900,18 +930,16 @@ const voiceBot = createVoiceBot({
     // Đợi một chút để minimap có thời gian render và zoom
     await new Promise(resolve => setTimeout(resolve, 300));
     
-    const STEP_MS = 1200, FADE_MS = 120, MAX_STEPS = 200;
+    const FADE_MS = 120, MAX_STEPS = 200;
     const ids = path.slice(0, MAX_STEPS).map(p => String(p));
     for (let idx = 0; idx < ids.length; idx++) {
       const id = ids[idx];
       // Bỏ qua delay cho scene đầu tiên vì đã ở đó rồi
-      if (idx > 0) {
-        await new Promise(resolve => setTimeout(resolve, STEP_MS));
-      }
+      if (idx > 0) { await new Promise(resolve => setTimeout(resolve, NAV_DELAY_MS)); }
       try {
         userActivity();
         await fade(1, FADE_MS);
-        await safeNavigateTo(id);
+        await navigateThrottled(id);
         await fade(0, FADE_MS);
       } catch (e) {
         console.error('onPathPlay step failed for', id, e);
