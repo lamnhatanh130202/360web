@@ -31,14 +31,14 @@ export default function MinimapEditor() {
 
   // Use raw image paths (no `url(...)`) so we can size stage to natural image pixels
   const floorBackgrounds = {
-    0: '/assets/minimap/so_do_ca_truong.jpg',
-    1: '/assets/minimap/lau_1_khu_a_b.jpg',
-    2: '/assets/minimap/lau_2_khu_a_b.jpg',
-    3: '/assets/minimap/lau_3_khu_a_b.jpg',
-    4: '/assets/minimap/lau_4_khu_a.jpg',
-    5: '/assets/minimap/lau_5_khu_a.jpg',
-    5.5: '/assets/minimap/mat_lung_lau_5_khu_a.jpg',
-    6: '/assets/minimap/lau_6_khu_a.jpg'
+    0: '/assets/minimap/sơ_đồ_cả_trường.jpg',
+    1: '/assets/minimap/lầu_1_Khu_A-B.jpg',
+    2: '/assets/minimap/lầu_2_Khu_A-B.jpg',
+    3: '/assets/minimap/lầu_3_Khu_A-B.jpg',
+    4: '/assets/minimap/lầu_4_Khu_A.jpg',
+    5: '/assets/minimap/lầu_5_Khu_A.jpg',
+    5.5: '/assets/minimap/mặt_lửng_lầu_5_Khu_A.jpg',
+    6: '/assets/minimap/lầu_6_Khu_A.jpg'
   };
 
   useEffect(() => {
@@ -170,7 +170,7 @@ export default function MinimapEditor() {
       if (!imgPath) return;
 
       // calculateBackgroundImageInfo will compute displayWidth/displayHeight/displayX/displayY
-      calculateBackgroundImageInfo(imgPath, rect.width, rect.height).then(info => {
+      calculateBackgroundImageInfo(encodeURI(imgPath), rect.width, rect.height).then(info => {
         if (!info) {
           setBgImageInfo(null);
           return;
@@ -198,7 +198,7 @@ export default function MinimapEditor() {
           bg.style.userSelect = 'none';
           stage.insertBefore(bg, stage.firstChild);
         }
-        bg.src = imgPath;
+        bg.src = encodeURI(imgPath);
         bg.style.width = info.displayWidth + 'px';
         bg.style.height = info.displayHeight + 'px';
 
