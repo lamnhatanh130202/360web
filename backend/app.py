@@ -6,6 +6,7 @@ from datetime import datetime, timedelta
 from collections import deque
 from functools import wraps
 import jwt
+import requests
 
 # Import thư viện xử lý ảnh
 from werkzeug.utils import secure_filename
@@ -124,6 +125,58 @@ SECRET_KEY = os.environ.get("AUTH_SECRET_KEY", "change_me_in_production")
 ADMIN_USERNAME = os.environ.get("ADMIN_USERNAME", "admin")
 ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "admin123")
 TOKEN_EXPIRE_HOURS = 8
+
+# --- GitHub Commit Config (optional) ---
+GH_TOKEN = os.environ.get("GH_TOKEN")
+GH_REPO = os.environ.get("GH_REPO")  # owner/repo
+GH_BRANCH = os.environ.get("GH_BRANCH", "main")
+GH_PATH_SCENES = os.environ.get("GH_PATH_SCENES", "backend/cms/data/scenes.json")
+GH_PATH_TOURS = os.environ.get("GH_PATH_TOURS", "backend/cms/data/tours.json")
+GH_PATH_GRAPH = os.environ.get("GH_PATH_GRAPH", "backend/cms/data/graph.json")
+
+def _gh_headers():
+    return {
+        "Authorization": f"token {GH_TOKEN}" if GH_TOKEN else "",
+        "Accept": "application/vnd.github+json"
+    }
+
+def _gh_get_sha(path):
+    if not (GH_TOKEN and GH_REPO):
+        return None
+    try:
+        url = f"https://api.github.com/repos/{GH_REPO}/contents/{path}?ref={GH_BRANCH}"
+        r = requests.get(url, headers=_gh_headers(), timeout=20)
+        if r.status_code == 200:
+            return r.json().get("sha")
+    except Exception as e:
+        print(f"[GH] get_sha error: {e}")
+    return None
+
+def _gh_upsert_json(path, data, message):
+    if not (GH_TOKEN and GH_REPO):
+        return False
+    try:
+        url = f"https://api.github.com/repos/{GH_REPO}/contents/{path}"
+        content_b64 = base64.b64encode(
+            json.dumps(data, ensure_ascii=False, indent=2).encode("utf-8")
+        ).decode("utf-8")
+        payload = {
+            "message": message,
+            "branch": GH_BRANCH,
+            "content": content_b64
+        }
+        sha = _gh_get_sha(path)
+        if sha:
+            payload["sha"] = sha
+        r = requests.put(url, headers=_gh_headers(), json=payload, timeout=30)
+        if 200 <= r.status_code < 300:
+            print(f"[GH] ✓ Committed {path} @ {GH_BRANCH}")
+            return True
+        else:
+            print(f"[GH] ✗ Commit failed {path}: {r.status_code} {r.text[:200]}")
+    except Exception as e:
+        print(f"[GH] upsert error: {e}")
+    return False
 
 # --- Global Variables ---
 _scenes = {}
@@ -860,6 +913,9 @@ def save_scenes():
             except Exception as e:
                 print(f"⚠ Failed to sync to {sync_file}: {e}")
     
+        # Optional: commit to GitHub
+        _gh_upsert_json(GH_PATH_SCENES, scenes_to_write, "CMS: update scenes.json")
+
     except Exception as e:
         print(f"✗ Failed to save scenes: {e}")
         import traceback
@@ -921,6 +977,8 @@ def save_tours():
         except Exception as e:
             print(f"⚠ Warning: Could not reload tours after save: {e}")
         
+        # Optional: commit to GitHub
+        _gh_upsert_json(GH_PATH_TOURS, db_tours, "CMS: update tours.json")
         return True
         
     except Exception as e:
@@ -1460,6 +1518,9 @@ def save_graph():
         nodes_with_pos = sum(1 for n in merged_nodes if n.get('x') is not None or n.get('y') is not None or n.get('positions'))
         print(f"✓ Successfully saved graph.json to {save_path}")
         print(f"✓ Saved {len(merged_nodes)} nodes ({nodes_with_pos} with positions) and {len(final_graph.get('edges', []))} edges")
+
+        # Optional: commit to GitHub
+        _gh_upsert_json(GH_PATH_GRAPH, final_graph, "CMS: update graph.json")
         
         return jsonify({
             "status": "ok", 
