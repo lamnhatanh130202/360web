@@ -765,6 +765,20 @@ def save_scenes():
         scenes_file_write_abs = os.path.abspath(SCENES_FILE_WRITE)
         if scenes_file_write_abs not in sync_files and scenes_file_write_abs != target_file_abs:
             sync_files.append(scenes_file_write_abs)
+
+        # CRITICAL: Also sync to the file currently used by the server (scenes_path)
+        try:
+            if scenes_path:
+                scenes_path_abs = os.path.abspath(scenes_path)
+                if scenes_path_abs not in sync_files and scenes_path_abs != target_file_abs:
+                    sync_files.append(scenes_path_abs)
+        except Exception:
+            pass
+
+        # Also include backend/scenes.json for compatibility
+        backend_scenes = os.path.abspath(os.path.join(BASE_DIR, 'scenes.json'))
+        if backend_scenes not in sync_files and backend_scenes != target_file_abs:
+            sync_files.append(backend_scenes)
         
         # Sync to all files
         for sync_file in sync_files:
