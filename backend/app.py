@@ -130,9 +130,9 @@ TOKEN_EXPIRE_HOURS = 8
 GH_TOKEN = os.environ.get("GH_TOKEN")
 GH_REPO = os.environ.get("GH_REPO")  # owner/repo
 GH_BRANCH = os.environ.get("GH_BRANCH", "main")
-GH_PATH_SCENES = os.environ.get("GH_PATH_SCENES", "backend/cms/data/scenes.json")
-GH_PATH_TOURS = os.environ.get("GH_PATH_TOURS", "backend/cms/data/tours.json")
-GH_PATH_GRAPH = os.environ.get("GH_PATH_GRAPH", "backend/cms/data/graph.json")
+GH_PATH_SCENES = os.environ.get("GH_PATH_SCENES", "backend/scenes.json")
+GH_PATH_TOURS = os.environ.get("GH_PATH_TOURS", "cms/data/tours.json")
+GH_PATH_GRAPH = os.environ.get("GH_PATH_GRAPH", "cms/data/graph.json")
 
 def _gh_headers():
     return {
