@@ -6,6 +6,7 @@ export function createMinimap(opts) {
         graph,
         onGotoScene,
         onPathPlay,
+        navigationDelayMs = 3000,
     } = opts || {};
 
     // --- 1. CONFIG & STATE ---
@@ -31,6 +32,10 @@ export function createMinimap(opts) {
     let activePath = []; // Biến global lưu đường đi hiện tại
     let isMapLocked = false;
     let scenes = []; 
+    // Cooldown để hạn chế chuyển scene quá nhanh
+    let lastNavAt = 0;
+    let pendingNavId = null;
+    let navTimer = null;
     
     // [NEW] Quản lý ngôn ngữ
     let currentLang = localStorage.getItem('lang') || 'vi';
@@ -594,8 +599,29 @@ export function createMinimap(opts) {
             }
             
             dot.onclick = (e) => {
-                e.stopPropagation(); 
-                if (onGotoScene) onGotoScene(n.id);
+                e.stopPropagation();
+                if (!onGotoScene) return;
+                const now = Date.now();
+                const elapsed = now - lastNavAt;
+
+                // Nếu đang trong cooldown, xếp yêu cầu điều hướng cuối cùng và chạy sau
+                if (elapsed < navigationDelayMs) {
+                    pendingNavId = n.id;
+                    const waitMs = navigationDelayMs - elapsed;
+                    if (navTimer) clearTimeout(navTimer);
+                    navTimer = setTimeout(() => {
+                        if (pendingNavId != null) {
+                            lastNavAt = Date.now();
+                            try { onGotoScene(pendingNavId); } catch (err) {}
+                            pendingNavId = null;
+                        }
+                    }, Math.max(150, waitMs));
+                    return;
+                }
+
+                // Thực hiện điều hướng ngay và bắt đầu cooldown
+                lastNavAt = now;
+                try { onGotoScene(n.id); } catch (err) {}
             };
 
             const label = document.createElement('div');
