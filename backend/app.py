@@ -1945,12 +1945,17 @@ def upload_file():
 
 @app.route('/uploads/<path:filename>')
 def uploaded_file(filename):
-    return send_from_directory(UPLOAD_DIR, filename)
+    resp = send_from_directory(UPLOAD_DIR, filename, conditional=True)
+    # Cache images aggressively; they are content-addressed by unique filenames
+    resp.headers['Cache-Control'] = 'public, max-age=31536000, immutable'
+    return resp
 
 # Fallback API path for uploads so Static Site can proxy via /api
 @app.route('/api/uploads/<path:filename>')
 def uploaded_file_api(filename):
-    return send_from_directory(UPLOAD_DIR, filename)
+    resp = send_from_directory(UPLOAD_DIR, filename, conditional=True)
+    resp.headers['Cache-Control'] = 'public, max-age=31536000, immutable'
+    return resp
 
 # --- Storage Health Check ---
 @app.route('/health/storage', methods=['GET'])
