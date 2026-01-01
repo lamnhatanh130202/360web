@@ -1886,6 +1886,11 @@ def upload_file():
 def uploaded_file(filename):
     return send_from_directory(UPLOAD_DIR, filename)
 
+# Fallback API path for uploads so Static Site can proxy via /api
+@app.route('/api/uploads/<path:filename>')
+def uploaded_file_api(filename):
+    return send_from_directory(UPLOAD_DIR, filename)
+
 # --- Analytics endpoints ---
 @app.route("/api/analytics/visit", methods=["POST"])
 def track_visit():

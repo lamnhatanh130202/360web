@@ -17,6 +17,8 @@ const FLOOR_NAMES = {
 
 function resolveSceneUrl(url = "") {
   if (!url) return "";
+  // If points to uploads, prefer /api/uploads so it proxies to backend via Render rewrite
+  if (url.startsWith("/uploads/")) return `/api/uploads/${url.slice('/uploads/'.length)}`;
   if (url.startsWith("http") || url.startsWith("/")) return url;
   if (url.startsWith("./")) return `/cms/${url.slice(2)}`;
   return url;
