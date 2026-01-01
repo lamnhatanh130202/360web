@@ -1891,6 +1891,30 @@ def uploaded_file(filename):
 def uploaded_file_api(filename):
     return send_from_directory(UPLOAD_DIR, filename)
 
+# --- Storage Health Check ---
+@app.route('/health/storage', methods=['GET'])
+def health_storage():
+    """Report effective data and uploads directories and basic file presence.
+    Optional query: ?file=<name> to test existence under uploads.
+    """
+    test_file = request.args.get('file')
+    exists = None
+    if test_file:
+        try:
+            path = os.path.join(UPLOAD_DIR, test_file)
+            exists = os.path.exists(path)
+        except Exception:
+            exists = False
+    return jsonify({
+        "cms_data_dir": CMS_DATA_DIR,
+        "uploads_dir": UPLOAD_DIR,
+        "scenes_file_write": SCENES_FILE_WRITE,
+        "graph_path": graph_path,
+        "tours_file_path": tours_file_path,
+        "test_file": test_file,
+        "test_file_exists": exists
+    }), 200
+
 # --- Analytics endpoints ---
 @app.route("/api/analytics/visit", methods=["POST"])
 def track_visit():
