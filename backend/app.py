@@ -20,9 +20,25 @@ except ImportError:
 
 # --- Cấu hình Server & Đường dẫn ---
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-CMS_DATA_DIR = os.path.join(BASE_DIR, "cms", "data") # Sửa lại cho đúng cấu trúc backend/cms/data
-UPLOAD_DIR = os.path.join(BASE_DIR, 'uploads')
-STATS_FILE = os.path.join(BASE_DIR, 'stats.json')
+
+# Cho phép cấu hình thư mục dữ liệu & uploads qua ENV để dùng Persistent Disk trên Render
+DATA_DIR_ENV = os.environ.get("DATA_DIR")  # ví dụ: /data/data
+UPLOADS_DIR_ENV = os.environ.get("UPLOADS_DIR")  # ví dụ: /data/uploads
+
+# Thư mục dữ liệu CMS (scenes.json, graph.json, tours.json)
+CMS_DATA_DIR = (
+    DATA_DIR_ENV if DATA_DIR_ENV else os.path.join(BASE_DIR, "cms", "data")
+)
+
+# Thư mục uploads (ảnh panorama, mp3)
+UPLOAD_DIR = (
+    UPLOADS_DIR_ENV if UPLOADS_DIR_ENV else os.path.join(BASE_DIR, 'uploads')
+)
+
+# Stats file nên nằm cùng DATA_DIR để bền vững qua deploy
+STATS_FILE = os.path.join(DATA_DIR_ENV if DATA_DIR_ENV else BASE_DIR, 'stats.json')
+
+# scenes.json đường dẫn ưu tiên ghi vào CMS_DATA_DIR
 SCENES_FILE_WRITE = os.path.join(CMS_DATA_DIR, "scenes.json")
 
 # Frontend paths
@@ -38,6 +54,56 @@ CANDIDATE_SCENES = [
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 os.makedirs(FRONTEND_ASSETS, exist_ok=True)
 os.makedirs(CMS_DATA_DIR, exist_ok=True)
+
+# Bootstrap dữ liệu lần đầu nếu DATA_DIR rỗng nhưng repo có sẵn file
+def _bootstrap_persistent_data():
+    try:
+        scenes_target = os.path.join(CMS_DATA_DIR, 'scenes.json')
+        repo_candidates = [
+            os.path.join(BASE_DIR, 'cms', 'data', 'scenes.json'),
+            os.path.normpath(os.path.join(BASE_DIR, '..', 'cms', 'data', 'scenes.json')),
+            os.path.join(BASE_DIR, 'scenes.json'),
+        ]
+        if not os.path.exists(scenes_target):
+            for src in repo_candidates:
+                if os.path.exists(src) and os.path.getsize(src) > 0:
+                    os.makedirs(os.path.dirname(scenes_target), exist_ok=True)
+                    import shutil
+                    shutil.copy(src, scenes_target)
+                    print(f"[Bootstrap] Copied scenes.json from {src} -> {scenes_target}")
+                    break
+
+        tours_target = os.path.join(CMS_DATA_DIR, 'tours.json')
+        tours_candidates = [
+            os.path.join(BASE_DIR, 'cms', 'data', 'tours.json'),
+            os.path.normpath(os.path.join(BASE_DIR, '..', 'cms', 'data', 'tours.json')),
+        ]
+        if not os.path.exists(tours_target):
+            for src in tours_candidates:
+                if os.path.exists(src) and os.path.getsize(src) > 0:
+                    os.makedirs(os.path.dirname(tours_target), exist_ok=True)
+                    import shutil
+                    shutil.copy(src, tours_target)
+                    print(f"[Bootstrap] Copied tours.json from {src} -> {tours_target}")
+                    break
+
+        graph_target = os.path.join(CMS_DATA_DIR, 'graph.json')
+        graph_candidates = [
+            os.path.join(BASE_DIR, 'cms', 'data', 'graph.json'),
+            os.path.normpath(os.path.join(BASE_DIR, '..', 'cms', 'data', 'graph.json')),
+        ]
+        if not os.path.exists(graph_target):
+            for src in graph_candidates:
+                if os.path.exists(src) and os.path.getsize(src) > 0:
+                    os.makedirs(os.path.dirname(graph_target), exist_ok=True)
+                    import shutil
+                    shutil.copy(src, graph_target)
+                    print(f"[Bootstrap] Copied graph.json from {src} -> {graph_target}")
+                    break
+    except Exception as e:
+        print(f"[Bootstrap] Warning: {e}")
+
+_bootstrap_persistent_data()
 # Thêm sau dòng os.makedirs(CMS_DATA_DIR, exist_ok=True)
 
 print(f"[DEBUG] BASE_DIR: {BASE_DIR}")
@@ -450,6 +516,8 @@ def find_tours_file():
     3. Create empty file if none exists
     """
     candidate_tours_paths = [
+        # 0. DATA_DIR (ưu tiên nếu khai báo ENV)
+        os.path.join(CMS_DATA_DIR, 'tours.json'),
         # 1. Root project cms/data (ưu tiên cao nhất)
         os.path.normpath(os.path.join(BASE_DIR, '..', 'cms', 'data', 'tours.json')),
         # 2. Docker mount path
@@ -468,7 +536,7 @@ def find_tours_file():
             continue
     
     # Create empty file if none exists
-    default_path = os.path.normpath(os.path.join(BASE_DIR, '..', 'cms', 'data', 'tours.json'))
+    default_path = os.path.join(CMS_DATA_DIR, 'tours.json')
     print(f"⚠ No tours.json found, creating empty file at {default_path}")
     try:
         os.makedirs(os.path.dirname(default_path), exist_ok=True)
@@ -494,7 +562,7 @@ def load_tours():
         db_tours = []
         # Set default path nếu chưa có
         if not tours_file_path:
-            tours_file_path = os.path.normpath(os.path.join(BASE_DIR, '..', 'cms', 'data', 'tours.json'))
+            tours_file_path = os.path.join(CMS_DATA_DIR, 'tours.json')
         return
     
     try:
@@ -557,6 +625,8 @@ def pathfinding(start_id, end_id):
 def find_graph_file():
     """Find graph.json file with correct priority"""
     candidate_graph_paths = [
+        # 0. DATA_DIR (ưu tiên nếu khai báo ENV)
+        os.path.join(CMS_DATA_DIR, 'graph.json'),
         # 1. Root project cms/data (ưu tiên cao nhất)
         os.path.normpath(os.path.join(BASE_DIR, '..', 'cms', 'data', 'graph.json')),
         # 2. Docker mount path
@@ -1010,6 +1080,8 @@ def find_graph_path():
     """Find the correct path for graph.json - same logic as find_graph_file()"""
     # Use same priority as find_graph_file()
     candidate_graph_paths = [
+        # 0. DATA_DIR (ưu tiên nếu khai báo ENV)
+        os.path.join(CMS_DATA_DIR, 'graph.json'),
         # 1. Root project cms/data (ưu tiên cao nhất)
         os.path.normpath(os.path.join(BASE_DIR, '..', 'cms', 'data', 'graph.json')),
         # 2. Docker mount path
@@ -1041,8 +1113,8 @@ def find_graph_path():
             print(f"⚠ Error checking {path}: {e}")
             continue
     
-    # Default to first path (root project cms/data)
-    default_path = os.path.normpath(os.path.join(BASE_DIR, '..', 'cms', 'data', 'graph.json'))
+    # Default to DATA_DIR
+    default_path = os.path.join(CMS_DATA_DIR, 'graph.json')
     print(f"✓ Using default path for graph.json: {default_path}")
     return default_path
 
