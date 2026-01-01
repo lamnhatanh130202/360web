@@ -36,12 +36,19 @@ def main():
         except Exception as e:
             print(f"✗ Failed to write GOOGLE_CREDENTIALS_JSON to file: {e}")
     elif "GOOGLE_APPLICATION_CREDENTIALS" not in os.environ:
-        key_path = os.path.join(os.path.dirname(__file__), "keys", "google-tts-key.json")
-        if os.path.exists(key_path):
-            os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = key_path
-            print(f"✓ Set GOOGLE_APPLICATION_CREDENTIALS to {key_path}")
+        # Try Render Secret Files default location first
+        secret_path = "/etc/secrets/google-tts-key.json"
+        if os.path.exists(secret_path):
+            os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = secret_path
+            print(f"✓ Using Render secret file at {secret_path}")
         else:
-            print(f"⚠ Google key not found at {key_path}")
+            # Fallback to repo-local key path
+            key_path = os.path.join(os.path.dirname(__file__), "keys", "google-tts-key.json")
+            if os.path.exists(key_path):
+                os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = key_path
+                print(f"✓ Set GOOGLE_APPLICATION_CREDENTIALS to {key_path}")
+            else:
+                print(f"⚠ Google key not found at {secret_path} or {key_path}")
     
     flask_env = os.environ.get("FLASK_ENV", "production")
     debug = os.environ.get("FLASK_DEBUG", "0") == "1"
