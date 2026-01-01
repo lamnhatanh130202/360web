@@ -11,74 +11,56 @@ import Tours from "./cms/pages/Tours";
 import MinimapEditor from "./cms/pages/MinimapEditor";
 import Login from "./cms/pages/Login";
 
-import "./cms/styles/cms.css";
+import "./cms/styles/cms.css"; 
 
 function App() {
   return (
-    // 👇 QUAN TRỌNG: Thêm basename lấy từ biến môi trường của Vite
-    // Giúp code chạy đúng dù ở Local hay trên Render
-    <BrowserRouter basename={import.meta.env.BASE_URL}>
+    <BrowserRouter>
       <AppLayout>
         <Routes>
-          {/* 1. Trang Login: Xóa /cms, chỉ để /login */}
-          <Route path="/login" element={<Login />} />
-          
-          {/* 2. Dashboard: Xóa /cms */}
+          <Route path="/cms/login" element={<Login />} />
+          <Route path="/login" element={<Navigate to="/cms/login" replace />} />
           <Route
-            path="/dashboard"
+            path="/cms/dashboard"
             element={
               <ProtectedRoute>
                 <Dashboard />
               </ProtectedRoute>
             }
           />
-
-          {/* 3. Scenes: Xóa /cms, giữ lại /* để route con hoạt động */}
           <Route
-            path="/scenes/*"
+            path="/cms/scenes/*"
             element={
               <ProtectedRoute>
                 <ScenesPage />
               </ProtectedRoute>
             }
           />
-
-          {/* 4. Hotspots */}
           <Route
-            path="/hotspots"
+            path="/cms/hotspots"
             element={
               <ProtectedRoute>
                 <Hotspots />
               </ProtectedRoute>
             }
           />
-
-          {/* 5. Tours */}
           <Route
-            path="/tours"
+            path="/cms/tours"
             element={
               <ProtectedRoute>
                 <Tours />
               </ProtectedRoute>
             }
           />
-
-          {/* 6. Minimap */}
           <Route
-            path="/minimap"
+            path="/cms/minimap"
             element={
               <ProtectedRoute>
                 <MinimapEditor />
               </ProtectedRoute>
             }
           />
-
-          {/* 7. Redirect: Khi vào trang chủ /, tự nhảy vào /dashboard */}
-          <Route path="/" element={<Navigate to="/dashboard" replace />} />
-          
-          {/* 8. Catch-all: Nếu gõ linh tinh, cũng nhảy về dashboard */}
-          <Route path="*" element={<Navigate to="/dashboard" replace />} />
-
+          <Route path="/" element={<Navigate to="/cms/dashboard" replace />} />
         </Routes>
       </AppLayout>
     </BrowserRouter>

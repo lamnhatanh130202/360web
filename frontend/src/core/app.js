@@ -673,8 +673,24 @@ function scheduleAutoResume() {
     }, { passive: true });
   })();
 
-  // ===== Minimap =====
-  const minimapEl = document.querySelector(minimapSelector);
+  // ===== Minimap =====
+  const minimapEl = document.querySelector(minimapSelector);
+  // Ensure minimap (and its panel wrapper) live as a top-level child so they aren't trapped
+  // inside a lower stacking context. This prevents overlays like footer from covering it.
+  if (minimapEl) {
+    const minimapPanel = minimapEl.closest('.minimap-panel');
+    try {
+      if (minimapPanel && minimapPanel.parentElement !== document.body) {
+        document.body.appendChild(minimapPanel);
+        console.log('[App] Moved .minimap-panel to document.body to avoid stacking-context issues');
+      } else if (!minimapPanel && minimapEl.parentElement !== document.body) {
+        document.body.appendChild(minimapEl);
+        console.log('[App] Moved #minimap to document.body to avoid stacking-context issues');
+      }
+    } catch (e) {
+      console.warn('[App] Failed to move minimap panel to body:', e);
+    }
+  }
 
   async function handleGraphChange(newGraph) {
     try {

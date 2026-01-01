@@ -1024,18 +1024,41 @@ export function createMinimap(opts) {
         }
         if (!wasCollapsed && isCollapsed) {
             try {
+                // If there's a voice command button (BOT), position the collapsed minimap
+                // just below it (preferred). Otherwise, fall back to keeping inside viewport.
                 const rect = container.getBoundingClientRect();
                 const vw = window.innerWidth || document.documentElement.clientWidth;
                 const vh = window.innerHeight || document.documentElement.clientHeight;
+                const voiceBtn = document.querySelector('#voice-command-btn');
+                const gap = 8;
                 let newLeft = rect.left;
                 let newTop = rect.top;
-                const margin = 4; 
-                if (rect.right > vw - margin) newLeft = Math.max(margin, vw - rect.width - margin);
-                if (rect.bottom > vh - margin) newTop = Math.max(margin, vh - rect.height - margin);
-                if (rect.left < margin) newLeft = margin;
-                if (rect.top < margin) newTop = margin;
-                container.style.left = `${newLeft}px`;
-                container.style.top = `${newTop}px`;
+
+                if (voiceBtn) {
+                    const vRect = voiceBtn.getBoundingClientRect();
+                    // Place the minimap immediately below the voice button.
+                    // Use fixed positioning relative to viewport so it stays anchored.
+                    container.style.position = 'fixed';
+                    // Try align right edges of minimap with voice button
+                    newLeft = Math.max(8, Math.min(vRect.right - rect.width, vw - rect.width - 8));
+                    // If the voice button is near bottom, place minimap below it; otherwise use bottom spacing
+                    newTop = vRect.bottom + gap;
+                    // Ensure it doesn't go off-screen vertically
+                    if (newTop + rect.height > vh - 8) {
+                        // instead place it above the voice button
+                        newTop = Math.max(8, vRect.top - gap - rect.height);
+                    }
+                } else {
+                    // fallback: keep inside viewport with small margin
+                    const margin = 4;
+                    if (rect.right > vw - margin) newLeft = Math.max(margin, vw - rect.width - margin);
+                    if (rect.bottom > vh - margin) newTop = Math.max(margin, vh - rect.height - margin);
+                    if (rect.left < margin) newLeft = margin;
+                    if (rect.top < margin) newTop = margin;
+                }
+
+                container.style.left = `${Math.round(newLeft)}px`;
+                container.style.top = `${Math.round(newTop)}px`;
                 container.style.right = 'auto';
                 container.style.bottom = 'auto';
             } catch (e) {}
