@@ -1455,13 +1455,20 @@ def get_scene(scene_id):
 @app.route("/api/scenes", methods=["POST"])
 def create_scene():
     clear_cache("/api/scenes")  # Clear cache khi tạo scene mới
-    data = request.get_json()
-    if not data or "id" not in data:
-        abort(400, "scene id required")
+    # Bảo đảm trả về JSON lỗi rõ ràng
+    data = None
+    try:
+        data = request.get_json(silent=True)
+    except Exception:
+        data = None
+    if not data:
+        return jsonify({"error": "No JSON body provided"}), 400
+    if "id" not in data or not str(data.get("id")).strip():
+        return jsonify({"error": "scene id required"}), 400
     
     scene_id = data["id"]
     if scene_id in _scenes:
-        abort(400, f"Scene {scene_id} already exists")
+        return jsonify({"error": f"Scene '{scene_id}' already exists"}), 400
     
     try:
         print(f"[Create Scene] Creating scene {scene_id}")

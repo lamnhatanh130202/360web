@@ -75,7 +75,17 @@ export default function ScenesCreate({ apiBase = "/api" }) {
     try {
       // Step 1: Generate scene ID first (needed for consistent file naming)
       const sceneName = nameVi || file.name.replace(/\.[^.]+$/, "");
-      const sceneId = generateSceneId(nameVi, file.name);
+      let sceneId = generateSceneId(nameVi, file.name);
+      // Ensure unique ID by checking against existing scenes
+      try {
+        const resList = await fetch(`${apiBase}/scenes`);
+        const existing = await resList.json().catch(() => []);
+        const ids = Array.isArray(existing) ? new Set(existing.map(s => s.id)) : new Set();
+        if (ids.has(sceneId)) {
+          const suffix = Date.now().toString(36);
+          sceneId = `${sceneId}-${suffix}`.slice(0, 64);
+        }
+      } catch (_) { /* ignore list fetch issue and proceed */ }
       
       // Step 2: Upload the file with scene_id for consistent naming
       const fd = new FormData();
@@ -124,8 +134,18 @@ export default function ScenesCreate({ apiBase = "/api" }) {
       });
       
       if (!createRes.ok) {
-        const createBody = await createRes.json().catch(() => ({ error: "Tạo scene thất bại" }));
-        throw new Error(createBody.error || createBody.message || "Tạo scene thất bại");
+        let errMsg = "Tạo scene thất bại";
+        try {
+          const createBody = await createRes.json();
+          errMsg = createBody?.error || createBody?.message || errMsg;
+        } catch (_) {
+          // Try read text for more info
+          try {
+            const txt = await createRes.text();
+            if (txt) errMsg = txt.slice(0, 300);
+          } catch (_) {}
+        }
+        throw new Error(errMsg);
       }
       
       // After creating new scene, create backlinks from target scenes to this new scene
