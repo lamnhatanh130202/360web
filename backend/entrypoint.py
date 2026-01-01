@@ -5,10 +5,37 @@ Supports hot reload in development mode and gunicorn in production
 """
 import os
 import sys
+import base64
 
 def main():
-    # Set Google Cloud credentials if not already set
-    if "GOOGLE_APPLICATION_CREDENTIALS" not in os.environ:
+    # Set Google Cloud credentials.
+    # Priority:
+    # 1) If GOOGLE_CREDENTIALS_JSON env is provided (Render secrets), write it to a file and use it
+    # 2) Else if GOOGLE_APPLICATION_CREDENTIALS already set, keep it
+    # 3) Else fall back to local file backend/keys/google-tts-key.json
+    creds_json = os.environ.get("GOOGLE_CREDENTIALS_JSON", "").strip()
+    creds_b64 = os.environ.get("GOOGLE_CREDENTIALS_JSON_BASE64", "").strip()
+    if creds_json or creds_b64:
+        # Ensure target directory exists
+        target_dir = os.path.join(os.path.dirname(__file__), "backend", "keys")
+        # If running inside backend folder already, fallback to keys under current dir
+        if not os.path.isdir(target_dir):
+            target_dir = os.path.join(os.path.dirname(__file__), "keys")
+        os.makedirs(target_dir, exist_ok=True)
+        key_path = os.path.join(target_dir, "google-tts-key.json")
+        try:
+            with open(key_path, "w", encoding="utf-8") as f:
+                if creds_json:
+                    f.write(creds_json)
+                else:
+                    # Decode base64 content to JSON
+                    decoded = base64.b64decode(creds_b64)
+                    f.write(decoded.decode("utf-8"))
+            os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = key_path
+            print(f"✓ Wrote Google credentials from env to {key_path}")
+        except Exception as e:
+            print(f"✗ Failed to write GOOGLE_CREDENTIALS_JSON to file: {e}")
+    elif "GOOGLE_APPLICATION_CREDENTIALS" not in os.environ:
         key_path = os.path.join(os.path.dirname(__file__), "keys", "google-tts-key.json")
         if os.path.exists(key_path):
             os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = key_path

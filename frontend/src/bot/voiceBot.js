@@ -235,8 +235,9 @@ export function createVoiceBot(opts = {}) {
 
     try {
       // Backend route is /tts/generate (not /api/tts/generate)
-      // Use provided baseUrl when running outside nginx proxy
-      const endpoint = BASE ? `${BASE}/tts/generate` : '/tts/generate';
+      // Nginx proxies /tts/ to backend:5000
+      // So we call /tts/generate directly (not through /api)
+      const endpoint = '/tts/generate';
       console.log('[TTS] Calling endpoint:', endpoint);
       
       const payload = { text };
@@ -765,42 +766,6 @@ function getSafeName(item) {
   async function handleSpokenText(text) {
     const normalizedText = normalize(text);
     console.log('[VoiceBot] Handling spoken text:', text, 'normalized:', normalizedText);
-    // --- Quick commands: minimap open/close ---
-    try {
-      const miniKeywords = ['minimap', 'mini map', 'mini-map', 'bản đồ nhỏ', 'bando', 'bản đồ'];
-      const wantsMinimap = miniKeywords.some(k => normalizedText.includes(normalize(k)));
-      if (wantsMinimap) {
-        const openWords = ['mở', 'hiện', 'show', 'open'];
-        const closeWords = ['đóng', 'thu', 'ẩn', 'hide', 'close'];
-        const wantsOpen = openWords.some(w => normalizedText.includes(w));
-        const wantsClose = closeWords.some(w => normalizedText.includes(w));
-
-        const minimapEl = document.querySelector('.minimap');
-        const toggleBtn = document.querySelector('#mmToggle') || document.querySelector('.mm-toggle');
-
-        if (toggleBtn && minimapEl) {
-          const isCollapsed = minimapEl.classList.contains('minimap--collapsed');
-          // Determine desired action. If user said only "minimap" toggle it.
-          let shouldToggle = false;
-          if (wantsOpen && isCollapsed) shouldToggle = true;
-          else if (wantsClose && !isCollapsed) shouldToggle = true;
-          else if (!wantsOpen && !wantsClose) shouldToggle = true; // just said "minimap" -> toggle
-
-          if (shouldToggle) {
-            try {
-              toggleBtn.click();
-              const isEn = (recognitionConfig && String(recognitionConfig.lang || '').startsWith('en'));
-              const verb = isCollapsed ? (isEn ? 'Opened minimap' : 'Mở minimap') : (isEn ? 'Closed minimap' : 'Đóng minimap');
-              showBubble(verb, 2000);
-              if (tts && tts.enabled) await speak(verb);
-            } catch (e) {
-              console.warn('[VoiceBot] Failed to toggle minimap via button click', e);
-            }
-            return; // handled command
-          }
-        }
-      }
-    } catch (e) { console.warn('[VoiceBot] Minimap quick command handler error', e); }
     
     // Stop voice recognition to avoid interference during navigation
     if (recognition && listening) {
