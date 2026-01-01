@@ -16,7 +16,13 @@ export function createVoiceBot(opts = {}) {
     getGraph = () => null,                // should return graph {nodes, edges} from minimap
     tts = { enabled: true, useGoogle: true, prefixText: 'Đang di chuyển tới', voice: 'vi-VN-Wavenet-B' },
     recognitionConfig = { lang: 'vi-VN' },
-    baseUrl = '' // backend base URL, e.g. 'http://127.0.0.1:5000'
+    baseUrl = '', // backend base URL, e.g. 'http://127.0.0.1:5000'
+    // Timing options (ms)
+    navDelayMs = 2500,           // wait after direct onGotoScene
+    pathPlayDelayMs = 3000,      // wait after onPathPlay(path)
+    dwellMs = 3000,              // rest between scenes in tours
+    introPauseMs = 1500,         // pause after floor intro TTS
+    transitionPauseMs = 2000     // pause after floor transition TTS
   } = opts;
 
   // normalize baseUrl (no trailing slash)
@@ -49,6 +55,9 @@ export function createVoiceBot(opts = {}) {
       .replace(/[\"'’‘`,.?¡!¿:;()\[\]{}<>\/\\]/g, '')
       .replace(/\s+/g, ' ');
   }
+
+  // Simple sleep helper for timed pauses
+  const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
   function levenshtein(a, b) {
     if (a === b) return 0;
@@ -620,6 +629,8 @@ function getSafeName(item) {
   async function navigateToSceneStepByStep(fromSceneId, toSceneId, scenes, getGraph = null, silent = false) {
     if (!fromSceneId || !toSceneId) {
       await onGotoScene(toSceneId);
+      // wait after direct navigation for scene to load
+      await sleep(navDelayMs);
       return;
     }
 
@@ -687,6 +698,7 @@ function getSafeName(item) {
         showBubble(`Không tìm thấy đường. Chuyển trực tiếp đến: ${toSceneId}`);
       }
       await onGotoScene(toSceneId);
+      await sleep(navDelayMs);
       return;
     }
 
@@ -707,10 +719,12 @@ function getSafeName(item) {
     // Use onPathPlay to navigate step by step
     try {
       await onPathPlay(path);
+      await sleep(pathPlayDelayMs);
     } catch (e) {
       console.warn('onPathPlay error', e);
       // Fallback: navigate directly
       await onGotoScene(toSceneId);
+      await sleep(navDelayMs);
     }
   }
 
@@ -870,7 +884,7 @@ function getSafeName(item) {
           showBubble(floorIntro);
           if (tts && tts.enabled) {
             await speak(floorIntro);
-            await new Promise(resolve => setTimeout(resolve, 1000));
+            await sleep(introPauseMs);
           }
           
           // 2. Di chuyển và giới thiệu từng scene trong tầng
@@ -892,7 +906,7 @@ function getSafeName(item) {
               // Nghỉ ngơi (trừ scene cuối cùng của tầng cuối)
               const isLastSceneOfLastFloor = (floorIdx === floors.length - 1 && sceneIdx === floorScenes.length - 1);
               if (!isLastSceneOfLastFloor) {
-                await new Promise(resolve => setTimeout(resolve, 2000));
+                await sleep(dwellMs);
               }
             } catch (e) { break; }
           }
@@ -906,7 +920,7 @@ function getSafeName(item) {
             showBubble(transitionMsg);
             if (tts && tts.enabled) {
               await speak(transitionMsg);
-              await new Promise(resolve => setTimeout(resolve, 1500));
+              await sleep(transitionPauseMs);
             }
           }
         }
