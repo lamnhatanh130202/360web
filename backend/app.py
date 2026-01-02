@@ -1981,6 +1981,89 @@ def health_storage():
         "test_file_exists": exists
     }), 200
 
+# --- Sync Health Check (Disk vs GitHub) ---
+def _file_info(path):
+    try:
+        abs_path = os.path.abspath(path) if path else None
+        exists = bool(abs_path and os.path.exists(abs_path))
+        size = os.path.getsize(abs_path) if exists else None
+        mtime = os.path.getmtime(abs_path) if exists else None
+        sha256 = None
+        if exists:
+            import hashlib
+            with open(abs_path, 'rb') as f:
+                sha256 = hashlib.sha256(f.read()).hexdigest()
+        return {
+            "path": abs_path,
+            "exists": exists,
+            "size": size,
+            "mtime": mtime,
+            "sha256": sha256,
+        }
+    except Exception as e:
+        return {"path": path, "error": str(e)}
+
+def _gh_content_info(repo_path):
+    if not (GH_TOKEN and GH_REPO and repo_path):
+        return {"configured": False}
+    try:
+        url = f"https://api.github.com/repos/{GH_REPO}/contents/{repo_path}?ref={GH_BRANCH}"
+        r = requests.get(url, headers=_gh_headers(), timeout=20)
+        if r.status_code == 200:
+            j = r.json()
+            content_b64 = j.get("content")
+            gh_sha = j.get("sha")
+            decoded = None
+            gh_sha256 = None
+            if content_b64:
+                try:
+                    decoded = base64.b64decode(content_b64)
+                    import hashlib
+                    gh_sha256 = hashlib.sha256(decoded).hexdigest()
+                except Exception:
+                    pass
+            return {
+                "configured": True,
+                "gh_path": repo_path,
+                "gh_sha": gh_sha,
+                "gh_sha256": gh_sha256,
+                "size": j.get("size"),
+            }
+        else:
+            return {"configured": True, "gh_path": repo_path, "error": f"status {r.status_code}"}
+    except Exception as e:
+        return {"configured": True, "gh_path": repo_path, "error": str(e)}
+
+@app.route('/health/sync', methods=['GET'])
+def health_sync():
+    """Compare local disk files with GitHub repo content for scenes/tours/graph."""
+    scenes_disk = _file_info(SCENES_FILE_WRITE)
+    tours_disk = _file_info(tours_file_path or os.path.join(CMS_DATA_DIR, 'tours.json'))
+    graph_disk = _file_info(graph_path or os.path.join(CMS_DATA_DIR, 'graph.json'))
+
+    scenes_gh = _gh_content_info(GH_PATH_SCENES)
+    tours_gh = _gh_content_info(GH_PATH_TOURS)
+    graph_gh = _gh_content_info(GH_PATH_GRAPH)
+
+    def _in_sync(disk, gh):
+        try:
+            d = disk.get("sha256")
+            g = gh.get("gh_sha256")
+            return bool(d and g and d == g)
+        except Exception:
+            return False
+
+    return jsonify({
+        "github": {
+            "configured": bool(GH_TOKEN and GH_REPO),
+            "repo": GH_REPO,
+            "branch": GH_BRANCH,
+        },
+        "scenes": {**scenes_disk, **{"gh": scenes_gh, "in_sync": _in_sync(scenes_disk, scenes_gh)}},
+        "tours": {**tours_disk, **{"gh": tours_gh, "in_sync": _in_sync(tours_disk, tours_gh)}},
+        "graph": {**graph_disk, **{"gh": graph_gh, "in_sync": _in_sync(graph_disk, graph_gh)}},
+    }), 200
+
 # --- Analytics endpoints ---
 @app.route("/api/analytics/visit", methods=["POST"])
 def track_visit():
