@@ -785,14 +785,36 @@ function scheduleAutoResume() {
   // Hàm helper để ẩn/hiện minimap
   const toggleMinimapVisibility = (hide) => {
     if (!minimapEl) return;
+    const minimapPanel = minimapEl.closest('.minimap-panel');
+    const voiceBtn = minimapPanel ? minimapPanel.querySelector('#voice-command-btn') : null;
+    const toolbar = minimapPanel ? minimapPanel.querySelector('.minimap-toolbar') : null;
     if (hide) {
+      // Hide only the map & toolbar, keep voice button visible on mobile
       minimapEl.style.display = 'none';
-      const minimapPanel = minimapEl.closest('.minimap-panel');
-      if (minimapPanel) minimapPanel.style.display = 'none';
+      if (toolbar) toolbar.style.display = 'none';
+      if (voiceBtn) {
+        voiceBtn.style.display = '';
+        voiceBtn.style.position = 'fixed';
+        voiceBtn.style.right = '12px';
+        voiceBtn.style.bottom = '76px';
+        voiceBtn.style.zIndex = '1000';
+      }
+      if (minimapPanel) {
+        minimapPanel.style.display = '';
+        minimapPanel.style.position = 'static';
+      }
     } else {
+      // Show full panel with minimap on desktop
+      if (toolbar) toolbar.style.display = '';
       minimapEl.style.display = '';
-      const minimapPanel = minimapEl.closest('.minimap-panel');
       if (minimapPanel) minimapPanel.style.display = '';
+      if (voiceBtn) {
+        // reset voice button positioning to default within the panel
+        voiceBtn.style.position = '';
+        voiceBtn.style.right = '';
+        voiceBtn.style.bottom = '';
+        voiceBtn.style.zIndex = '';
+      }
     }
   };
   
