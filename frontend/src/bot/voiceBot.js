@@ -628,8 +628,8 @@ function getSafeName(item) {
 
   async function navigateToSceneStepByStep(fromSceneId, toSceneId, scenes, getGraph = null, silent = false) {
     if (!fromSceneId || !toSceneId) {
+      // If we don't know the start, fall back to direct navigation
       await onGotoScene(toSceneId);
-      // wait after direct navigation for scene to load
       await sleep(navDelayMs);
       return;
     }
@@ -693,12 +693,18 @@ function getSafeName(item) {
 
     const path = findPath(fromSceneId, toSceneId);
     if (!path || path.length === 0) {
-      // No path found, try direct navigation
+      // No path found: still apply minimap-style transition with alignment using a 2-node path
       if (!silent) {
-        showBubble(`Không tìm thấy đường. Chuyển trực tiếp đến: ${toSceneId}`);
+        showBubble(`Không tìm thấy đường. Căn hướng và chuyển trực tiếp đến: ${toSceneId}`);
       }
-      await onGotoScene(toSceneId);
-      await sleep(navDelayMs);
+      try {
+        await onPathPlay([fromSceneId, toSceneId]);
+        await sleep(pathPlayDelayMs);
+      } catch (e) {
+        // Fallback to direct
+        await onGotoScene(toSceneId);
+        await sleep(navDelayMs);
+      }
       return;
     }
 
@@ -722,9 +728,14 @@ function getSafeName(item) {
       await sleep(pathPlayDelayMs);
     } catch (e) {
       console.warn('onPathPlay error', e);
-      // Fallback: navigate directly
-      await onGotoScene(toSceneId);
-      await sleep(navDelayMs);
+      // Fallback: try alignment with a simple [from,to] path
+      try {
+        await onPathPlay([fromSceneId, toSceneId]);
+        await sleep(pathPlayDelayMs);
+      } catch (_) {
+        await onGotoScene(toSceneId);
+        await sleep(navDelayMs);
+      }
     }
   }
 

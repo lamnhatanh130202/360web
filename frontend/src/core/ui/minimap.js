@@ -7,6 +7,8 @@ export function createMinimap(opts) {
         onGotoScene,
         onPathPlay,
         navigationDelayMs = 3000,
+        readOnly = false,
+        mobileMode = false,
     } = opts || {};
 
     // --- 1. CONFIG & STATE ---
@@ -248,8 +250,15 @@ export function createMinimap(opts) {
     // --- 2. DOM STRUCTURE ---
 
     try { isMapLocked = JSON.parse(localStorage.getItem('minimap_locked') || 'false'); } catch { }
+    // Trên mobile, luôn cho phép kéo để tránh hiểu nhầm khoá
+    if (mobileMode) {
+        isMapLocked = false;
+        localStorage.setItem('minimap_locked', 'false');
+    }
     if (isMapLocked) container.classList.add('locked');
     container.classList.add('minimap');
+    if (mobileMode) container.classList.add('minimap--mobile');
+    if (readOnly) container.classList.add('minimap--readonly');
     
     container.innerHTML = `
     <div class="mm-toolbar">
@@ -258,12 +267,12 @@ export function createMinimap(opts) {
             <span>→</span>
             <select id="mmTo"></select>
             <button id="mmGo">Tìm đường</button>
-            <button id="mmClear">Xóa</button>
+            <button id="mmClear">Làm Mới</button>
         </div>
         <button class="mm-toggle" id="mmToggle">Thu</button>
     </div>
 
-    <div class="mm-viewport" id="mmViewport" style="overflow: hidden; position: relative; width: 100%; height: 100%; background: #e5e5e5; user-select: none;">
+    <div class="mm-viewport" id="mmViewport" style="overflow: hidden; position: relative; width: 100%; height: 100%; background: #e5e5e5; user-select: none; touch-action: none;">
         <div class="mm-controls">
             <div class="floor-selector">
                 <button data-floor="6">6</button>
@@ -279,7 +288,6 @@ export function createMinimap(opts) {
                 <button id="mmZoomIn" title="Phóng to">+</button>
                 <button id="mmZoomOut" title="Thu nhỏ">−</button>
                 <button id="mmZoomReset" title="Vừa màn hình">Fit</button>
-                <button id="mmLock" title="Khoá vị trí">Khoá</button>
             </div>
         </div>
         
@@ -296,14 +304,32 @@ export function createMinimap(opts) {
     const content = container.querySelector('#mmContent');
     const selFrom = container.querySelector('#mmFrom');
     const selTo = container.querySelector('#mmTo');
+    const floorSelectorEl = container.querySelector('.floor-selector');
+
+    // Ẩn các controls tìm đường khi ở chế độ read-only/mobile
+    try {
+        if (readOnly || mobileMode) {
+            const routeEl = container.querySelector('.mm-route');
+            if (routeEl) routeEl.style.display = 'none';
+            const zoomEl = container.querySelector('.mm-zoom');
+            if (zoomEl) zoomEl.style.display = 'none';
+            // Move floor selector into toolbar and lay out horizontally on mobile
+            const toolbarEl = container.querySelector('.mm-toolbar');
+            if (floorSelectorEl && toolbarEl) {
+                floorSelectorEl.classList.add('floor-selector--inline');
+                toolbarEl.insertBefore(floorSelectorEl, container.querySelector('#mmToggle'));
+            }
+            const controlsEl = container.querySelector('.mm-controls');
+            if (controlsEl) controlsEl.style.display = 'none';
+        }
+    } catch {}
 
     // [NEW] Cập nhật text nút bấm theo ngôn ngữ
     function updateUIText() {
         const isEn = currentLang === 'en';
         container.querySelector('#mmGo').innerText = isEn ? 'Find' : 'Tìm đường';
-        container.querySelector('#mmClear').innerText = isEn ? 'Clear' : 'Xóa';
+        container.querySelector('#mmClear').innerText = isEn ? 'Clear' : 'Làm Mới';
         container.querySelector('#mmToggle').innerText = isEn ? 'Hide' : 'Thu';
-        container.querySelector('#mmLock').title = isEn ? 'Lock position' : 'Khoá vị trí';
         container.querySelector('#mmZoomReset').title = isEn ? 'Fit screen' : 'Vừa màn hình';
     }
 
@@ -600,6 +626,11 @@ export function createMinimap(opts) {
             
             dot.onclick = (e) => {
                 e.stopPropagation();
+                if (readOnly || mobileMode) {
+                    // Chế độ mobile/read-only: chỉ hiển thị nhãn, không điều hướng
+                    showNodeLabel(n.id);
+                    return;
+                }
                 if (!onGotoScene) return;
                 const now = Date.now();
                 const elapsed = now - lastNavAt;
@@ -714,11 +745,19 @@ export function createMinimap(opts) {
 
     // --- 4. TRANSFORM & ZOOM LOGIC ---
 
+    // Prevent unintended auto-fit during user interaction
+    let autoFitLock = false;
+
     function updateTransform() {
         stage.style.transform = `translate(${view.x}px, ${view.y}px) scale(${view.scale})`;
+        try {
+            // Expose current scale to CSS so labels and dots can remain readable
+            container.style.setProperty('--mm-scale', String(view.scale));
+        } catch (e) { /* ignore */ }
     }
 
-    function fitToScreen() {
+    function fitToScreen(force = false) {
+        if (autoFitLock && !force) return;
         const vpRect = viewport.getBoundingClientRect();
         if (vpRect.width === 0 || stageWidth === 0) return;
         const scaleW = vpRect.width / stageWidth;
@@ -731,75 +770,62 @@ export function createMinimap(opts) {
     }
 
     function focusPath(path) {
+        // Zoom the viewport without panning the map content.
         if (!Array.isArray(path) || path.length === 0) return;
         if (!savedView) savedView = { ...view };
 
         const nodesOnPath = [];
         path.forEach(id => {
-            // [FIX] So sánh String để đảm bảo tìm thấy
             const n = G.nodes.find(node => String(node.id) === String(id));
             if (!n) return;
-            
-            // Chỉ lấy tọa độ các node ở tầng hiện tại
             if ((n.floor ?? 0) === currentFloor) {
                 const pos = getNodePosition(n, currentFloor);
                 if (pos) nodesOnPath.push({ pos });
             }
         });
 
-        if (nodesOnPath.length === 0) return; // Không có node nào ở tầng này để zoom
+        if (nodesOnPath.length === 0) return;
 
         const xs = nodesOnPath.map(p => p.pos.x);
         const ys = nodesOnPath.map(p => p.pos.y);
-
         const minX = Math.min(...xs);
         const maxX = Math.max(...xs);
         const minY = Math.min(...ys);
         const maxY = Math.max(...ys);
 
-        const cx = (minX + maxX) / 2;
-        const cy = (minY + maxY) / 2;
-
         const vpRect = viewport.getBoundingClientRect();
-        const padding = 120; // Giảm padding để zoom gần hơn
+        const padding = 120;
         const contentW = (maxX - minX) + padding * 2;
         const contentH = (maxY - minY) + padding * 2;
-
         const scaleW = vpRect.width / contentW;
         const scaleH = vpRect.height / contentH;
         let bboxScale = Math.min(scaleW, scaleH);
 
-        // Compute absolute target scale (do NOT multiply current scale to avoid accumulation)
-        let newScale = Math.max(bboxScale * 1.2, view.scale);
-        newScale = Math.max(0.5, Math.min(2.0, newScale));
+        // Target absolute scale, clamped
+        let targetScale = Math.max(bboxScale * 1.2, view.scale);
+        targetScale = Math.max(0.5, Math.min(2.0, targetScale));
 
-        const newX = vpRect.width / 2 - cx * newScale;
-        const newY = vpRect.height / 2 - cy * newScale;
-
-        // Smooth animation
+        // Keep current viewport center anchored so user perceives only zoom
         const startScale = view.scale;
         const startX = view.x;
         const startY = view.y;
-        const duration = 500; // 500ms animation
-        const startTime = performance.now();
-        
-        function animate(currentTime) {
-            const elapsed = currentTime - startTime;
-            const progress = Math.min(elapsed / duration, 1);
-            // Easing function (ease-out)
-            const easeProgress = 1 - Math.pow(1 - progress, 3);
-            
-            view.scale = startScale + (newScale - startScale) * easeProgress;
-            view.x = startX + (newX - startX) * easeProgress;
-            view.y = startY + (newY - startY) * easeProgress;
-        updateTransform();
-            
-            if (progress < 1) {
-                requestAnimationFrame(animate);
-            }
-        }
-        
-        requestAnimationFrame(animate);
+        const vpCenterX = vpRect.width / 2;
+        const vpCenterY = vpRect.height / 2;
+        const stageCenterX = (vpCenterX - startX) / startScale;
+        const stageCenterY = (vpCenterY - startY) / startScale;
+
+        const duration = 500;
+        const t0 = performance.now();
+        (function animate(now){
+            const p = Math.min(1, (now - t0) / duration);
+            const ease = 1 - Math.pow(1 - p, 3);
+            const currentScale = startScale + (targetScale - startScale) * ease;
+            view.scale = currentScale;
+            view.x = vpCenterX - stageCenterX * currentScale;
+            view.y = vpCenterY - stageCenterY * currentScale;
+            updateTransform();
+            if (p < 1) requestAnimationFrame(animate);
+        })(t0);
     }
 
     // Focus a single node (center + optional zoom)
@@ -847,13 +873,10 @@ export function createMinimap(opts) {
     }
 
     function resetViewAfterPath() {
-        if (savedView) {
-            view = { ...savedView };
-            savedView = null;
-            updateTransform();
-        } else {
-            fitToScreen();
-        }
+        // Always return to normal fit after path playback
+        savedView = null;
+        autoFitLock = false;
+        fitToScreen(true);
         activePath = []; // Xóa đường đi
         renderNodes();
     }
@@ -877,28 +900,19 @@ export function createMinimap(opts) {
 
     viewport.addEventListener('wheel', (e) => {
         e.preventDefault();
+        autoFitLock = true;
         zoomAt(e.deltaY > 0 ? 0.9 : 1.1, e.clientX, e.clientY);
     }, { passive: false });
 
     let isDragging = false;
     let startX = 0, startY = 0;
     
+    // Tắt kéo nội dung minimap trên mọi thiết bị (chỉ cho phép zoom)
     viewport.addEventListener('mousedown', (e) => {
-        if (isMapLocked) return;
-        if (e.target.closest('button') || e.target.closest('select')) return;
-        isDragging = true;
-        startX = e.clientX - view.x;
-        startY = e.clientY - view.y;
-        container.style.cursor = 'grabbing';
+        return; // no-op: disable content panning
     });
 
-    window.addEventListener('mousemove', (e) => {
-        if (!isDragging) return;
-        e.preventDefault();
-        view.x = e.clientX - startX;
-        view.y = e.clientY - startY;
-        updateTransform();
-    });
+    window.addEventListener('mousemove', (e) => { /* no content pan */ });
 
     window.addEventListener('mouseup', () => {
         if (isDragging) {
@@ -907,25 +921,11 @@ export function createMinimap(opts) {
         }
     });
 
-    viewport.addEventListener('touchstart', (e) => {
-         if (e.touches.length === 1) {
-             const t = e.touches[0];
-             isDragging = true;
-             startX = t.clientX - view.x;
-             startY = t.clientY - view.y;
-         }
-    }, { passive: true });
+            viewport.addEventListener('touchstart', (e) => { /* no content pan on touch */ }, { passive: false });
     
-    window.addEventListener('touchmove', (e) => {
-        if (isDragging && e.touches.length === 1) {
-             const t = e.touches[0];
-             view.x = t.clientX - startX;
-             view.y = t.clientY - startY;
-             updateTransform();
-        }
-    }, { passive: true });
+    window.addEventListener('touchmove', (e) => { /* no content pan on touch */ }, { passive: false });
     
-    window.addEventListener('touchend', () => isDragging = false);
+    window.addEventListener('touchend', () => { /* no content pan */ });
 
     // Khi di chuyển chuột trên minimap: hiện labels của các node gần đó
     let mouseMoveTimeout = null;
@@ -973,15 +973,27 @@ export function createMinimap(opts) {
         const rect = viewport.getBoundingClientRect();
         zoomAt(0.8, rect.left + rect.width/2, rect.top + rect.height/2);
     };
-    container.querySelector('#mmZoomReset').onclick = fitToScreen;
+    container.querySelector('#mmZoomReset').onclick = () => { autoFitLock = false; savedView = null; fitToScreen(true); };
 
     const toolbar = container.querySelector('.mm-toolbar');
     let isContainerDragging = false;
     let startCX = 0, startCY = 0;
     let startLeft = 0, startTop = 0;
 
+    // Helper: determine if the event target is an interactive control
+    function isInteractiveTarget(el) {
+        if (!el) return false;
+        const tag = el.tagName;
+        if (tag === 'BUTTON' || tag === 'SELECT' || tag === 'INPUT' || tag === 'A') return true;
+        // Floor selector or any route controls inside toolbar
+        if (el.closest('.floor-selector') || el.closest('.mm-route')) return true;
+        // The collapse toggle button
+        if (el.closest('#mmToggle')) return true;
+        return false;
+    }
+
     toolbar.addEventListener('mousedown', (e) => {
-        if (e.target.tagName === 'SELECT') return;
+        if (isInteractiveTarget(e.target)) return;
         isContainerDragging = true;
         const rect = container.getBoundingClientRect();
         startLeft = rect.left;
@@ -1009,14 +1021,52 @@ export function createMinimap(opts) {
         container.classList.remove('minimap--dragging');
     });
 
-    const btnLock = container.querySelector('#mmLock');
-    btnLock.onclick = () => {
-        isMapLocked = !isMapLocked;
-        container.classList.toggle('locked', isMapLocked);
-        btnLock.classList.toggle('active', isMapLocked);
-        localStorage.setItem('minimap_locked', JSON.stringify(isMapLocked));
-    };
-    if (isMapLocked) btnLock.classList.add('active');
+    // Mobile: touch drag on toolbar to move minimap panel
+    toolbar.addEventListener('touchstart', (e) => {
+        if (e.touches.length !== 1) return;
+        // Do not start drag when interacting with controls
+        const target = e.target;
+        if (isInteractiveTarget(target)) return;
+        const t = e.touches[0];
+        isContainerDragging = true;
+        const rect = container.getBoundingClientRect();
+        startLeft = rect.left;
+        startTop = rect.top;
+        startCX = t.clientX;
+        startCY = t.clientY;
+        container.style.left = `${rect.left}px`;
+        container.style.top = `${rect.top}px`;
+        container.style.right = 'auto';
+        container.style.bottom = 'auto';
+        container.classList.add('minimap--dragging');
+        e.preventDefault();
+    }, { passive: false });
+
+    window.addEventListener('touchmove', (e) => {
+        if (!isContainerDragging || e.touches.length !== 1) return;
+        const t = e.touches[0];
+        const dx = t.clientX - startCX;
+        const dy = t.clientY - startCY;
+        // Clamp within viewport bounds
+        const vw = window.innerWidth || document.documentElement.clientWidth;
+        const vh = window.innerHeight || document.documentElement.clientHeight;
+        const rect = container.getBoundingClientRect();
+        let newLeft = startLeft + dx;
+        let newTop = startTop + dy;
+        newLeft = Math.max(0, Math.min(newLeft, vw - rect.width));
+        newTop = Math.max(0, Math.min(newTop, vh - rect.height));
+        container.style.left = `${Math.round(newLeft)}px`;
+        container.style.top = `${Math.round(newTop)}px`;
+        e.preventDefault();
+    }, { passive: false });
+
+    window.addEventListener('touchend', () => {
+        if (!isContainerDragging) return;
+        isContainerDragging = false;
+        container.classList.remove('minimap--dragging');
+    }, { passive: true });
+
+    // Lock control removed (auto-locked behavior); no UI button
 
     container.querySelector('.floor-selector').addEventListener('click', (e) => {
         if (e.target.tagName === 'BUTTON') {
@@ -1152,8 +1202,11 @@ export function createMinimap(opts) {
         }
 
         // 4. Hẹn giờ reset
-        const STEP_MS = 1200; 
-        const totalMs = Math.max(path.length, 1) * STEP_MS + 2500; 
+        // Align reset timing with app navigation pacing to avoid mid-route reset
+        const steps = Math.max(safePath.length - 1, 0);
+        const stepDelay = Number(navigationDelayMs || 0) || 0; // provided via opts
+        const fadeBuffer = 600; // extra buffer for fades/processing
+        const totalMs = steps * stepDelay + fadeBuffer + 1200; 
         
         if (window.resetViewTimeout) clearTimeout(window.resetViewTimeout);
         window.resetViewTimeout = setTimeout(() => {
@@ -1168,21 +1221,21 @@ export function createMinimap(opts) {
             setFloor(n.floor ?? 0);
         } else {
             renderNodes();
-            // Đảm bảo label của node active được hiển thị sau khi render
+            // Hiện label node active và các node kề (giống hover) — không pan
             setTimeout(() => {
-                if (activeId) {
-                    showNodeLabel(activeId);
-                    currentlyShowingLabels.add(String(activeId));
-                }
+                if (!activeId) return;
+                showNodeLabel(activeId);
+                currentlyShowingLabels.add(String(activeId));
+                const neighbors = findConnectedNodes(activeId) || [];
+                neighbors.forEach(nodeId => {
+                    showNodeLabel(nodeId);
+                    currentlyShowingLabels.add(String(nodeId));
+                });
             }, 0);
         }
-        // Chọn giá trị trong select nếu có
+        // Cập nhật select nếu có
         if (selFrom && selFrom.querySelector(`option[value="${id}"]`)) selFrom.value = id;
-        // Focus the active node so editor can pan to it
-        try {
-            // Do not automatically zoom when setting active from editor/clicks — only pan to center
-            setTimeout(() => { focusNode(id, { zoom: false }); }, 150);
-        } catch (e) { }
+        // KHÔNG pan/center tự động khi đổi scene bằng hotspot
     }
     
     function highlightPath(path) {
@@ -1262,10 +1315,14 @@ export function createMinimap(opts) {
                         currentlyShowingLabels.add(String(activeId));
                     }, 100);
                 }
+                try {
+                    // Notify app that minimap is ready so it can set active scene
+                    window.dispatchEvent(new CustomEvent('minimap-ready', { detail: { nodes: G.nodes.length } }));
+                } catch (e) { /* ignore */ }
             }
         }, 50);
     });
-    window.addEventListener('resize', fitToScreen);
+    window.addEventListener('resize', () => fitToScreen());
 
     // Allow external code (CMS/editor) to notify minimap about changes
     window.addEventListener('scene-updated', async (e) => {

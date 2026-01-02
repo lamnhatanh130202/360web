@@ -33,6 +33,18 @@
   </header>
 
   <main class="main" role="main">
+    <!-- Mobile-only centered scene title -->
+    <div id="mobileSceneTitle" class="mobile-scene-title" aria-live="polite" role="status" style="display:none"></div>
+
+    <!-- Mobile fullscreen toggle button -->
+    <button id="btnFullscreen" class="btn-fullscreen" title="Toàn màn hình" aria-label="Toàn màn hình" style="display:none">⛶</button>
+
+    <!-- Mobile minimap toggle button -->
+    <button id="btnMinimap" class="btn-minimap" title="Bật/tắt minimap" aria-label="Bật/tắt minimap" style="display:none">🗺</button>
+
+    <!-- Mobile language toggle button -->
+    <button id="btnLang" class="btn-lang" title="Đổi ngôn ngữ" aria-label="Đổi ngôn ngữ" style="display:none">VI</button>
+
     <div id="pano" class="viewer" aria-label="Trình xem panorama 360°"></div>
 
     <div id="fade" class="fade"></div>
@@ -73,6 +85,9 @@
       </div>
     </aside>
   </main>
+
+  <!-- Desktop corner logo (shown on >=768px) -->
+  <img id="cornerLogo" src="/assets/icon/logo BDU Eng.png" alt="Binh Duong University" />
 
   <footer class="footer">
     <div id="controls" class="controls" aria-label="Điều khiển góc nhìn">

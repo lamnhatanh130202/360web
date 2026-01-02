@@ -3,7 +3,7 @@
     {
       "id": "congtruong",
       "floor": 0,
-      "label": "Cổng Chính",
+      "label": "Cổng Chính -  Đường Đại Lộ Bình Dương",
       "positions": {
         "0": {
           "x": 199,
@@ -1040,7 +1040,6 @@
         }
       }
     }
-
   ],
   "edges": [
     {

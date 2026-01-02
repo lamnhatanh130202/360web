@@ -310,8 +310,8 @@ main {
 
 .minimap {
   position: fixed; /* Keep it fixed on the screen */
-  width: 750px; /* Fixed width to match CMS */
-  height: 600px; /* Fixed height to match CMS (toolbar 36px + viewport 464px) */
+  width: 520px; /* Smaller footprint */
+  height: 420px; /* Smaller footprint */
   border: 1px solid #ccc;
   border-radius: 8px;
   background: #fff;
@@ -476,8 +476,9 @@ main {
 /* 2. Chấm tròn (Node) */
 .mm-dot {
   position: absolute;
-  width: 40px;   /* to hơn để dễ thấy */
-  height: 40px;
+  /* Keep dots readable at any zoom using inverse scale */
+  width: clamp(16px, calc(32px / var(--mm-scale, 1)), 46px);
+  height: clamp(16px, calc(32px / var(--mm-scale, 1)), 46px);
 
   background-color: #2563eb; /* Xanh dương đậm hơn */
   border: 2px solid #ffffff;
@@ -498,6 +499,20 @@ main {
     border-color: #fff;
 }
 
+/* Vòng sáng nhấn mạnh vị trí hiện tại */
+.mm-dot.mm-dot--active::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: clamp(28px, calc(56px / var(--mm-scale, 1)), 80px);
+  height: clamp(28px, calc(56px / var(--mm-scale, 1)), 80px);
+  border-radius: 50%;
+  border: 2px solid rgba(239, 68, 68, 0.8);
+  box-shadow: 0 0 10px rgba(239, 68, 68, 0.4);
+}
+
 /* 3. Nhãn tên (Label) */
 .mm-label {
   position: absolute;
@@ -506,7 +521,8 @@ main {
   padding: 4px 10px;
   border-radius: 4px;
   border: 1px solid #94a3b8;
-  font-size: 35px;   /* chữ to hơn nữa */
+  /* Keep label readable regardless of zoom using inverse scale */
+  font-size: clamp(12px, calc(22px / var(--mm-scale, 1)), 36px);
   font-weight: 600;
   color: #0f172a;
   white-space: nowrap;
@@ -599,6 +615,135 @@ main {
     background-color: rgba(59, 130, 246, 0.9) !important;
     height: 4px;
     z-index: 16;
+}
+
+/* ========== Mobile Simplification ========== */
+@media (max-width: 768px) {
+  /* Ẩn hoàn toàn header và trigger trên mobile */
+  header, .header, .header-trigger { display: none !important; }
+
+  /* Tiêu đề khu vực ở giữa trên cùng (mobile) */
+  .mobile-scene-title {
+    position: fixed;
+    top: env(safe-area-inset-top, 10px);
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1005;
+    background: rgba(0, 92, 184, 0.95);
+    color: #fff;
+    padding: 8px 14px;
+    border-radius: 16px;
+    font-weight: 600;
+    font-size: 14px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+    max-width: 80vw;
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* Nút toàn màn hình (mobile) */
+  .btn-fullscreen {
+    position: fixed;
+    left: 12px;
+    top: calc(env(safe-area-inset-top, 0px) + 12px);
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+    background: rgba(255,255,255,0.95);
+    color: #0f172a;
+    border: 1px solid rgba(0,0,0,0.15);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    z-index: 1006;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    line-height: 1;
+  }
+
+  /* Nút minimap (mobile) */
+  .btn-minimap {
+    position: fixed;
+    left: 12px;
+    top: calc(env(safe-area-inset-top, 0px) + 12px + 56px);
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+    background: rgba(255,255,255,0.95);
+    color: #0f172a;
+    border: 1px solid rgba(0,0,0,0.15);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    z-index: 1006;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    line-height: 1;
+  }
+
+  /* Nút đổi ngôn ngữ (mobile) */
+  .btn-lang {
+    position: fixed;
+    left: 12px;
+    top: calc(env(safe-area-inset-top, 0px) + 12px + 56px + 56px);
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+    background: rgba(255,255,255,0.95);
+    color: #0f172a;
+    border: 1px solid rgba(0,0,0,0.15);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    z-index: 1006;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+  }
+
+  /* Thu nhỏ minimap và ẩn các controls không cần thiết */
+  .minimap {
+    width: 320px;
+    height: 240px;
+    left: 12px;   /* chuyển sang góc trái để tránh nút BOT */
+    top: 72px;    /* bên dưới header một chút */
+    right: auto;
+    bottom: auto;
+    z-index: 1000;
+  }
+  .minimap .mm-route { display: none; }
+  .minimap .mm-zoom { display: none; }
+  .minimap .mm-controls { display: none; }
+  /* Ẩn nút Thu (old minimap toggle) trên mobile, dùng nút mới bên trái */
+  .minimap .mm-toggle { display: none !important; }
+  /* Floor selector ngang trong toolbar */
+  /* Ẩn selector tầng trên mobile cho giao diện gọn hơn */
+  .minimap .mm-toolbar .floor-selector--inline { display: none !important; }
+  /* Ẩn minimap khi ở trạng thái thu gọn (chỉ giữ 3 nút bên trái) */
+  .minimap.minimap--collapsed { display: none !important; }
+  /* Logo chỉ hiển thị trên mobile góc phải trên */
+  #cornerLogo {
+    position: fixed;
+    top: calc(env(safe-area-inset-top, 0px) + 10px);
+    right: 12px;
+    width: 220px;
+    height: auto;
+    z-index: 1200;
+    pointer-events: none;
+    filter: drop-shadow(0 2px 6px rgba(0,0,0,0.3));
+    display: block;
+  }
+  /* Giữ nhãn của vị trí hiện tại rõ ràng */
+  .mm-label { opacity: 0; }
+  .mm-dot.mm-dot--active + .mm-label { opacity: 1 !important; }
+  /* Ẩn các nút controls ở footer trên mobile để giao diện gọn hơn */
+  footer.footer #controls { display: none !important; }
+}
+
+/* Ẩn logo trên desktop (vì đã có ở header) */
+@media (min-width: 768px) {
+  #cornerLogo { display: none !important; }
 }
   /* ========== Panel chỉ đường (Nav) ========== */
   #directions {
@@ -821,11 +966,11 @@ main {
         min-height: 44px;
     }
     
-    /* Ẩn minimap trên mobile vì quá nhỏ không sử dụng được */
+    /* Hiển thị minimap trên mobile ở chế độ đơn giản (read-only) */
     .minimap,
     .minimap-panel,
     #minimap {
-        display: none !important;
+      display: block !important;
     }
     
     /* Menu responsive - TĂNG KÍCH THƯỚC */
@@ -1002,11 +1147,11 @@ main {
         font-size: 13px;
     }
     
-    /* Minimap vẫn ẩn trên landscape mobile */
+    /* Minimap hiển thị cả ở landscape, thu nhỏ kích thước */
     .minimap,
     .minimap-panel,
     #minimap {
-        display: none !important;
+      display: block !important;
     }
 }
 
@@ -1014,3 +1159,30 @@ main {
 .minimap {
   z-index: 20000 !important;
 }
+
+/* Ẩn các nút mobile trên desktop */
+@media (min-width: 768px) {
+  #btnFullscreen, .btn-fullscreen,
+  #btnMinimap, .btn-minimap,
+  #btnLang, .btn-lang,
+  #mobileSceneTitle, .mobile-scene-title { display: none !important; }
+}
+
+/* Desktop corner logo */
+@media (min-width: 768px) {
+  #cornerLogo {
+    position: fixed;
+    top: 12px;
+    right: 12px;
+    width: 240px;
+    height: auto;
+    z-index: 1200;
+    pointer-events: none;
+    filter: drop-shadow(0 2px 6px rgba(0,0,0,0.3));
+  }
+}
+
+/* Minimap hidden state */
+.minimap.minimap--hidden { display: none !important; }
+/* Ensure ID-specific override beats mobile `#minimap { display:block !important; }` */
+#minimap.minimap--hidden { display: none !important; }

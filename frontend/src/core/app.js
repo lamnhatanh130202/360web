@@ -29,6 +29,10 @@ export async function bootstrap(opts) {
     console.log('[App] First scene:', { id: scenes[0].id, url: scenes[0].url, name: scenes[0].name });
   }
 
+  // Index scenes by id for fast hotspot lookup
+  const scenesById = new Map();
+  scenes.forEach(s => { if (s && s.id) scenesById.set(String(s.id), s); });
+
   // ===== Viewer setup =====
   const root = document.querySelector(rootSelector);
   if (!root) throw new Error(`Không tìm thấy ${rootSelector}`);
@@ -383,12 +387,15 @@ export async function bootstrap(opts) {
 // ===== UI title helper =====
 function updateTenKhuVuc(sceneId) {
   const el = document.getElementById('tenKhuVuc');
+  const mobileTitle = document.getElementById('mobileSceneTitle');
   const s = scenes.find(x => x.id === sceneId);
-  if (el) {
-    const currentLang = localStorage.getItem('lang') || 'vi';
-    const sceneName = (s?.name?.[currentLang]) || s?.name?.vi || s?.name || sceneId;
-    
-    el.textContent = sceneName; 
+  const currentLang = localStorage.getItem('lang') || 'vi';
+  const sceneName = (s?.name?.[currentLang]) || s?.name?.vi || s?.name || sceneId;
+  if (el) el.textContent = sceneName;
+  if (mobileTitle) {
+    mobileTitle.textContent = sceneName;
+    // Ensure visible on mobile
+    if (window.innerWidth < 768) mobileTitle.style.display = 'block';
   }
 }
 
@@ -769,6 +776,153 @@ function scheduleAutoResume() {
     }
   }
 
+  // ===== Hotspot-aligned rotation before scene change =====
+  const ALIGN_TOL_DEG = 6;            // acceptable yaw error
+  const ALIGN_TIMEOUT_MS = 8000;      // max time to attempt alignment
+  const SETTLE_PAUSE_MS = 1000;       // pause when aligned (for viewer comprehension)
+
+  function normalizeYaw(rad) {
+    while (rad > Math.PI) rad -= 2 * Math.PI;
+    while (rad < -Math.PI) rad += 2 * Math.PI;
+    return rad;
+  }
+  function degToRad(d) { return d * Math.PI / 180; }
+  function radToDeg(r) { return r * 180 / Math.PI; }
+
+  // Find yaw of hotspot in scene `fromId` that links to `toId`
+  function getHotspotYaw(fromId, toId) {
+    const scene = scenesById.get(String(fromId));
+    if (!scene || !Array.isArray(scene.hotspots)) return null;
+    const hs = scene.hotspots.find(h => h && (String(h.target) === String(toId) || String(h.to) === String(toId) || String(h.linkTo) === String(toId)));
+    if (!hs) return null;
+    let yaw = typeof hs.yaw === 'number' ? hs.yaw : (typeof hs.theta === 'number' ? hs.theta : null);
+    if (yaw == null) return null;
+    // If value looks like degrees (> 2π), convert to radians
+    if (Math.abs(yaw) > (2 * Math.PI + 0.0001)) yaw = degToRad(yaw);
+    return yaw;
+  }
+
+  async function smoothRotateToYaw(targetYawRad) {
+    if (!active || !active.view) return;
+    const view = active.view;
+    targetYawRad = normalizeYaw(targetYawRad);
+    let last = performance.now();
+    const MAX_SPEED = 1.6; // rad/s
+    const MIN_SPEED = 0.5; // rad/s
+    return new Promise(resolve => {
+      function step(now) {
+        const current = normalizeYaw(view.yaw());
+        const diff = normalizeYaw(targetYawRad - current);
+        const dt = Math.max(0.0005, (now - last) / 1000);
+        last = now;
+        const speed = Math.max(MIN_SPEED, Math.min(MAX_SPEED, Math.abs(diff) * 1.2));
+        const delta = Math.sign(diff) * Math.min(Math.abs(diff), speed * dt);
+        view.setYaw(normalizeYaw(current + delta));
+        const errDeg = Math.abs(radToDeg(normalizeYaw(targetYawRad - view.yaw())));
+        if (errDeg <= ALIGN_TOL_DEG) return resolve();
+        requestAnimationFrame(step);
+      }
+      requestAnimationFrame(step);
+    });
+  }
+
+  async function alignToHotspotBeforeNavigate(fromId, toId) {
+    const yaw = getHotspotYaw(fromId, toId);
+    if (typeof yaw !== 'number') return false;
+    try {
+      userActivity(); // stop auto-rotate while aligning
+      const start = performance.now();
+      await smoothRotateToYaw(yaw);
+      // wait until aligned within tolerance or timeout
+      while (performance.now() - start < ALIGN_TIMEOUT_MS) {
+        const errDeg = Math.abs(radToDeg(normalizeYaw(yaw - active.view.yaw())));
+        if (errDeg <= ALIGN_TOL_DEG) break;
+        await new Promise(r => setTimeout(r, 80));
+      }
+      await new Promise(r => setTimeout(r, SETTLE_PAUSE_MS));
+      return true;
+    } catch (e) {
+      console.warn('[App] Alignment failed, continuing:', e);
+      return false;
+    }
+  }
+
+  // ===== Destination voice announcement =====
+  let arrivalAudio = null;
+  let audioCtx = null;
+  let audioPrimed = false;
+  function primeAudioPlayback() {
+    try {
+      if (!audioPrimed) {
+        audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+        audioCtx.resume && audioCtx.resume();
+        audioPrimed = true;
+      }
+    } catch (_) {}
+  }
+  async function ttsSpeak(text) {
+    try {
+      primeAudioPlayback();
+      // Always hit backend TTS root path (not under /api)
+      const res = await fetch(`/tts/generate`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          text,
+          language_code: 'vi-VN',
+          voice: 'vi-VN-Wavenet-B',
+          format: 'MP3',
+          speakingRate: 1.0,
+          pitch: 0.0,
+          volumeGainDb: 6.0,
+          sampleRateHertz: 24000
+        })
+      });
+      if (!res.ok) throw new Error('TTS request failed');
+      const data = await res.json();
+      const url = data && data.url ? data.url : null;
+      if (url) {
+        // Reset previous audio, then play arrival voice slightly louder
+        try { if (arrivalAudio) { arrivalAudio.pause(); arrivalAudio.currentTime = 0; } } catch (_) {}
+        arrivalAudio = new Audio();
+        arrivalAudio.src = url;
+        arrivalAudio.preload = 'auto';
+        arrivalAudio.volume = 1.0;
+        try {
+          await arrivalAudio.play();
+        } catch (e) {
+          // Attempt to unlock and retry once
+          try {
+            primeAudioPlayback();
+            await arrivalAudio.play();
+          } catch (e2) {
+            console.warn('[TTS] Audio play blocked, falling back to SpeechSynthesis');
+            const utter = new SpeechSynthesisUtterance(text);
+            utter.lang = 'vi-VN';
+            window.speechSynthesis.speak(utter);
+          }
+        }
+        return true;
+      }
+    } catch (e) {
+      // Fallback to Web Speech API (only if Google TTS is unavailable)
+      try {
+        const utter = new SpeechSynthesisUtterance(text);
+        utter.lang = 'vi-VN';
+        window.speechSynthesis.speak(utter);
+        return true;
+      } catch (_) {}
+    }
+    return false;
+  }
+  async function announceArrival(sceneId) {
+    const s = scenes.find(x => x.id === sceneId);
+    const lang = localStorage.getItem('lang') || 'vi';
+    const name = (s && s.name && (s.name[lang] || s.name.vi)) || (s && s.name) || sceneId;
+    const text = `Đã tới ${name}`;
+    return ttsSpeak(text);
+  }
+
   // Inject Google Maps API key to window for minimap (if available)
   // Frontend có thể nhận API key từ window hoặc config
   // Có thể set từ backend config hoặc environment variable
@@ -778,75 +932,43 @@ function scheduleAutoResume() {
     // Tạm thời để empty, có thể set sau từ config
   }
 
-  // Kiểm tra nếu là mobile (width < 768px) thì không khởi tạo minimap
+  // Phát hiện mobile để cấu hình minimap ở chế độ đơn giản (read-only)
   let isMobile = window.innerWidth < 768;
-  const shouldInitMinimap = minimapEl && !isMobile;
-  
-  // Hàm helper để ẩn/hiện minimap
-  const toggleMinimapVisibility = (hide) => {
-    if (!minimapEl) return;
-    const minimapPanel = minimapEl.closest('.minimap-panel');
-    const voiceBtn = minimapPanel ? minimapPanel.querySelector('#voice-command-btn') : null;
-    const toolbar = minimapPanel ? minimapPanel.querySelector('.minimap-toolbar') : null;
-    if (hide) {
-      // Hide only the map & toolbar, keep voice button visible on mobile
-      minimapEl.style.display = 'none';
-      if (toolbar) toolbar.style.display = 'none';
-      if (voiceBtn) {
-        voiceBtn.style.display = '';
-        voiceBtn.style.position = 'fixed';
-        voiceBtn.style.right = '12px';
-        voiceBtn.style.bottom = '76px';
-        voiceBtn.style.zIndex = '1000';
-      }
-      if (minimapPanel) {
-        minimapPanel.style.display = '';
-        minimapPanel.style.position = 'static';
-      }
-    } else {
-      // Show full panel with minimap on desktop
-      if (toolbar) toolbar.style.display = '';
-      minimapEl.style.display = '';
-      if (minimapPanel) minimapPanel.style.display = '';
-      if (voiceBtn) {
-        // reset voice button positioning to default within the panel
-        voiceBtn.style.position = '';
-        voiceBtn.style.right = '';
-        voiceBtn.style.bottom = '';
-        voiceBtn.style.zIndex = '';
-      }
-    }
-  };
-  
-  if (isMobile && minimapEl) {
-    console.log('[App] Mobile device detected, hiding minimap');
-    toggleMinimapVisibility(true);
-  }
+  const shouldInitMinimap = !!minimapEl; // luôn khởi tạo minimap cả trên mobile (read-only)
 
   // Helper function để tạo minimap
   const createMinimapInstance = () => {
     const checkIsMobile = window.innerWidth < 768;
-    if (!minimapEl || checkIsMobile) return null;
+    if (!minimapEl) return null;
     return createMinimap({
       container: minimapEl,
       graph: currentGraph,
-      onGotoScene: (id) => { userActivity(); return navigateThrottled(id); },
+      // Trên mobile: chỉ hiển thị vị trí hiện tại, bỏ tìm đường thủ công
+      readOnly: checkIsMobile,
+      mobileMode: checkIsMobile,
+      onGotoScene: (id) => { userActivity(); primeAudioPlayback(); return navigateThrottled(id); },
       onPathPlay: (path) => {
         if (!Array.isArray(path) || !path.length) return Promise.resolve();
+        primeAudioPlayback();
         const FADE_MS = 100, MAX_STEPS = 200;
         const ids = path.slice(0, MAX_STEPS).map(p => String(p));
         (async () => {
           for (let idx = 0; idx < ids.length; idx++) {
             const id = ids[idx];
-            // Delay 3s giữa các bước (bỏ qua bước đầu tiên nếu đang ở đúng scene)
-            if (idx > 0) { await new Promise(r => setTimeout(r, NAV_DELAY_MS)); }
+            if (idx > 0) {
+              const fromId = ids[idx - 1];
+              // Align view to hotspot in `fromId` that leads to `id`
+              await alignToHotspotBeforeNavigate(fromId, id);
+            }
             try {
               userActivity();
               await fade(1, FADE_MS);
-              await navigateThrottled(id);
+              // Navigate immediately after alignment; no throttle delay and record edge
+              await loadScene(id, ids[idx - 1] ?? null);
               await fade(0, FADE_MS);
             } catch (e) { console.error('onPathPlay step failed for', id, e); }
           }
+          try { await announceArrival(ids[ids.length - 1]); } catch (e) {}
         })();
         return Promise.resolve();
       },
@@ -856,6 +978,119 @@ function scheduleAutoResume() {
   
   let minimap = shouldInitMinimap ? createMinimapInstance() : null;
 
+  // Ensure current position is shown once minimap finishes initial render
+  window.addEventListener('minimap-ready', () => {
+    try {
+      if (currentSceneId && minimap?.setActive) {
+        minimap.setActive(currentSceneId);
+      }
+    } catch (e) { console.warn('[App] Failed to set active on minimap-ready:', e); }
+  });
+
+  // Setup mobile-only fullscreen button
+  (function setupFullscreenBtn(){
+    const fsBtn = document.getElementById('btnFullscreen');
+    const mobileTitle = document.getElementById('mobileSceneTitle');
+    const showMobileUI = () => {
+      const mobile = window.innerWidth < 768;
+      if (fsBtn) fsBtn.style.display = mobile ? 'inline-flex' : 'none';
+      if (mobileTitle) mobileTitle.style.display = mobile ? 'block' : 'none';
+    };
+    const isFs = () => document.fullscreenElement || document.webkitFullscreenElement || document.msFullscreenElement;
+    const enterFs = async () => {
+      const el = document.documentElement;
+      try {
+        if (el.requestFullscreen) return await el.requestFullscreen();
+        if (el.webkitRequestFullscreen) return el.webkitRequestFullscreen();
+        if (el.msRequestFullscreen) return el.msRequestFullscreen();
+      } catch (e) { console.warn('[Fullscreen] enter failed:', e); }
+    };
+    const exitFs = async () => {
+      try {
+        if (document.exitFullscreen) return await document.exitFullscreen();
+        if (document.webkitExitFullscreen) return document.webkitExitFullscreen();
+        if (document.msExitFullscreen) return document.msExitFullscreen();
+      } catch (e) { console.warn('[Fullscreen] exit failed:', e); }
+    };
+    const updateBtn = () => {
+      if (!fsBtn) return;
+      fsBtn.textContent = isFs() ? '🗗' : '⛶';
+      fsBtn.title = isFs() ? 'Thoát toàn màn hình' : 'Toàn màn hình';
+      fsBtn.setAttribute('aria-label', fsBtn.title);
+    };
+    if (fsBtn) {
+      fsBtn.addEventListener('click', async () => {
+        if (isFs()) await exitFs(); else await enterFs();
+        setTimeout(updateBtn, 50);
+      });
+    }
+    document.addEventListener('fullscreenchange', updateBtn);
+    document.addEventListener('webkitfullscreenchange', updateBtn);
+    document.addEventListener('MSFullscreenChange', updateBtn);
+    showMobileUI();
+    updateBtn();
+    window.addEventListener('resize', () => { showMobileUI(); updateBtn(); });
+  })();
+
+  // Setup mobile-only minimap and language toggle buttons
+  (function setupMobileButtons(){
+    const mmBtn = document.getElementById('btnMinimap');
+    const langBtn = document.getElementById('btnLang');
+    const showMobile = () => {
+      const m = window.innerWidth < 768;
+      if (mmBtn) mmBtn.style.display = m ? 'inline-flex' : 'none';
+      if (langBtn) langBtn.style.display = m ? 'inline-flex' : 'none';
+    };
+    showMobile();
+    window.addEventListener('resize', showMobile);
+
+    if (mmBtn) {
+      const updateMmBtn = () => {
+        const el = document.getElementById('minimap');
+        if (!el) return;
+        const hidden = el.classList.contains('minimap--hidden');
+        mmBtn.textContent = '🗺';
+        mmBtn.title = hidden ? 'Hiện minimap' : 'Ẩn minimap';
+        mmBtn.setAttribute('aria-label', mmBtn.title);
+      };
+      mmBtn.addEventListener('click', () => {
+        const el = document.getElementById('minimap');
+        if (!el) return;
+        // Toggle show/hide only on mobile to avoid showing the small block
+        if (el.classList.contains('minimap--hidden')) {
+          el.classList.remove('minimap--hidden');
+          el.classList.remove('minimap--collapsed');
+        } else {
+          el.classList.add('minimap--hidden');
+          el.classList.remove('minimap--collapsed');
+        }
+        updateMmBtn();
+      });
+      // Initialize button state
+      updateMmBtn();
+    }
+
+    if (langBtn) {
+      const updateLangBtn = () => {
+        const current = localStorage.getItem('lang') || 'vi';
+        langBtn.textContent = current.toUpperCase();
+        langBtn.title = current === 'vi' ? 'Đổi sang EN' : 'Switch to VI';
+        langBtn.setAttribute('aria-label', langBtn.title);
+      };
+      updateLangBtn();
+      langBtn.addEventListener('click', () => {
+        const current = (localStorage.getItem('lang') || 'vi').toLowerCase();
+        const next = current === 'vi' ? 'en' : 'vi';
+        localStorage.setItem('lang', next);
+        // Thông báo cho minimap và các thành phần khác
+        window.dispatchEvent(new CustomEvent('change-lang', { detail: next }));
+        // Cập nhật tiêu đề khu vực
+        try { updateTenKhuVuc(currentSceneId); } catch (_) {}
+        updateLangBtn();
+      });
+    }
+  })();
+
   // Refresh minimap với graph đã load từ API sau khi minimap đã khởi tạo xong (chỉ nếu không phải mobile)
   if (minimap && minimap.refresh && currentGraph && currentGraph.nodes && currentGraph.nodes.length > 0 && !isMobile) {
     setTimeout(() => {
@@ -864,7 +1099,7 @@ function scheduleAutoResume() {
     }, 200);
   }
   
-  // Handle window resize để ẩn/hiện minimap khi chuyển giữa mobile và desktop
+  // Handle window resize: chuyển chế độ mobile/desktop cho minimap
   let resizeTimeout;
   window.addEventListener('resize', () => {
     clearTimeout(resizeTimeout);
@@ -872,22 +1107,15 @@ function scheduleAutoResume() {
       const newIsMobile = window.innerWidth < 768;
       if (newIsMobile !== isMobile) {
         isMobile = newIsMobile;
-        if (newIsMobile) {
-          console.log('[App] Switched to mobile, hiding minimap');
-          toggleMinimapVisibility(true);
-        } else {
-          console.log('[App] Switched to desktop, showing minimap');
-          toggleMinimapVisibility(false);
-          // Nếu minimap chưa được khởi tạo và giờ là desktop, khởi tạo lại
-          if (!minimap && minimapEl) {
-            console.log('[App] Initializing minimap after resize to desktop');
-            minimap = createMinimapInstance();
-            if (minimap && currentGraph && currentGraph.nodes && currentGraph.nodes.length > 0) {
-              setTimeout(() => {
-                minimap.refresh(currentGraph);
-                console.log('[App] Minimap initialized and refreshed after resize');
-              }, 200);
-            }
+        console.log('[App] Resize detected, reinitializing minimap with mode:', newIsMobile ? 'mobile' : 'desktop');
+        // Re-init minimap to apply mobile/desktop options
+        if (minimapEl) {
+          minimap = createMinimapInstance();
+          if (minimap && currentGraph && currentGraph.nodes && currentGraph.nodes.length > 0) {
+            setTimeout(() => {
+              minimap.refresh(currentGraph);
+              console.log('[App] Minimap initialized and refreshed after resize');
+            }, 200);
           }
         }
       }
@@ -914,9 +1142,8 @@ function scheduleAutoResume() {
   onSceneChange(({ id }) => {
     updateTenKhuVuc(id);
     const activeSceneData = scenes.find(s => s.id === id);
-    // Chỉ update minimap nếu không phải mobile (kiểm tra lại mỗi lần)
-    const currentIsMobile = window.innerWidth < 768;
-    if (!currentIsMobile && activeSceneData && minimap?.setActive) minimap.setActive(id);
+    // Luôn cập nhật minimap để làm nổi bật vị trí hiện tại (kể cả mobile)
+    if (activeSceneData && minimap?.setActive) minimap.setActive(id);
   });
 
 
@@ -938,6 +1165,7 @@ const voiceBot = createVoiceBot({
     console.log('[App] VoiceBot path:', path); // Log để kiểm tra
     
     if (!Array.isArray(path) || !path.length) return Promise.resolve();
+    primeAudioPlayback();
 
     // Gọi visualizePath NGAY LẬP TỨC để làm mờ và zoom minimap
     if (minimap && minimap.visualizePath) {
@@ -956,17 +1184,20 @@ const voiceBot = createVoiceBot({
     const ids = path.slice(0, MAX_STEPS).map(p => String(p));
     for (let idx = 0; idx < ids.length; idx++) {
       const id = ids[idx];
-      // Bỏ qua delay cho scene đầu tiên vì đã ở đó rồi
-      if (idx > 0) { await new Promise(resolve => setTimeout(resolve, NAV_DELAY_MS)); }
+      if (idx > 0) {
+        const fromId = ids[idx - 1];
+        await alignToHotspotBeforeNavigate(fromId, id);
+      }
       try {
         userActivity();
         await fade(1, FADE_MS);
-        await navigateThrottled(id);
+        await loadScene(id, ids[idx - 1] ?? null);
         await fade(0, FADE_MS);
       } catch (e) {
         console.error('onPathPlay step failed for', id, e);
       }
     }
+    try { await announceArrival(ids[ids.length - 1]); } catch (e) {}
     return Promise.resolve();
   },
   getGraph: () => currentGraph,
@@ -994,6 +1225,21 @@ const voiceBot = createVoiceBot({
   baseUrl: dataBaseUrl || '' // Use same origin for API calls
 });
 await voiceBot.mount();
+
+  // Đảm bảo nút VoiceBot luôn hiển thị (đặc biệt trên mobile)
+  function ensureVoiceButtonVisible() {
+    const btn = document.getElementById('voice-command-btn');
+    if (!btn) return;
+    btn.style.display = 'block';
+    btn.style.position = 'fixed';
+    btn.style.right = '15px';
+    // Đặt cao hơn footer để không che
+    btn.style.bottom = (window.innerWidth < 768) ? '110px' : '100px';
+    btn.style.zIndex = '10020';
+    btn.style.pointerEvents = 'auto';
+  }
+  ensureVoiceButtonVisible();
+  window.addEventListener('resize', ensureVoiceButtonVisible);
 
 
   // ===== Analytics tracking =====
