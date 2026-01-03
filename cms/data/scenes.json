@@ -37,11 +37,11 @@
   {
     "id": "congphu",
     "name": {
-      "en": "Side Gate",
-      "vi": "Cổng Phụ"
+      "vi": "Cổng Phụ",
+      "en": "Side Gate"
     },
     "type": "equirect",
-    "url": "/assets/congphu.jpg",
+    "url": "/uploads/congphu_1767434197839.webp",
     "initialView": {
       "yaw": 0.226506549190157,
       "pitch": 0.059635276565314754,
@@ -61,10 +61,10 @@
         "yaw": -0.38434424648655785
       },
       {
-        "target": "b0_3",
         "label": "Tầng Trệt Dãy B 3",
-        "yaw": 0.3537463966351968,
-        "pitch": 0.03997807997872016
+        "pitch": 0.03997807997872016,
+        "target": "b0_3",
+        "yaw": 0.3537463966351968
       }
     ],
     "floor": 0
@@ -72,15 +72,15 @@
   {
     "id": "phongtuyensinh",
     "name": {
-      "en": "Admissions Office",
-      "vi": "Phòng Tuyển Sinh"
+      "vi": "Phòng Tuyển Sinh",
+      "en": "Admissions Office"
     },
     "type": "equirect",
-    "url": "/assets/phongtuyensinh.jpg",
+    "url": "/uploads/phongtuyensinh_1767434219483.webp",
     "initialView": {
-      "hfov": 1.2,
+      "yaw": 0,
       "pitch": 0,
-      "yaw": 0
+      "hfov": 1.2
     },
     "hotspots": [
       {
@@ -99,7 +99,7 @@
       "en": "PTNLS Center"
     },
     "type": "equirect",
-    "url": "/assets/TrungtamPTNLS.jpg",
+    "url": "/uploads/TrungtamPTNLS_1767434239290.webp",
     "initialView": {
       "yaw": 0,
       "pitch": 0,
@@ -107,10 +107,10 @@
     },
     "hotspots": [
       {
-        "target": "congtruong",
-        "yaw": 3.3,
+        "label": "Cổng Chính",
         "pitch": 0,
-        "label": "Cổng Chính"
+        "target": "congtruong",
+        "yaw": 3.3
       }
     ],
     "floor": 0
@@ -118,11 +118,11 @@
   {
     "id": "duonglencong",
     "name": {
-      "en": "Path to Main Gate",
-      "vi": "Đường Lên Cổng"
+      "vi": "Đường Lên Cổng",
+      "en": "Path to Main Gate"
     },
     "type": "equirect",
-    "url": "/assets/duonglencong.jpg",
+    "url": "/uploads/duonglencong_1767434264051.webp",
     "initialView": {
       "yaw": 2.8968866971742484,
       "pitch": 0.16584445157402783,
@@ -147,11 +147,11 @@
   {
     "id": "santruong",
     "name": {
-      "en": "School Yard",
-      "vi": "Sân Trường"
+      "vi": "Sân Trường",
+      "en": "School Yard"
     },
     "type": "equirect",
-    "url": "/assets/santruong.jpg",
+    "url": "/uploads/santruong_1767434312081.webp",
     "initialView": {
       "yaw": -1.2762041385439176,
       "pitch": -0.19927270930189245,
@@ -183,10 +183,10 @@
         "yaw": 4
       },
       {
-        "target": "b0_3",
         "label": "Tầng Trệt Dãy B 3",
-        "yaw": -1.342993475415458,
-        "pitch": 0.004132349422778958
+        "pitch": 0.004132349422778958,
+        "target": "b0_3",
+        "yaw": -1.342993475415458
       }
     ],
     "floor": 0
@@ -268,7 +268,7 @@
       "en": "In Front of Canteen"
     },
     "type": "equirect",
-    "url": "/assets/truocphongan.jpg",
+    "url": "/uploads/truocphongan_1767434341923.webp",
     "initialView": {
       "yaw": 0,
       "pitch": 0,
@@ -276,16 +276,16 @@
     },
     "hotspots": [
       {
-        "target": "loidi1",
-        "yaw": 0,
+        "label": "Dãy Học Hỏi Hiếu Hành",
         "pitch": 0,
-        "label": "Dãy Học Hỏi Hiếu Hành"
+        "target": "loidi1",
+        "yaw": 0
       },
       {
-        "target": "phongan",
-        "yaw": -2.2,
+        "label": "Phòng Ăn",
         "pitch": -0.1,
-        "label": "Phòng Ăn"
+        "target": "phongan",
+        "yaw": -2.2
       }
     ],
     "floor": 0
@@ -297,7 +297,7 @@
       "en": "Canteen"
     },
     "type": "equirect",
-    "url": "/assets/phongan.jpg",
+    "url": "/uploads/phongan_1767434351299.webp",
     "initialView": {
       "yaw": 0,
       "pitch": 0,
@@ -305,10 +305,10 @@
     },
     "hotspots": [
       {
-        "target": "truocphongan",
-        "yaw": 4,
+        "label": "Rời Phòng Ăn",
         "pitch": 0,
-        "label": "Rời Phòng Ăn"
+        "target": "truocphongan",
+        "yaw": 4
       }
     ],
     "floor": 0
@@ -316,11 +316,11 @@
   {
     "id": "b0_1",
     "name": {
-      "en": "Ground Floor Block B1",
-      "vi": "Tầng Trệt Dãy B 1"
+      "vi": "Tầng Trệt Dãy B 1",
+      "en": "Ground Floor Block B1"
     },
     "type": "equirect",
-    "url": "/assets/b0_1.jpg",
+    "url": "/uploads/b0_1_1767434369977.webp",
     "initialView": {
       "yaw": -1.6133248324731913,
       "pitch": -0.10949946054899407,
@@ -355,7 +355,7 @@
       "en": "Ground Floor Block B2"
     },
     "type": "equirect",
-    "url": "/assets/b0_2.jpg",
+    "url": "/uploads/b0_2_1767434378973.webp",
     "initialView": {
       "yaw": 0,
       "pitch": 0,
@@ -363,28 +363,28 @@
     },
     "hotspots": [
       {
+        "label": "Tầng Trệt Dãy B 1",
+        "pitch": 0,
         "target": "b0_1",
-        "yaw": 1.3,
-        "pitch": 0,
-        "label": "Tầng Trệt Dãy B 1"
+        "yaw": 1.3
       },
       {
+        "label": "Sân Trường",
+        "pitch": 0,
         "target": "santruong",
-        "yaw": 0,
-        "pitch": 0,
-        "label": "Sân Trường"
+        "yaw": 0
       },
       {
+        "label": "Lên tầng 2 Dãy B",
+        "pitch": 0,
         "target": "b1_1",
-        "yaw": 2,
-        "pitch": 0,
-        "label": "Lên tầng 2 Dãy B"
+        "yaw": 2
       },
       {
-        "target": "b0_3",
-        "yaw": -2,
+        "label": "Tầng Trệt Dãy B 3",
         "pitch": 0.3,
-        "label": "Tầng Trệt Dãy B 3"
+        "target": "b0_3",
+        "yaw": -2
       }
     ],
     "floor": 0
@@ -392,11 +392,11 @@
   {
     "id": "b0_3",
     "name": {
-      "en": "Ground Floor Block B3",
-      "vi": "Tầng Trệt Dãy B 3"
+      "vi": "Tầng Trệt Dãy B 3",
+      "en": "Ground Floor Block B3"
     },
     "type": "equirect",
-    "url": "/assets/b0_3.jpg",
+    "url": "/uploads/b0_3_1767434404471.webp",
     "initialView": {
       "yaw": 1.623406702889958,
       "pitch": 0.06440960107062921,
@@ -410,10 +410,10 @@
         "yaw": 1.472370206846799
       },
       {
-        "target": "a0_1",
         "label": "Hành lang Dãy A 1",
-        "yaw": 1.5346747299764143,
-        "pitch": -0.027945808143972073
+        "pitch": -0.027945808143972073,
+        "target": "a0_1",
+        "yaw": 1.5346747299764143
       }
     ],
     "floor": 0
@@ -425,7 +425,7 @@
       "en": "Block B1 - Middle 2"
     },
     "type": "equirect",
-    "url": "/assets/b1.giua.2.jpg",
+    "url": "/uploads/b1_1_1767434635311.webp",
     "initialView": {
       "yaw": 0,
       "pitch": 0,
@@ -433,40 +433,40 @@
     },
     "hotspots": [
       {
+        "label": "Phòng Sejong 4",
+        "pitch": 0,
         "target": "b1_sejong4",
-        "yaw": 1.4,
-        "pitch": 0.0,
-        "label": "Phòng Sejong 4"
+        "yaw": 1.4
       },
       {
+        "label": "Phòng Sejong 5",
+        "pitch": 0,
         "target": "b1_sejong5",
-        "yaw": 0.8,
-        "pitch": 0.0,
-        "label": "Phòng Sejong 5"
+        "yaw": 0.8
       },
       {
-        "target": "b1_2",
-        "yaw": -0.4,
+        "label": "Trung tâm Nghiên cứu HTTM",
         "pitch": 0.2,
-        "label": "Trung tâm Nghiên cứu HTTM"
+        "target": "b1_2",
+        "yaw": -0.4
       },
       {
+        "label": "Phòng DataLAB",
+        "pitch": 0,
         "target": "b1_datalab",
-        "yaw": -0.9,
-        "pitch": 0.0,
-        "label": "Phòng DataLAB"
+        "yaw": -0.9
       },
       {
+        "label": "Lên tầng 2 Dãy B",
+        "pitch": 0,
         "target": "b2_1",
-        "yaw": 0,
-        "pitch": 0.0,
-        "label": "Lên tầng 2 Dãy B"
+        "yaw": 0
       },
       {
+        "label": "Tầng 1 Dãy B - 3",
+        "pitch": 0,
         "target": "b1_4",
-        "yaw": -1.4,
-        "pitch": 0.0,
-        "label": "Tầng 1 Dãy B - 3"
+        "yaw": -1.4
       }
     ],
     "floor": 1
@@ -474,11 +474,11 @@
   {
     "id": "b1_2",
     "name": {
-      "en": "Block B1 - Middle 1",
-      "vi": "Tầng 1 Dãy B - Giữa 1"
+      "vi": "Tầng 1 Dãy B - Giữa 1",
+      "en": "Block B1 - Middle 1"
     },
     "type": "equirect",
-    "url": "/assets/b1.giua.1.jpg",
+    "url": "/uploads/b1_2_1767434648314.webp",
     "initialView": {
       "yaw": 1.8864979359520166,
       "pitch": 0.03550224231475774,
@@ -528,10 +528,10 @@
         "yaw": 1.83217574199897
       },
       {
-        "target": "b1_sejong4",
         "label": "Phòng Sejong 4",
-        "yaw": 2.04426188639051,
-        "pitch": 0.0225648610057242
+        "pitch": 0.0225648610057242,
+        "target": "b1_sejong4",
+        "yaw": 2.04426188639051
       }
     ],
     "floor": 1
@@ -539,11 +539,11 @@
   {
     "id": "b1_3",
     "name": {
-      "en": "Block B1 - Corridor",
-      "vi": "Tầng 1 Dãy B - Hành lang"
+      "vi": "Tầng 1 Dãy B - Hành lang",
+      "en": "Block B1 - Corridor"
     },
     "type": "equirect",
-    "url": "/assets/b1.hl.jpg",
+    "url": "/uploads/b1_3_1767434668905.webp",
     "initialView": {
       "yaw": 0.5109287309570405,
       "pitch": 0.10833924342350798,
@@ -572,7 +572,7 @@
       "en": "Block B1 - Computer Rooms"
     },
     "type": "equirect",
-    "url": "/assets/b1.pm2.jpg",
+    "url": "/uploads/b1_4_1767434698982.webp",
     "initialView": {
       "yaw": 0,
       "pitch": 0,
@@ -580,28 +580,28 @@
     },
     "hotspots": [
       {
-        "target": "b1_2",
-        "yaw": 1.3,
+        "label": "Tầng 1 Dãy B - 1",
         "pitch": 0.3,
-        "label": "Tầng 1 Dãy B - 1"
+        "target": "b1_2",
+        "yaw": 1.3
       },
       {
+        "label": "Tầng 1 Dãy B - 4",
+        "pitch": 0,
         "target": "b1_5",
-        "yaw": -2,
-        "pitch": 0.0,
-        "label": "Tầng 1 Dãy B - 4"
+        "yaw": -2
       },
       {
+        "label": "Phòng máy 2",
+        "pitch": 0,
         "target": "b1_pm2",
-        "yaw": 0,
-        "pitch": 0.0,
-        "label": "Phòng máy 2"
+        "yaw": 0
       },
       {
+        "label": "Phòng máy 1",
+        "pitch": 0,
         "target": "b1_pm1",
-        "yaw": -1.7,
-        "pitch": 0.0,
-        "label": "Phòng máy 1"
+        "yaw": -1.7
       }
     ],
     "floor": 1
@@ -609,11 +609,11 @@
   {
     "id": "b1_5",
     "name": {
-      "en": "Block B1 - End",
-      "vi": "Tầng 1 Dãy B - Cuối"
+      "vi": "Tầng 1 Dãy B - Cuối",
+      "en": "Block B1 - End"
     },
     "type": "equirect",
-    "url": "/assets/b1.cuoi.jpg",
+    "url": "/uploads/b1_5_1767434720918.webp",
     "initialView": {
       "yaw": -1.587798506106612,
       "pitch": 0.16179150902026862,
@@ -633,10 +633,10 @@
         "yaw": -2.2752167681194777
       },
       {
-        "target": "b2_5",
         "label": "Tầng 2 B 5",
-        "yaw": -1.897861674033102,
-        "pitch": -0.2629886173973919
+        "pitch": -0.2629886173973919,
+        "target": "b2_5",
+        "yaw": -1.897861674033102
       }
     ],
     "floor": 1
@@ -648,7 +648,7 @@
       "en": "Smart System Center Room"
     },
     "type": "equirect",
-    "url": "/assets/b1_phethong.jpg",
+    "url": "/uploads/b1_phethong_1767434733203.webp",
     "initialView": {
       "yaw": 0,
       "pitch": 0,
@@ -671,7 +671,7 @@
       "en": "DataLAB Room"
     },
     "type": "equirect",
-    "url": "/assets/b1_datalab.jpg",
+    "url": "/uploads/b1_datalab_1767434761726.webp",
     "initialView": {
       "yaw": 0,
       "pitch": 0,
@@ -679,10 +679,10 @@
     },
     "hotspots": [
       {
+        "label": "Ra phòng",
+        "pitch": 0,
         "target": "b1_1",
-        "yaw": -0.5,
-        "pitch": 0.0,
-        "label": "Ra phòng"
+        "yaw": -0.5
       }
     ],
     "floor": 1
@@ -694,7 +694,7 @@
       "en": "Sejong Room 5"
     },
     "type": "equirect",
-    "url": "/assets/b1_sejong5.jpg",
+    "url": "/uploads/b1_sejong5_1767434795426.webp",
     "initialView": {
       "yaw": 0,
       "pitch": 0,
@@ -702,10 +702,10 @@
     },
     "hotspots": [
       {
-        "target": "b1_1",
-        "yaw": -0.1,
+        "label": "Ra phòng",
         "pitch": 0.4,
-        "label": "Ra phòng"
+        "target": "b1_1",
+        "yaw": -0.1
       }
     ],
     "floor": 1
@@ -717,7 +717,7 @@
       "en": "Sejong Room 4"
     },
     "type": "equirect",
-    "url": "/assets/b1_sejong4.jpg",
+    "url": "/uploads/b1_sejong4_1767434807566.webp",
     "initialView": {
       "yaw": 0,
       "pitch": 0,
@@ -725,10 +725,10 @@
     },
     "hotspots": [
       {
-        "target": "b1_1",
-        "yaw": -0.1,
+        "label": "Ra phòng",
         "pitch": 0.4,
-        "label": "Ra phòng"
+        "target": "b1_1",
+        "yaw": -0.1
       }
     ],
     "floor": 1
@@ -740,7 +740,7 @@
       "en": "Sejong Room 6"
     },
     "type": "equirect",
-    "url": "/assets/b1_sejong6.jpg",
+    "url": "/uploads/b1_sejong6_1767434816309.webp",
     "initialView": {
       "yaw": 0,
       "pitch": 0,
@@ -748,10 +748,10 @@
     },
     "hotspots": [
       {
-        "target": "b1_2",
-        "yaw": -0.1,
+        "label": "Ra phòng",
         "pitch": 0.4,
-        "label": "Ra phòng"
+        "target": "b1_2",
+        "yaw": -0.1
       }
     ],
     "floor": 1
@@ -763,7 +763,7 @@
       "en": "Computer Room 1"
     },
     "type": "equirect",
-    "url": "/assets/b1_pm1.jpg",
+    "url": "/uploads/b1_pm1_1767434852779.webp",
     "initialView": {
       "yaw": 0,
       "pitch": 0,
@@ -771,10 +771,10 @@
     },
     "hotspots": [
       {
-        "target": "b1_4",
-        "yaw": 1.2,
+        "label": "Ra phòng",
         "pitch": 0,
-        "label": "Ra phòng"
+        "target": "b1_4",
+        "yaw": 1.2
       }
     ],
     "floor": 1
@@ -786,7 +786,7 @@
       "en": "Computer Room 2"
     },
     "type": "equirect",
-    "url": "/assets/b1_pm2.jpg",
+    "url": "/uploads/b1_pm2_1767434829305.webp",
     "initialView": {
       "yaw": 0,
       "pitch": 0,
@@ -794,10 +794,10 @@
     },
     "hotspots": [
       {
-        "target": "b1_4",
-        "yaw": 1.2,
+        "label": "Ra phòng",
         "pitch": 0,
-        "label": "Ra phòng"
+        "target": "b1_4",
+        "yaw": 1.2
       }
     ],
     "floor": 1
@@ -809,7 +809,7 @@
       "en": "Block B2 - 1"
     },
     "type": "equirect",
-    "url": "/assets/b2_1.jpg",
+    "url": "/uploads/b2_1_1767434970342.webp",
     "initialView": {
       "yaw": 0,
       "pitch": 0,
@@ -817,34 +817,34 @@
     },
     "hotspots": [
       {
+        "label": "Tầng 2 Dãy B - 2",
+        "pitch": 0,
         "target": "b2_3",
-        "yaw": 1.4,
-        "pitch": 0.0,
-        "label": "Tầng 2 Dãy B - 2"
+        "yaw": 1.4
       },
       {
+        "label": "Lên tầng 3",
+        "pitch": 0,
         "target": "b3_1",
-        "yaw": 0,
-        "pitch": 0.0,
-        "label": "Lên tầng 3"
+        "yaw": 0
       },
       {
-        "target": "b1_1",
-        "yaw": -0.3,
+        "label": "Xuống tầng 1",
         "pitch": 0.4,
-        "label": "Xuống tầng 1"
+        "target": "b1_1",
+        "yaw": -0.3
       },
       {
-        "target": "b2_2",
-        "yaw": -0.5,
+        "label": "Smart LAB",
         "pitch": 0.2,
-        "label": "Smart LAB"
+        "target": "b2_2",
+        "yaw": -0.5
       },
       {
+        "label": "Tầng 2 Dãy B - 3",
+        "pitch": 0,
         "target": "b2_4",
-        "yaw": -1.4,
-        "pitch": 0.0,
-        "label": "Tầng 2 Dãy B - 3"
+        "yaw": -1.4
       }
     ],
     "floor": 2
@@ -856,7 +856,7 @@
       "en": "Block B2 - 2"
     },
     "type": "equirect",
-    "url": "/assets/b2_2.jpg",
+    "url": "/uploads/b2_2_1767435031582.webp",
     "initialView": {
       "yaw": 0,
       "pitch": 0,
@@ -864,34 +864,34 @@
     },
     "hotspots": [
       {
+        "label": "Tầng 2 Dãy B",
+        "pitch": 0,
         "target": "b2_1",
-        "yaw": 2.5,
-        "pitch": 0.0,
-        "label": "Tầng 2 Dãy B"
+        "yaw": 2.5
       },
       {
+        "label": "Phòng Lab",
+        "pitch": 0,
         "target": "b2_plab",
-        "yaw": 1.75,
-        "pitch": 0.0,
-        "label": "Phòng Lab"
+        "yaw": 1.75
       },
       {
+        "label": "Phòng SteamLab",
+        "pitch": 0,
         "target": "b2_steamlab",
-        "yaw": 1.2,
-        "pitch": 0.0,
-        "label": "Phòng SteamLab"
+        "yaw": 1.2
       },
       {
+        "label": "Tầng 2 Dãy B - 2",
+        "pitch": 0,
         "target": "b2_3",
-        "yaw": 2.0,
-        "pitch": 0.0,
-        "label": "Tầng 2 Dãy B - 2"
+        "yaw": 2
       },
       {
+        "label": "Tầng 2 Dãy B - 3",
+        "pitch": 0,
         "target": "b2_4",
-        "yaw": -2.2,
-        "pitch": 0.0,
-        "label": "Tầng 2 Dãy B - 3"
+        "yaw": -2.2
       }
     ],
     "floor": 2
@@ -899,11 +899,11 @@
   {
     "id": "b2_3",
     "name": {
-      "en": "Block B2 - 3",
-      "vi": "Tầng 2 Dãy B - 3"
+      "vi": "Tầng 2 Dãy B - 3",
+      "en": "Block B2 - 3"
     },
     "type": "equirect",
-    "url": "/assets/b2_3.jpg",
+    "url": "/uploads/b2_3_1767435047766.webp",
     "initialView": {
       "yaw": 0.3440341108828484,
       "pitch": 0.008015942156758271,
@@ -923,10 +923,10 @@
         "yaw": 0
       },
       {
-        "target": "phongb25",
         "label": "Phòng B2.5",
-        "yaw": 0.31775116372746126,
-        "pitch": 0.11858134503853357
+        "pitch": 0.11858134503853357,
+        "target": "phongb25",
+        "yaw": 0.31775116372746126
       }
     ],
     "floor": 2
@@ -938,7 +938,7 @@
       "en": "Block B2 - 4"
     },
     "type": "equirect",
-    "url": "/assets/b2_4.jpg",
+    "url": "/uploads/b2_4_1767435064258.webp",
     "initialView": {
       "yaw": 0,
       "pitch": 0,
@@ -946,16 +946,16 @@
     },
     "hotspots": [
       {
-        "target": "b2_2",
-        "yaw": 1.4,
+        "label": "Tầng 2 Dãy B - 1",
         "pitch": 0.2,
-        "label": "Tầng 2 Dãy B - 1"
+        "target": "b2_2",
+        "yaw": 1.4
       },
       {
-        "target": "b2_5",
-        "yaw": -1.7,
+        "label": "Tầng 2 Dãy B - 1",
         "pitch": 0.2,
-        "label": "Tầng 2 Dãy B - 1"
+        "target": "b2_5",
+        "yaw": -1.7
       }
     ],
     "floor": 2
@@ -963,11 +963,11 @@
   {
     "id": "b2_5",
     "name": {
-      "en": "Block B2 - End",
-      "vi": "Tầng 2 Dãy B - Cuối"
+      "vi": "Tầng 2 Dãy B - Cuối",
+      "en": "Block B2 - End"
     },
     "type": "equirect",
-    "url": "/assets/b2_5.jpg",
+    "url": "/uploads/b2_5_1767435079175.webp",
     "initialView": {
       "yaw": 2.0632372195651616,
       "pitch": 0.35632393762661607,
@@ -987,10 +987,10 @@
         "yaw": 2.6557991659729083
       },
       {
-        "target": "b1_5",
         "label": "Tầng 1 B_5",
-        "yaw": 1.8414943174119838,
-        "pitch": 0.4892533998926698
+        "pitch": 0.4892533998926698,
+        "target": "b1_5",
+        "yaw": 1.8414943174119838
       }
     ],
     "floor": 2
@@ -1002,7 +1002,7 @@
       "en": "Lab Room"
     },
     "type": "equirect",
-    "url": "/assets/b2_plab.jpg",
+    "url": "/uploads/b2_plab_1767435098527.webp",
     "initialView": {
       "yaw": 0,
       "pitch": 0,
@@ -1010,10 +1010,10 @@
     },
     "hotspots": [
       {
+        "label": "Rời phòng",
+        "pitch": 0,
         "target": "b2_2",
-        "yaw": 0,
-        "pitch": 0.0,
-        "label": "Rời phòng"
+        "yaw": 0
       }
     ],
     "floor": 2
@@ -1025,7 +1025,7 @@
       "en": "SteamLab Room"
     },
     "type": "equirect",
-    "url": "/assets/b2_steamlab.jpg",
+    "url": "/uploads/b2_steamlab_1767435126465.webp",
     "initialView": {
       "yaw": 0,
       "pitch": 0,
@@ -1033,10 +1033,10 @@
     },
     "hotspots": [
       {
+        "label": "Rời phòng",
+        "pitch": 0,
         "target": "b2_2",
-        "yaw": 0,
-        "pitch": 0.0,
-        "label": "Rời phòng"
+        "yaw": 0
       }
     ],
     "floor": 2
@@ -1048,7 +1048,7 @@
       "en": "Block B3 - 1"
     },
     "type": "equirect",
-    "url": "/assets/b3_1.jpg",
+    "url": "/uploads/b3_1_1767435259844.webp",
     "initialView": {
       "yaw": 0,
       "pitch": 0,
@@ -1056,28 +1056,28 @@
     },
     "hotspots": [
       {
+        "label": "Tầng 3 Dãy B - 2",
+        "pitch": 0,
         "target": "b3_3",
-        "yaw": 1.4,
-        "pitch": 0.0,
-        "label": "Tầng 3 Dãy B - 2"
+        "yaw": 1.4
       },
       {
-        "target": "b3_2",
-        "yaw": -0.4,
+        "label": "BIII.13A",
         "pitch": 0.2,
-        "label": "BIII.13A"
+        "target": "b3_2",
+        "yaw": -0.4
       },
       {
-        "target": "b2_1",
-        "yaw": -0.2,
+        "label": "Xuống tầng 2",
         "pitch": 0.3,
-        "label": "Xuống tầng 2"
+        "target": "b2_1",
+        "yaw": -0.2
       },
       {
+        "label": "BIII.14A",
+        "pitch": 0,
         "target": "b3_5",
-        "yaw": -1.4,
-        "pitch": 0.0,
-        "label": "BIII.14A"
+        "yaw": -1.4
       }
     ],
     "floor": 3
@@ -1089,7 +1089,7 @@
       "en": "in front of Room BIII.13A"
     },
     "type": "equirect",
-    "url": "/assets/b3_2.jpg",
+    "url": "/uploads/b3_2_1767435271290.webp",
     "initialView": {
       "yaw": 0,
       "pitch": 0,
@@ -1097,22 +1097,22 @@
     },
     "hotspots": [
       {
+        "label": "Tầng 3 Dãy B",
+        "pitch": 0.3,
         "target": "b3_1",
-        "yaw": 3.1,
-        "pitch": 0.3,
-        "label": "Tầng 3 Dãy B"
+        "yaw": 3.1
       },
       {
+        "label": "BIII.11",
+        "pitch": 0.3,
         "target": "b3_3",
-        "yaw": 1.8,
-        "pitch": 0.3,
-        "label": "BIII.11"
+        "yaw": 1.8
       },
       {
-        "target": "b3_5",
-        "yaw": -2.0,
+        "label": "BIII.14A",
         "pitch": 0.3,
-        "label": "BIII.14A"
+        "target": "b3_5",
+        "yaw": -2
       }
     ],
     "floor": 3
@@ -1124,7 +1124,7 @@
       "en": "Block B3 - 2"
     },
     "type": "equirect",
-    "url": "/assets/b3_3.jpg",
+    "url": "/uploads/b3_3_1767435286778.webp",
     "initialView": {
       "yaw": 0,
       "pitch": 0,
@@ -1132,16 +1132,16 @@
     },
     "hotspots": [
       {
-        "target": "b3_4",
-        "yaw": 1.4,
+        "label": "Tầng 3 Dãy B - 3",
         "pitch": 0.3,
-        "label": "Tầng 3 Dãy B - 3"
+        "target": "b3_4",
+        "yaw": 1.4
       },
       {
-        "target": "b3_2",
-        "yaw": -1.7,
+        "label": "Trước Phòng BIII.13A",
         "pitch": 0.3,
-        "label": "Trước Phòng BIII.13A"
+        "target": "b3_2",
+        "yaw": -1.7
       }
     ],
     "floor": 3
@@ -1149,11 +1149,11 @@
   {
     "id": "b3_4",
     "name": {
-      "en": "Before the Faculty of Social Sciences and Humanities",
-      "vi": "Trước Khoa Xã hội và Nhân văn"
+      "vi": "Trước Khoa Xã hội và Nhân văn",
+      "en": "Before the Faculty of Social Sciences and Humanities"
     },
     "type": "equirect",
-    "url": "/assets/b3_4.jpg",
+    "url": "/uploads/b3_4_1767435312002.webp",
     "initialView": {
       "yaw": -1.1476773252196075,
       "pitch": -0.0009513660590805273,
@@ -1188,7 +1188,7 @@
       "en": "Block B3 - 3"
     },
     "type": "equirect",
-    "url": "/assets/b3_5.jpg",
+    "url": "/uploads/b3_5_1767435348293.webp",
     "initialView": {
       "yaw": 0,
       "pitch": 0,
@@ -1196,22 +1196,22 @@
     },
     "hotspots": [
       {
+        "label": "BIII.13A",
+        "pitch": 0.3,
         "target": "b3_2",
-        "yaw": 1.5,
-        "pitch": 0.3,
-        "label": "BIII.13A"
+        "yaw": 1.5
       },
       {
+        "label": "Phòng BIII.14A",
+        "pitch": 0,
         "target": "b3_14a",
-        "yaw": 0,
-        "pitch": 0.0,
-        "label": "Phòng BIII.14A"
+        "yaw": 0
       },
       {
-        "target": "b3_6",
-        "yaw": -1.6,
+        "label": "Cuối hành lang tầng 3",
         "pitch": 0.3,
-        "label": "Cuối hành lang tầng 3"
+        "target": "b3_6",
+        "yaw": -1.6
       }
     ],
     "floor": 3
@@ -1219,11 +1219,11 @@
   {
     "id": "b3_6",
     "name": {
-      "en": "End of Corridor Block B3 - 3rd Floor",
-      "vi": "Cuối hành lang tầng 3 Dãy B"
+      "vi": "Cuối hành lang tầng 3 Dãy B",
+      "en": "End of Corridor Block B3 - 3rd Floor"
     },
     "type": "equirect",
-    "url": "/assets/b3_6.jpg",
+    "url": "/uploads/b3_6_1767435391132.webp",
     "initialView": {
       "yaw": 2.217987841160152,
       "pitch": 0.3227945708478277,
@@ -1252,7 +1252,7 @@
       "en": "Room BIII.14A"
     },
     "type": "equirect",
-    "url": "/assets/b3_14a.jpg",
+    "url": "/uploads/b3_14a_1767435456491.webp",
     "initialView": {
       "yaw": 0,
       "pitch": 0,
@@ -1260,10 +1260,10 @@
     },
     "hotspots": [
       {
+        "label": "Ra phòng",
+        "pitch": 0,
         "target": "b3_5",
-        "yaw": 1.3,
-        "pitch": 0.0,
-        "label": "Ra phòng"
+        "yaw": 1.3
       }
     ],
     "floor": 3
@@ -1271,11 +1271,11 @@
   {
     "id": "trcdaya",
     "name": {
-      "en": "In Front of Block A",
-      "vi": "Trước Dãy A"
+      "vi": "Trước Dãy A",
+      "en": "In Front of Block A"
     },
     "type": "equirect",
-    "url": "/assets/truocdaya.jpg",
+    "url": "/uploads/trcdaya_1767434416294.webp",
     "initialView": {
       "yaw": 1.6816284367169274,
       "pitch": 0.0067052394830060535,
@@ -1312,11 +1312,11 @@
   {
     "id": "truockhoacntt",
     "name": {
-      "en": "In Front of IT Dept.",
-      "vi": "Trước Khoa CNTT"
+      "vi": "Trước khoa công nghệ thông tin",
+      "en": "In Front of IT Dept."
     },
     "type": "equirect",
-    "url": "/assets/truockhoacntt.jpg",
+    "url": "/uploads/truockhoacntt_1767434454936.webp",
     "initialView": {
       "yaw": 1.820043939788662,
       "pitch": -0.1605226129376618,
@@ -1359,11 +1359,11 @@
   {
     "id": "a0_1",
     "name": {
-      "en": "Corridor Block A1",
-      "vi": "Hành lang Dãy A 1"
+      "vi": "Hành lang Dãy A 1",
+      "en": "Corridor Block A1"
     },
     "type": "equirect",
-    "url": "/assets/a0_1.jpg",
+    "url": "/uploads/a0_1_1767434471143.webp",
     "initialView": {
       "yaw": 1.357458336455947,
       "pitch": -0.09062947792563847,
@@ -1395,10 +1395,10 @@
         "yaw": 2.92542240461203
       },
       {
-        "target": "b0_3",
         "label": "Tầng Trệt Dãy B 3",
-        "yaw": 1.2764094116788183,
-        "pitch": 0.09898566998563751
+        "pitch": 0.09898566998563751,
+        "target": "b0_3",
+        "yaw": 1.2764094116788183
       }
     ],
     "floor": 0
@@ -1406,11 +1406,11 @@
   {
     "id": "a0_2",
     "name": {
-      "en": "Corridor Block A2",
-      "vi": "Hành lang Dãy A 2"
+      "vi": "Hành lang Dãy A 2",
+      "en": "Corridor Block A2"
     },
     "type": "equirect",
-    "url": "/assets/a0_2.jpg",
+    "url": "/uploads/a0_2_1767434482312.webp",
     "initialView": {
       "yaw": -1.115313483109798,
       "pitch": -0.18966507793252596,
@@ -1447,11 +1447,11 @@
   {
     "id": "a0_3",
     "name": {
-      "en": "Corridor Block A3",
-      "vi": "Hành lang Dãy A 3"
+      "vi": "Hành lang Dãy A 3",
+      "en": "Corridor Block A3"
     },
     "type": "equirect",
-    "url": "/assets/a0_3.jpg",
+    "url": "/uploads/a0_3_1767434498660.webp",
     "initialView": {
       "yaw": 0.2500990832912784,
       "pitch": 0.4828745197480053,
@@ -1495,10 +1495,10 @@
         "yaw": -1.27017219000678
       },
       {
-        "target": "a0_phongkebencntt",
         "label": "Khoa điện",
-        "yaw": 1.26235186755496,
-        "pitch": 0.0115112507157283
+        "pitch": 0.0115112507157283,
+        "target": "a0_phongkebencntt",
+        "yaw": 1.26235186755496
       }
     ],
     "floor": 0
@@ -1510,7 +1510,7 @@
       "en": "IT Department"
     },
     "type": "equirect",
-    "url": "/assets/a0_cntt.jpg",
+    "url": "/uploads/a0_cntt_1767434509440.webp",
     "initialView": {
       "yaw": 0,
       "pitch": 0,
@@ -1533,7 +1533,7 @@
       "en": "Architecture Department"
     },
     "type": "equirect",
-    "url": "/assets/a0_kientruc.jpg",
+    "url": "/uploads/a0_kientruc_1767434523304.webp",
     "initialView": {
       "yaw": 0,
       "pitch": 0,
@@ -1541,10 +1541,10 @@
     },
     "hotspots": [
       {
-        "target": "truockhoacntt",
-        "yaw": 0.03,
+        "label": "Rời Phòng",
         "pitch": 0.2,
-        "label": "Rời Phòng"
+        "target": "truockhoacntt",
+        "yaw": 0.03
       }
     ],
     "floor": 0
@@ -1552,15 +1552,15 @@
   {
     "id": "a0_ktoto",
     "name": {
-      "en": "Automotive Engineering Dept.",
-      "vi": "Khoa Kỹ Thuật Ô Tô"
+      "vi": "Khoa Kỹ Thuật Ô Tô",
+      "en": "Automotive Engineering Dept."
     },
     "type": "equirect",
-    "url": "/assets/a0_ktoto.jpg",
+    "url": "/uploads/a0_ktoto_1767434533177.webp",
     "initialView": {
-      "hfov": 1.2,
+      "yaw": 0,
       "pitch": 0,
-      "yaw": 0
+      "hfov": 1.2
     },
     "hotspots": [
       {
@@ -1579,7 +1579,7 @@
       "en": "Law Department"
     },
     "type": "equirect",
-    "url": "/assets/a0_luat.jpg",
+    "url": "/uploads/a0_luat_1767434546844.webp",
     "initialView": {
       "yaw": 0,
       "pitch": 0,
@@ -1587,10 +1587,10 @@
     },
     "hotspots": [
       {
-        "target": "a0_3",
-        "yaw": 0.03,
+        "label": "Rời Phòng",
         "pitch": 0,
-        "label": "Rời Phòng"
+        "target": "a0_3",
+        "yaw": 0.03
       }
     ],
     "floor": 0
@@ -1602,7 +1602,7 @@
       "en": "Department of electronics"
     },
     "type": "equirect",
-    "url": "/assets/a0_phongkebencntt.jpg",
+    "url": "/uploads/a0_phongkebencntt_1767434560566.webp",
     "initialView": {
       "yaw": 0,
       "pitch": 0,
@@ -1610,10 +1610,10 @@
     },
     "hotspots": [
       {
-        "target": "truockhoacntt",
-        "yaw": -3.141592653589793,
+        "label": "Trước Khoa CNTT",
         "pitch": 0,
-        "label": "Trước Khoa CNTT"
+        "target": "truockhoacntt",
+        "yaw": -3.141592653589793
       }
     ],
     "floor": 0
@@ -1625,7 +1625,7 @@
       "en": "Industrial Management & Logistics"
     },
     "type": "equirect",
-    "url": "/assets/a0_qtcn_logistic.jpg",
+    "url": "/uploads/a0_qtcn_logistic_1767434575578.webp",
     "initialView": {
       "yaw": 0,
       "pitch": 0,
@@ -1633,10 +1633,10 @@
     },
     "hotspots": [
       {
-        "target": "a0_3",
-        "yaw": 0.03,
+        "label": "Rời Phòng",
         "pitch": 0,
-        "label": "Rời Phòng"
+        "target": "a0_3",
+        "yaw": 0.03
       }
     ],
     "floor": 0
@@ -1671,7 +1671,7 @@
       "en": "Economics Department"
     },
     "type": "equirect",
-    "url": "/assets/a0_kinhte.jpg",
+    "url": "/uploads/a0_kinhte_1767434586925.webp",
     "initialView": {
       "yaw": 0,
       "pitch": 0,
@@ -1679,10 +1679,10 @@
     },
     "hotspots": [
       {
-        "target": "a0_2",
-        "yaw": 0.03,
+        "label": "Rời Phòng",
         "pitch": 0,
-        "label": "Rời Phòng"
+        "target": "a0_2",
+        "yaw": 0.03
       }
     ],
     "floor": 0
@@ -1690,11 +1690,11 @@
   {
     "id": "a1_1",
     "name": {
-      "en": "Corridor Block A1 - 1st Floor",
-      "vi": "Hành lang Dãy A1 - Tầng 1"
+      "vi": "Hành lang Dãy A1 - Tầng 1",
+      "en": "Corridor Block A1 - 1st Floor"
     },
     "type": "equirect",
-    "url": "/uploads/a1hop.jpg",
+    "url": "/uploads/a1_1_1767434881057.webp",
     "initialView": {
       "yaw": 0.9311655427812564,
       "pitch": -0.1211927498337424,
@@ -1743,11 +1743,11 @@
   {
     "id": "a1_2",
     "name": {
-      "en": "Corridor Block A3 - 1st Floor",
-      "vi": "Hành lang Dãy A3 - Tầng 1"
+      "vi": "Hành lang Dãy A3 - Tầng 1",
+      "en": "Corridor Block A3 - 1st Floor"
     },
     "type": "equirect",
-    "url": "/assets/a1.jpg",
+    "url": "/uploads/a1_2_1767434895546.webp",
     "initialView": {
       "yaw": 1.4928757925456333,
       "pitch": 0.051084232732064194,
@@ -1779,10 +1779,10 @@
         "yaw": -1.1858547807254087
       },
       {
-        "target": "truockhoacntt",
         "label": "Xuống Tầng Trệt ",
-        "yaw": 1.507088153457163,
-        "pitch": 0.29323301072624375
+        "pitch": 0.29323301072624375,
+        "target": "truockhoacntt",
+        "yaw": 1.507088153457163
       }
     ],
     "floor": 1
@@ -1790,11 +1790,11 @@
   {
     "id": "a1_3",
     "name": {
-      "en": "Corridor Block A2 - 1st Floor",
-      "vi": "Hành lang Dãy A2 - Tầng 1"
+      "vi": "Hành lang Dãy A2 - Tầng 1",
+      "en": "Corridor Block A2 - 1st Floor"
     },
     "type": "equirect",
-    "url": "/assets/a1_3.jpg",
+    "url": "/uploads/a1_3_1767434907029.webp",
     "initialView": {
       "yaw": -1.1531425178627295,
       "pitch": 0.0004319404018531259,
@@ -1848,11 +1848,11 @@
   {
     "id": "a1_al4",
     "name": {
-      "en": "Room AL4",
-      "vi": "Phòng AL4"
+      "vi": "Phòng AL4",
+      "en": "Room AL4"
     },
     "type": "equirect",
-    "url": "/assets/a1_al4.jpg",
+    "url": "/uploads/a1_al4_1767434937018.webp",
     "initialView": {
       "yaw": 0,
       "pitch": 0,
@@ -1875,7 +1875,7 @@
       "en": "King Sejong Institute"
     },
     "type": "equirect",
-    "url": "/assets/a1_hocvienkingsejong.jpg",
+    "url": "/uploads/a1_hocvienkingsejong_1767434948987.webp",
     "initialView": {
       "yaw": 0,
       "pitch": 0,
@@ -1883,10 +1883,10 @@
     },
     "hotspots": [
       {
-        "target": "a1_1",
-        "yaw": 3.2,
+        "label": "Ra hành lang",
         "pitch": 0,
-        "label": "Ra hành lang"
+        "target": "a1_1",
+        "yaw": 3.2
       }
     ],
     "floor": 1
@@ -1894,11 +1894,11 @@
   {
     "id": "a2_1",
     "name": {
-      "en": "Corridor Block A1 - 2nd Floor",
-      "vi": "Hành lang Dãy A1 - Tầng 2"
+      "vi": "Hành lang Dãy A1 - Tầng 2",
+      "en": "Corridor Block A1 - 2nd Floor"
     },
     "type": "equirect",
-    "url": "/assets/a2_1.jpg",
+    "url": "/uploads/a2_1_1767435142315.webp",
     "initialView": {
       "yaw": 3.099113604371434,
       "pitch": 0.13432803062763554,
@@ -1929,11 +1929,11 @@
   {
     "id": "a2_2",
     "name": {
-      "en": "Corridor Block A2 - 2nd Floor",
-      "vi": "Hành lang Dãy A2 - Tầng 2"
+      "vi": "Hành lang Dãy A2 - Tầng 2",
+      "en": "Corridor Block A2 - 2nd Floor"
     },
     "type": "equirect",
-    "url": "/assets/a2_2.jpg",
+    "url": "/uploads/a2_2_1767435166706.webp",
     "initialView": {
       "yaw": 2.5999307991114478,
       "pitch": 0.19533640482394965,
@@ -1958,11 +1958,11 @@
   {
     "id": "a2_3",
     "name": {
-      "en": "Corridor Block A3 - 2nd Floor",
-      "vi": "Hành lang Dãy A3 - Tầng 2"
+      "vi": "Hành lang Dãy A3 - Tầng 2",
+      "en": "Corridor Block A3 - 2nd Floor"
     },
     "type": "equirect",
-    "url": "/assets/a2_3.jpg",
+    "url": "/uploads/a2_3_1767435216907.webp",
     "initialView": {
       "yaw": -2.3800971060142295,
       "pitch": -0.04079561849667357,
@@ -1994,10 +1994,10 @@
         "yaw": 1.56806331213638
       },
       {
-        "target": "test",
         "label": "Phòng A2.3",
-        "yaw": -2.3800971060142295,
-        "pitch": -0.04079561849667357
+        "pitch": -0.04079561849667357,
+        "target": "test",
+        "yaw": -2.3800971060142295
       }
     ],
     "floor": 2
@@ -2005,11 +2005,11 @@
   {
     "id": "a3_trcthuvien",
     "name": {
-      "en": "In front of the Library - 3rd Floor",
-      "vi": "Trước Thư Viện - Tầng 3"
+      "vi": "Trước Thư Viện - Tầng 3",
+      "en": "In front of the Library - 3rd Floor"
     },
     "type": "equirect",
-    "url": "/assets/trcthuvien.jpg",
+    "url": "/uploads/a3_trcthuvien_1767435470533.webp",
     "initialView": {
       "yaw": -1.5989926799619631,
       "pitch": 0.16020636924955767,
@@ -2052,11 +2052,11 @@
   {
     "id": "a3_thuvien1",
     "name": {
-      "en": "Library - 3rd Floor",
-      "vi": "Thư Viện - Tầng 3"
+      "vi": "Thư Viện - Tầng 3",
+      "en": "Library - 3rd Floor"
     },
     "type": "equirect",
-    "url": "/assets/thuvien1.jpg",
+    "url": "/uploads/a3_thuvien1_1767435480973.webp",
     "initialView": {
       "yaw": 0.9666595625644661,
       "pitch": 0.14770551555892553,
@@ -2075,11 +2075,11 @@
   {
     "id": "a3_thuvien2",
     "name": {
-      "en": "Library - 3rd Floor",
-      "vi": "Thư Viện 2 - Tầng 3"
+      "vi": "Thư Viện 2 - Tầng 3",
+      "en": "Library - 3rd Floor"
     },
     "type": "equirect",
-    "url": "/assets/thuvien2.jpg",
+    "url": "/uploads/a3_thuvien2_1767435496533.webp",
     "initialView": {
       "yaw": -1.499024533479007,
       "pitch": 0.12648299654153483,
@@ -2329,7 +2329,7 @@
       "en": "zone e"
     },
     "type": "equirect",
-    "url": "/uploads/khue_1763404380342.jpg",
+    "url": "/uploads/khue_1767434605830.webp",
     "initialView": {
       "yaw": 0,
       "pitch": 0,
