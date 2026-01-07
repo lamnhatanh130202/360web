@@ -8,9 +8,9 @@
     "type": "equirect",
     "url": "/uploads/congtruong_1765098324330.webp",
     "initialView": {
-      "hfov": 0.9276924009922387,
-      "pitch": -0.2850844739225824,
-      "yaw": 2.3723205918906425
+      "yaw": 1.5255307666129818,
+      "pitch": -0.024124584169941343,
+      "hfov": 0.9276924009922387
     },
     "hotspots": [
       {
@@ -26,16 +26,10 @@
         "yaw": 1.3
       },
       {
-        "label": "Phòng Tuyển Sinh",
-        "pitch": -0.045819335563665575,
-        "target": "phongtuyensinh",
-        "yaw": 1.7710950408149042
-      },
-      {
+        "label": "Trước phòng tuyển sinh",
+        "pitch": -0.04905387697293051,
         "target": "truocphongtuyensinh",
-        "yaw": 0,
-        "pitch": 0,
-        "label": "Trước phòng tuyển sinh"
+        "yaw": 1.7870267710999324
       }
     ],
     "floor": 0

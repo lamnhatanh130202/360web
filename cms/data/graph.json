@@ -927,12 +927,12 @@
       "id": "khue",
       "label": "Cổng Khu E",
       "floor": 0,
-      "x": 264,
-      "y": 990,
+      "x": 2527,
+      "y": 1026,
       "positions": {
         "0": {
-          "x": 264,
-          "y": 990
+          "x": 2527,
+          "y": 1026
         }
       }
     },
@@ -1077,11 +1077,6 @@
       "from": "congtruong",
       "label": "Trung Tâm PTNLS",
       "to": "TrungtamPTNLS"
-    },
-    {
-      "from": "congtruong",
-      "label": "Phòng Tuyển Sinh",
-      "to": "phongtuyensinh"
     },
     {
       "from": "congtruong",
