@@ -30,15 +30,16 @@ export default function MinimapEditor() {
   const SCALE_STEP = 0.15;
 
   // Use raw image paths (no `url(...)`) so we can size stage to natural image pixels
+  // Use CMS-scoped assets to avoid falling back to viewer's old /assets
   const floorBackgrounds = {
-    0: '/assets/minimap/sơ_đồ_cả_trường.jpg',
-    1: '/assets/minimap/lầu_1_Khu_A-B.jpg',
-    2: '/assets/minimap/lầu_2_Khu_A-B.jpg',
-    3: '/assets/minimap/lầu_3_Khu_A-B.jpg',
-    4: '/assets/minimap/lầu_4_Khu_A.jpg',
-    5: '/assets/minimap/lầu_5_Khu_A.jpg',
-    5.5: '/assets/minimap/mặt_lửng_lầu_5_Khu_A.jpg',
-    6: '/assets/minimap/lầu_6_Khu_A.jpg'
+    0: '/cms/assets/minimap/sơ_đồ_cả_trường.jpg',
+    1: '/cms/assets/minimap/lầu_1_Khu_A-B.jpg',
+    2: '/cms/assets/minimap/lầu_2_Khu_A-B.jpg',
+    3: '/cms/assets/minimap/lầu_3_Khu_A-B.jpg',
+    4: '/cms/assets/minimap/lầu_4_Khu_A.jpg',
+    5: '/cms/assets/minimap/lầu_5_Khu_A.jpg',
+    5.5: '/cms/assets/minimap/mặt_lửng_lầu_5_Khu_A.jpg',
+    6: '/cms/assets/minimap/lầu_6_Khu_A.jpg'
   };
 
   useEffect(() => {
@@ -165,12 +166,13 @@ export default function MinimapEditor() {
       if (!viewportRef.current || !stageRef.current) return;
       const rect = viewportRef.current.getBoundingClientRect();
       if (rect.width === 0 || rect.height === 0) return;
-
-      const imgPath = floorBackgrounds[currentFloor] || floorBackgrounds[0];
+      const rawImgPath = floorBackgrounds[currentFloor] || floorBackgrounds[0];
+      const imgPath = encodeURI(rawImgPath) + `?v=${Date.now()}`;
+      console.log('[MinimapEditor] Floor', currentFloor, 'image URL:', imgPath);
       if (!imgPath) return;
 
       // calculateBackgroundImageInfo will compute displayWidth/displayHeight/displayX/displayY
-      calculateBackgroundImageInfo(encodeURI(imgPath), rect.width, rect.height).then(info => {
+      calculateBackgroundImageInfo(imgPath, rect.width, rect.height).then(info => {
         if (!info) {
           setBgImageInfo(null);
           return;
@@ -198,7 +200,7 @@ export default function MinimapEditor() {
           bg.style.userSelect = 'none';
           stage.insertBefore(bg, stage.firstChild);
         }
-        bg.src = encodeURI(imgPath);
+        bg.src = imgPath;
         bg.style.width = info.displayWidth + 'px';
         bg.style.height = info.displayHeight + 'px';
 

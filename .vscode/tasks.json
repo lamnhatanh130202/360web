@@ -18,6 +18,62 @@
 			"isBackground": false,
 			"problemMatcher": [],
 			"group": "build"
+		},
+		{
+			"label": "Rebuild frontend for CMS editor image update",
+			"type": "shell",
+			"command": "docker-compose",
+			"args": [
+				"up",
+				"-d",
+				"--build",
+				"frontend"
+			],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "build"
+		},
+		{
+			"label": "Rebuild frontend with Nginx no-cache",
+			"type": "shell",
+			"command": "docker-compose",
+			"args": [
+				"up",
+				"-d",
+				"--build",
+				"frontend"
+			],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "build"
+		},
+		{
+			"label": "Rebuild frontend after path fix",
+			"type": "shell",
+			"command": "docker-compose",
+			"args": [
+				"up",
+				"-d",
+				"--build",
+				"frontend"
+			],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "build"
+		},
+		{
+			"label": "Rebuild frontend for minimap zoom fix",
+			"type": "shell",
+			"command": "docker-compose",
+			"args": [
+				"up",
+				"-d",
+				"--build",
+				"frontend"
+			],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "build"
 		}
 	]
 }

@@ -2,15 +2,15 @@
   {
     "id": "congtruong",
     "name": {
-      "vi": "Cổng Chính -  Đường Đại Lộ Bình Dương",
-      "en": "Main Gate"
+      "en": "Main Gate",
+      "vi": "Cổng Chính -  Đường Đại Lộ Bình Dương"
     },
     "type": "equirect",
     "url": "/uploads/congtruong_1765098324330.webp",
     "initialView": {
-      "yaw": 0.9128430272660353,
-      "pitch": -0.16201709241683382,
-      "hfov": 0.9276924009922387
+      "hfov": 0.9276924009922387,
+      "pitch": -0.2850844739225824,
+      "yaw": 2.3723205918906425
     },
     "hotspots": [
       {
@@ -27,9 +27,15 @@
       },
       {
         "label": "Phòng Tuyển Sinh",
-        "pitch": -0.05,
+        "pitch": -0.045819335563665575,
         "target": "phongtuyensinh",
-        "yaw": 1.79
+        "yaw": 1.7710950408149042
+      },
+      {
+        "target": "truocphongtuyensinh",
+        "yaw": 0,
+        "pitch": 0,
+        "label": "Trước phòng tuyển sinh"
       }
     ],
     "floor": 0
@@ -37,22 +43,22 @@
   {
     "id": "congphu",
     "name": {
-      "vi": "Cổng Phụ",
-      "en": "Side Gate"
+      "en": "Side Gate",
+      "vi": "Cổng Phụ"
     },
     "type": "equirect",
     "url": "/uploads/congphu_1767434197839.webp",
     "initialView": {
-      "yaw": 0.226506549190157,
-      "pitch": 0.059635276565314754,
-      "hfov": 0.9398657104440635
+      "yaw": 3.0935628996024684,
+      "pitch": -0.1742396577259946,
+      "hfov": 0.9276924009922387
     },
     "hotspots": [
       {
         "label": "cổng khu E",
-        "pitch": 0,
+        "pitch": 0.07686302238280618,
         "target": "khue",
-        "yaw": -3.141592653589793
+        "yaw": 2.6952935137091814
       },
       {
         "label": "Hành lang Dãy A 1",
@@ -72,15 +78,15 @@
   {
     "id": "phongtuyensinh",
     "name": {
-      "vi": "Phòng Tuyển Sinh",
-      "en": "Admissions Office"
+      "en": "Admissions Office",
+      "vi": "Phòng Tuyển Sinh"
     },
     "type": "equirect",
     "url": "/uploads/phongtuyensinh_1767434219483.webp",
     "initialView": {
-      "yaw": 0,
+      "hfov": 1.2,
       "pitch": 0,
-      "hfov": 1.2
+      "yaw": 0
     },
     "hotspots": [
       {
@@ -88,6 +94,12 @@
         "pitch": 0,
         "target": "congtruong",
         "yaw": 0
+      },
+      {
+        "target": "truocphongtuyensinh",
+        "yaw": 0,
+        "pitch": 0,
+        "label": "Trước phòng tuyển sinh"
       }
     ],
     "floor": 0
@@ -118,15 +130,15 @@
   {
     "id": "duonglencong",
     "name": {
-      "vi": "Đường Lên Cổng",
-      "en": "Path to Main Gate"
+      "en": "Path to Main Gate",
+      "vi": "Đường Lên Cổng"
     },
     "type": "equirect",
     "url": "/uploads/duonglencong_1767434264051.webp",
     "initialView": {
-      "yaw": 2.8968866971742484,
-      "pitch": 0.16584445157402783,
-      "hfov": 0.9398657104440635
+      "hfov": 0.9276924009922387,
+      "pitch": -0.26876889610511157,
+      "yaw": 0.9652595819981933
     },
     "hotspots": [
       {
@@ -137,9 +149,15 @@
       },
       {
         "label": "Khối văn phòng C1- 1",
-        "pitch": -0.15,
+        "pitch": -0.026936003590138924,
         "target": "loidi1",
-        "yaw": 1
+        "yaw": 1.331251080350663
+      },
+      {
+        "target": "truocphongtuyensinh",
+        "yaw": 0,
+        "pitch": 0,
+        "label": "Trước phòng tuyển sinh"
       }
     ],
     "floor": 0
@@ -200,9 +218,9 @@
     "type": "equirect",
     "url": "/uploads/loidi1_1765881293853.webp",
     "initialView": {
-      "yaw": 3.1099752463991956,
-      "pitch": -0.3473633347975298,
-      "hfov": 1.7394741801058355
+      "yaw": -3.009590102724287,
+      "pitch": -0.058721232680074564,
+      "hfov": 0.9276924009922387
     },
     "hotspots": [
       {
@@ -220,7 +238,7 @@
       {
         "label": "Trước Phòng Tuyển Sinh",
         "pitch": 0.09,
-        "target": "truocphongan",
+        "target": "truocphongtuyensinh",
         "yaw": 3.07
       }
     ],
@@ -264,19 +282,19 @@
   {
     "id": "truocphongan",
     "name": {
-      "vi": "Trước Phòng Ăn",
-      "en": "In Front of Canteen"
+      "en": "In Front of Canteen",
+      "vi": "Trước Phòng Ăn"
     },
     "type": "equirect",
     "url": "/uploads/truocphongan_1767434341923.webp",
     "initialView": {
-      "yaw": 0,
-      "pitch": 0,
-      "hfov": 1.2
+      "yaw": -0.044594089734250275,
+      "pitch": -0.06115044223776245,
+      "hfov": 0.9276924009922387
     },
     "hotspots": [
       {
-        "label": "Dãy Học Hỏi Hiếu Hành",
+        "label": "Khối văn phòng C1 - 1",
         "pitch": 0,
         "target": "loidi1",
         "yaw": 0
@@ -2005,14 +2023,14 @@
   {
     "id": "a3_trcthuvien",
     "name": {
-      "vi": "Trước Thư Viện - Tầng 3",
-      "en": "In front of the Library - 3rd Floor"
+      "en": "In front of the Library - 3rd Floor",
+      "vi": "Trước Thư Viện - Tầng 3"
     },
     "type": "equirect",
     "url": "/uploads/a3_trcthuvien_1767435470533.webp",
     "initialView": {
-      "yaw": -1.5989926799619631,
-      "pitch": 0.16020636924955767,
+      "yaw": 0.670831196694829,
+      "pitch": -0.13097320167402238,
       "hfov": 0.9276924009922387
     },
     "hotspots": [
@@ -2045,6 +2063,12 @@
         "pitch": 0.09295357496262113,
         "target": "b3_4",
         "yaw": 2.733160772247956
+      },
+      {
+        "label": "Hành lang tầng 3",
+        "pitch": 0.06358859165261777,
+        "target": "hanhlangtang3",
+        "yaw": 1.1501665256301283
       }
     ],
     "floor": 3
@@ -2549,6 +2573,64 @@
         "pitch": 0.19098486289487404,
         "target": "b3_4",
         "yaw": -1.489797887971564
+      }
+    ],
+    "floor": 3
+  },
+  {
+    "id": "truocphongtuyensinh",
+    "name": {
+      "en": "In front of the admissions office",
+      "vi": "Trước phòng tuyển sinh"
+    },
+    "type": "equirect",
+    "url": "/uploads/truocphongtuyensinh_1767803605501.webp",
+    "initialView": {
+      "yaw": -1.4112413794493346,
+      "pitch": -0.17008683445529726,
+      "hfov": 0.9276924009922387
+    },
+    "hotspots": [
+      {
+        "label": "Cổng Chính -  Đường Đại Lộ Bình Dương",
+        "pitch": 0.1286666160806309,
+        "target": "congtruong",
+        "yaw": 2.722853743194449
+      },
+      {
+        "label": "Phòng Tuyển Sinh",
+        "pitch": 0.011036941045119875,
+        "target": "phongtuyensinh",
+        "yaw": 0.6243810755661414
+      },
+      {
+        "label": "Đường Lên Cổng",
+        "pitch": -0.0870373376228315,
+        "target": "loidi1",
+        "yaw": -1.4653102804615301
+      }
+    ],
+    "floor": 0
+  },
+  {
+    "id": "hanhlangtang3",
+    "name": {
+      "en": "Third floor hallway",
+      "vi": "Hành lang tầng 3"
+    },
+    "type": "equirect",
+    "url": "/uploads/hanhlangtang3_1767803791667.webp",
+    "initialView": {
+      "yaw": -0.21141934864255418,
+      "pitch": 0.031052237281020467,
+      "hfov": 0.9276924009922387
+    },
+    "hotspots": [
+      {
+        "label": "Trước Thư Viện - Tầng 3",
+        "pitch": 0,
+        "target": "a3_trcthuvien",
+        "yaw": 0
       }
     ],
     "floor": 3

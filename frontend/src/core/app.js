@@ -133,6 +133,20 @@ export async function bootstrap(opts) {
   try {
     viewer = new Marzipano.Viewer(root, viewerOptions);
     console.log('[App] Marzipano Viewer initialized successfully', hasWebGL ? 'with WebGL' : 'with CSS fallback');
+    // Ensure wheel and pinch zoom controls are registered
+    try {
+      const ctrls = typeof viewer.controls === 'function' ? viewer.controls() : null;
+      if (Marzipano.registerDefaultControls && ctrls) {
+        // Correct API: pass Controls instance, not Viewer
+        Marzipano.registerDefaultControls(ctrls);
+      } else if (ctrls) {
+        ctrls.registerMethod('scrollZoom', new Marzipano.ScrollZoomControlMethod(), true);
+        ctrls.registerMethod('pinchZoom', new Marzipano.PinchZoomControlMethod(), true);
+      }
+      console.log('[App] Zoom controls registered (scroll + pinch)');
+    } catch (ctrlErr) {
+      console.warn('[App] Failed to register zoom controls:', ctrlErr);
+    }
   } catch (error) {
     console.error('[App] Failed to initialize Marzipano Viewer:', error);
     
@@ -149,6 +163,18 @@ export async function bootstrap(opts) {
           }
         });
         console.log('[App] Marzipano Viewer initialized with CSS fallback');
+        try {
+          const ctrls = typeof viewer.controls === 'function' ? viewer.controls() : null;
+          if (Marzipano.registerDefaultControls && ctrls) {
+            Marzipano.registerDefaultControls(ctrls);
+          } else if (ctrls) {
+            ctrls.registerMethod('scrollZoom', new Marzipano.ScrollZoomControlMethod(), true);
+            ctrls.registerMethod('pinchZoom', new Marzipano.PinchZoomControlMethod(), true);
+          }
+          console.log('[App] Zoom controls registered (scroll + pinch) [CSS fallback]');
+        } catch (ctrlErr2) {
+          console.warn('[App] Failed to register zoom controls (CSS fallback):', ctrlErr2);
+        }
       } catch (cssError) {
         console.error('[App] Failed to initialize with CSS fallback:', cssError);
         // Fall through to final error handling
@@ -166,6 +192,18 @@ export async function bootstrap(opts) {
           }
         });
         console.log('[App] Marzipano Viewer initialized on retry (Marzipano auto-selected stage type)');
+        try {
+          const ctrls = typeof viewer.controls === 'function' ? viewer.controls() : null;
+          if (Marzipano.registerDefaultControls && ctrls) {
+            Marzipano.registerDefaultControls(ctrls);
+          } else if (ctrls) {
+            ctrls.registerMethod('scrollZoom', new Marzipano.ScrollZoomControlMethod(), true);
+            ctrls.registerMethod('pinchZoom', new Marzipano.PinchZoomControlMethod(), true);
+          }
+          console.log('[App] Zoom controls registered (scroll + pinch) [retry]');
+        } catch (ctrlErr3) {
+          console.warn('[App] Failed to register zoom controls (retry):', ctrlErr3);
+        }
       } catch (retryError) {
         console.error('[App] Failed to initialize Marzipano Viewer after retry:', retryError);
         throw retryError;
@@ -173,6 +211,22 @@ export async function bootstrap(opts) {
     }
   }
   
+  // Fallback: ensure desktop wheel zoom always works even if controls fail
+  try {
+    root.addEventListener('wheel', (e) => {
+      // Ignore if interacting with overlays
+      if (e.target.closest('#minimap') || e.target.closest('header') || e.target.closest('footer')) return;
+      userActivity();
+      const delta = e.deltaY;
+      // Small step to feel smooth; positive = zoom out, negative = zoom in
+      fovDelta(delta > 0 ? +0.08 : -0.08);
+      scheduleAutoResume();
+    }, { passive: true });
+    console.log('[App] Wheel zoom fallback attached to #pano');
+  } catch (wheelErr) {
+    console.warn('[App] Failed to attach wheel zoom fallback:', wheelErr);
+  }
+
   // Final error handling nếu tất cả đều fail
   if (!viewer) {
     const isWebGLError = true; // Assume WebGL error if we got here
@@ -247,16 +301,31 @@ export async function bootstrap(opts) {
     const el = document.createElement('div');
     el.className = 'hotspot';
     el.innerHTML = `
+      <div class="hs-label">${(h.title || h.label || '').trim() || ''}</div>
+      <svg class="hs-arrow" viewBox="0 0 120 60" aria-hidden="true">
+        <g fill="none" stroke="#fff" stroke-width="8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 42 L36 28 L60 42" />
+          <path d="M60 42 L84 28 L108 42" />
+        </g>
+      </svg>
       <img class="hotspot-icon" src="${h.icon || '/assets/icon/vitri.png'}" alt="">
     `;
     // Text đã được hiển thị trong tooltip khi hover, không cần hiển thị dưới icon
 
-    const targetScene = scenes.find(x => x.id === h.target);
-    const hsTitle = h.title || h.label || h.text || (targetScene?.name?.vi || targetScene?.name || h.target);
+  const targetScene = scenes.find(x => x.id === h.target);
+  const hsTitle = h.title || h.label || h.text || (targetScene?.name?.vi || targetScene?.name || h.target);
     const hsDesc = h.desc || targetScene?.desc || '';
     const hsImg = h.thumb || targetScene?.preview || '';
 
-    const tipHtml = `
+    // Cập nhật label hiển thị trực tiếp trên hotspot
+    const lbl = el.querySelector('.hs-label');
+    if (lbl) lbl.textContent = hsTitle;
+
+    // Tăng khoảng cách giữa mũi tên và icon (có thể tùy biến bằng h.arrowGap)
+    const arrowGap = Number.isFinite(+h.arrowGap) ? Math.max(20, +h.arrowGap) : 36;
+    el.style.setProperty('--arrow-gap', arrowGap + 'px');
+
+    const tipHtml = `
       <div class="row">
         ${hsImg ? `<img src="${hsImg}" alt="">` : ''}
         <div>
@@ -276,11 +345,7 @@ export async function bootstrap(opts) {
 
     el.addEventListener('click', async () => {
       hideTip();
-      const fromId = active.id;
-      const toId = h.target;
-      await fade(1, 120);
-      await loadScene(toId, fromId);
-      await fade(0, 120);
+      try { await travelToScene(h.target); } catch (e) { console.warn('[Hotspot] travel failed, fallback:', e); await fade(1,120); await loadScene(h.target, active.id); await fade(0,120); }
     });
 
     // Mobile touch handling - cho phép pan khi drag, chỉ xử lý tap khi không drag
@@ -293,7 +358,13 @@ export async function bootstrap(opts) {
     const TAP_DURATION = 300; // ms
 
     el.addEventListener('touchstart', (e) => {
-      if (e.touches.length > 1) return; // Bỏ qua multi-touch
+      // Nếu là multi-touch (pinch), chuyển sự kiện cho viewer bằng cách tạm thời tắt pointer-events
+      if (e.touches.length > 1) {
+        isDraggingHotspot = true; // đánh dấu đang thao tác để bỏ qua xử lý tap
+        el.style.pointerEvents = 'none';
+        void el.offsetHeight; // force reflow để áp dụng ngay
+        return; // để viewer nhận các sự kiện pinch
+      }
       const touch = e.touches[0];
       touchStartX = touch.clientX;
       touchStartY = touch.clientY;
@@ -326,13 +397,13 @@ export async function bootstrap(opts) {
     }, { passive: true });
 
     el.addEventListener('touchend', (e) => {
-      // Bật lại pointer-events
+      // Bật lại pointer-events sau mọi thao tác chạm
       el.style.pointerEvents = 'auto';
       
       if (e.touches.length > 0) return; // Nếu vẫn còn touch khác, bỏ qua
       const touchDuration = Date.now() - touchStartTime;
       
-      // Nếu đã drag, không xử lý tap - để viewer xử lý pan
+      // Nếu đã drag hoặc vừa pinch, không xử lý tap - để viewer xử lý pan/zoom
       if (touchMoved || isDraggingHotspot) {
         touchMoved = false;
         isDraggingHotspot = false;
@@ -345,11 +416,9 @@ export async function bootstrap(opts) {
         e.stopPropagation(); // Ngăn click event sau đó
         const touch = e.changedTouches[0];
         if (tip.style.display === 'block') {
-          // Tap lần 2: điều hướng
+          // Tap lần 2: điều hướng với hiệu ứng travel
           hideTip();
-          const fromId = active.id;
-          const toId = h.target;
-          fade(1, 120).then(() => loadScene(toId, fromId)).then(() => fade(0, 120));
+          travelToScene(h.target).catch(() => { fade(1,120).then(() => loadScene(h.target, active.id)).then(() => fade(0,120)); });
         } else {
           // Tap lần 1: hiển thị tooltip
           showTip(tipHtml, touch.clientX + 8, touch.clientY + 8);
@@ -361,6 +430,7 @@ export async function bootstrap(opts) {
     
     // Xử lý touchcancel để đảm bảo reset state
     el.addEventListener('touchcancel', () => {
+      // Luôn khôi phục pointer-events nếu thao tác bị hủy (bao gồm pinch)
       el.style.pointerEvents = 'auto';
       touchMoved = false;
       isDraggingHotspot = false;
@@ -380,7 +450,23 @@ export async function bootstrap(opts) {
       fov: +(s.initialView?.hfov ?? 1.2)
     }, limiter);
     const scene = viewer.createScene({ source, geometry, view });
-    (s.hotspots || []).forEach(addHotspot.bind(null, scene));
+    (s.hotspots || []).forEach(addHotspot.bind(null, scene));
+    // Add scene-anchored road banner directly in panorama
+    try {
+      const lang = localStorage.getItem('lang') || 'vi';
+      const roadText = extractRoadText(s, lang);
+      if (roadText) {
+        const banner = document.createElement('div');
+        banner.className = 'scene-banner';
+        banner.textContent = roadText;
+        const yaw = +(s.bannerYaw ?? s.initialView?.yaw ?? 0);
+        const pitch = +(s.bannerPitch ?? -0.22);
+        const hs = scene.hotspotContainer().createHotspot(banner, { yaw, pitch });
+        scene.__banner = { el: banner, yaw, pitch, hs };
+      }
+    } catch (e) {
+      console.warn('[SceneBanner] Unable to add banner:', e);
+    }
     return { scene, view };
   }
 
@@ -399,8 +485,40 @@ function updateTenKhuVuc(sceneId) {
   }
 }
 
+// ===== Road banner helper =====
+function updateRoadBanner(sceneId) {
+  const rb = document.getElementById('roadBanner');
+  if (!rb) return;
+  const s = scenes.find(x => x.id === sceneId);
+  const currentLang = localStorage.getItem('lang') || 'vi';
+
+  // Ưu tiên dùng trường tuỳ chọn s.road nếu CMS có; nếu không, cố gắng lấy từ tên scene
+  let roadText = (s?.road && (typeof s.road === 'string' ? s.road : s.road[currentLang])) || '';
+
+  if (!roadText) {
+    const nameText = (s?.name?.[currentLang]) || s?.name?.vi || s?.name || '';
+    // Nếu tên chứa "Đường" hoặc "Road" thì lấy cụm sau đó
+    const matchVi = /Đường\s+[^\-]+(?:\-[^]*)?/i.exec(nameText);
+    const matchEn = /Road\s+[^\-]+(?:\-[^]*)?/i.exec(nameText);
+    roadText = (matchVi && matchVi[0]) || (matchEn && matchEn[0]) || '';
+  }
+
+  // Chỉ hiển thị cho một số cổng (có thể mở rộng danh sách)
+  const specialGateIds = new Set(['congtruong', 'congphu']);
+  const shouldShow = specialGateIds.has(String(sceneId)) && !!roadText;
+
+  if (shouldShow) {
+    rb.textContent = roadText;
+    rb.style.display = 'inline-block';
+  } else {
+    rb.style.display = 'none';
+    rb.textContent = '';
+  }
+}
+
   // ===== Auto-rotate & idle resume =====
-  const autoRotate = { on: false, raf: 0, speed: 0.004 };
+  // Auto-rotate speed is per animation frame; keep extremely low for slowest motion
+  const autoRotate = { on: false, raf: 0, speed: 0.0001 };
   const idle = { timer: 0, delay: 7500 }; // 7.5 giây
   
   // Detect user interaction với viewer (drag, touch) để reset timer
@@ -528,6 +646,7 @@ function scheduleAutoResume() {
     active = { id, scene, view };
     currentSceneId = id;
     updateTenKhuVuc(id);
+  updateRoadBanner(id);
 
     // update currentGraph
     let graphChanged = false;
@@ -571,9 +690,12 @@ function scheduleAutoResume() {
     if (v) v.setYaw(v.yaw() + d);
   }
   function fovDelta(d = 0) {
-    const v = active.view || viewer.scene()?.view(); if (!v) return;
-    const ZMIN = Marzipano.util.degToRad(20), ZMAX = Marzipano.util.degToRad(110);
-    v.setFov(Math.min(ZMAX, Math.max(ZMIN, v.fov() + d)));
+    const v = active.view || viewer.scene()?.view(); if (!v) return;
+    const ZMIN = Marzipano.util.degToRad(20), ZMAX = Marzipano.util.degToRad(110);
+    const before = v.fov();
+    const after = Math.min(ZMAX, Math.max(ZMIN, before + d));
+    v.setFov(after);
+    try { console.log('[Zoom] FOV change:', { beforeDeg: Marzipano.util.radToDeg(before).toFixed(2), afterDeg: Marzipano.util.radToDeg(after).toFixed(2) }); } catch (_) {}
   }
 
   // ===== Smooth impulse rotate =====
@@ -670,9 +792,12 @@ function scheduleAutoResume() {
     function start() { if (!running) { running = true; rafId = requestAnimationFrame(loop); } }
 
     function stop() { dir = 0; }
-    window.addEventListener('keydown', e => {
+    window.addEventListener('keydown', e => {
       if (e.key === 'ArrowLeft') { userActivity(); dir = -1; start(); }
       if (e.key === 'ArrowRight') { userActivity(); dir = +1; start(); }
+      // Quick zoom keys: + / - / =
+      if (e.key === '+' || e.key === '=' ) { e.preventDefault(); userActivity(); try { fovDelta(-0.12); } finally { scheduleAutoResume(); } }
+      if (e.key === '-' ) { e.preventDefault(); userActivity(); try { fovDelta(+0.12); } finally { scheduleAutoResume(); } }
     }, { passive: true });
     window.addEventListener('keyup', e => {
       if (e.key === 'ArrowLeft' && dir === -1) { dir = 0; scheduleAutoResume(); }
@@ -690,9 +815,17 @@ function scheduleAutoResume() {
       if (minimapPanel && minimapPanel.parentElement !== document.body) {
         document.body.appendChild(minimapPanel);
         console.log('[App] Moved .minimap-panel to document.body to avoid stacking-context issues');
+        // Hide panel initially to avoid flash-of-unstyled content while bootstrapping
+        minimapPanel.style.visibility = 'hidden';
+        minimapPanel.style.opacity = '0';
+        minimapPanel.style.transition = 'opacity 150ms ease';
       } else if (!minimapPanel && minimapEl.parentElement !== document.body) {
         document.body.appendChild(minimapEl);
         console.log('[App] Moved #minimap to document.body to avoid stacking-context issues');
+        // Hide container initially
+        minimapEl.style.visibility = 'hidden';
+        minimapEl.style.opacity = '0';
+        minimapEl.style.transition = 'opacity 150ms ease';
       }
     } catch (e) {
       console.warn('[App] Failed to move minimap panel to body:', e);
@@ -847,6 +980,64 @@ function scheduleAutoResume() {
     }
   }
 
+  // ===== Travel-like transition between scenes =====
+  function animateFov(view, targetFov, duration = 350) {
+    if (!view) return Promise.resolve();
+    const startFov = view.fov();
+    const t0 = performance.now();
+    return new Promise(resolve => {
+      (function step(now){
+        const p = Math.min(1, (now - t0) / duration);
+        const ease = 1 - Math.pow(1 - p, 3);
+        view.setFov(startFov + (targetFov - startFov) * ease);
+        if (p < 1) requestAnimationFrame(step); else resolve();
+      })(t0);
+    });
+  }
+
+  async function travelToScene(toId) {
+    const fromId = active?.id;
+    if (!toId || toId === fromId) return;
+    try {
+      userActivity();
+      // Animate traveler on minimap from current to target
+      try { minimap?.playTravel && minimap.playTravel([fromId, toId]); } catch (_) {}
+      const v = active.view || viewer.scene()?.view();
+      const prevFov = v ? v.fov() : Marzipano.util.degToRad(75);
+      // 1) Align to hotspot yaw if available (glide)
+      await alignToHotspotBeforeNavigate(fromId, toId).catch(() => {});
+      // 2) Zoom-out the current scene slightly to give a shrink effect
+      if (v) {
+        const maxFov = Marzipano.util.degToRad(110);
+        const farFov = Math.min(maxFov, prevFov * 1.25);
+        await animateFov(v, farFov, 320);
+      }
+      // 3) Crossfade and switch
+      await fade(0.5, 150);
+      await loadScene(toId, fromId);
+      const newView = active.view || viewer.scene()?.view();
+      // Keep arrival yaw consistent with departure heading if known
+      const carryYaw = getHotspotYaw(fromId, toId);
+      if (newView && typeof carryYaw === 'number') newView.setYaw(carryYaw);
+      // 4) Zoom-in on the destination scene, then ease to comfortable FOV
+      if (newView) {
+        const minFov = Marzipano.util.degToRad(20);
+        const nearFovArrive = Math.max(minFov, Math.min(prevFov, prevFov * 0.75));
+        newView.setFov(nearFovArrive);
+      }
+      await fade(0, 150);
+      if (newView) {
+        // Hold the zoom-in briefly, then ease back to previous FOV
+        await new Promise(r => setTimeout(r, 220));
+        await animateFov(newView, prevFov, 520);
+      }
+      scheduleAutoResume();
+    } catch (e) {
+      console.warn('[App] travelToScene fallback to direct navigate:', e);
+      await fade(1, 120); await loadScene(toId, fromId); await fade(0, 120);
+    }
+  }
+
   // ===== Destination voice announcement =====
   let arrivalAudio = null;
   let audioCtx = null;
@@ -952,20 +1143,14 @@ function scheduleAutoResume() {
         primeAudioPlayback();
         const FADE_MS = 100, MAX_STEPS = 200;
         const ids = path.slice(0, MAX_STEPS).map(p => String(p));
+        // Show animated traveler along the full path on minimap
+        try { minimap?.visualizePath && minimap.visualizePath(ids); } catch (_) {}
+        try { minimap?.playTravel && minimap.playTravel(ids); } catch (_) {}
         (async () => {
           for (let idx = 0; idx < ids.length; idx++) {
             const id = ids[idx];
-            if (idx > 0) {
-              const fromId = ids[idx - 1];
-              // Align view to hotspot in `fromId` that leads to `id`
-              await alignToHotspotBeforeNavigate(fromId, id);
-            }
             try {
-              userActivity();
-              await fade(1, FADE_MS);
-              // Navigate immediately after alignment; no throttle delay and record edge
-              await loadScene(id, ids[idx - 1] ?? null);
-              await fade(0, FADE_MS);
+              await travelToScene(id);
             } catch (e) { console.error('onPathPlay step failed for', id, e); }
           }
           try { await announceArrival(ids[ids.length - 1]); } catch (e) {}
@@ -984,6 +1169,11 @@ function scheduleAutoResume() {
       if (currentSceneId && minimap?.setActive) {
         minimap.setActive(currentSceneId);
       }
+      // Reveal minimap panel/container now that it's ready
+      const panel = document.querySelector('.minimap-panel');
+      const container = document.getElementById('minimap');
+      if (panel) { panel.style.visibility = 'visible'; panel.style.opacity = '1'; }
+      if (container) { container.style.visibility = 'visible'; container.style.opacity = '1'; }
     } catch (e) { console.warn('[App] Failed to set active on minimap-ready:', e); }
   });
 
@@ -1124,11 +1314,7 @@ function scheduleAutoResume() {
 
  
   // ===== API helpers =====
-  async function navigateTo(id) {
-    await fade(1, 120);
-    await loadScene(id);
-    await fade(0, 120);
-  }
+  async function navigateTo(id) { await travelToScene(id); }
 
   // Start at first scene
   if (scenes && scenes.length > 0) {
@@ -1184,18 +1370,8 @@ const voiceBot = createVoiceBot({
     const ids = path.slice(0, MAX_STEPS).map(p => String(p));
     for (let idx = 0; idx < ids.length; idx++) {
       const id = ids[idx];
-      if (idx > 0) {
-        const fromId = ids[idx - 1];
-        await alignToHotspotBeforeNavigate(fromId, id);
-      }
-      try {
-        userActivity();
-        await fade(1, FADE_MS);
-        await loadScene(id, ids[idx - 1] ?? null);
-        await fade(0, FADE_MS);
-      } catch (e) {
-        console.error('onPathPlay step failed for', id, e);
-      }
+      try { await travelToScene(id); }
+      catch (e) { console.error('onPathPlay step failed for', id, e); }
     }
     try { await announceArrival(ids[ids.length - 1]); } catch (e) {}
     return Promise.resolve();
@@ -1344,3 +1520,71 @@ await voiceBot.mount();
     scenes: scenes // Expose scenes for i18n
   };
 }
+
+// Extract road text for scene-anchored banner
+function extractRoadText(scene, lang = (localStorage.getItem('lang') || 'vi')) {
+  if (!scene) return '';
+  const fromField = scene?.road && (typeof scene.road === 'string' ? scene.road : scene.road[lang]);
+  if (fromField) return fromField;
+  const overrides = {
+    congphu: { vi: 'Đường Hoàng Hoa Thám', en: 'Hoang Hoa Tham Street' },
+  };
+  const ov = overrides[String(scene.id)];
+  if (ov) return ov[lang] || ov.vi;
+  const nameText = (scene?.name?.[lang]) || scene?.name?.vi || scene?.name || '';
+  const matchVi = /Đường\s+[^\-]+/i.exec(nameText);
+  const matchEn = /Road\s+[^\-]+/i.exec(nameText);
+  return (matchVi && matchVi[0]) || (matchEn && matchEn[0]) || '';
+}
+
+// Move/update scene banner position at runtime
+function setSceneBannerPosition(sceneId, yaw, pitch) {
+  const rec = sceneCache[sceneId];
+  if (!rec) { console.warn('[SceneBanner] Scene not in cache:', sceneId); return false; }
+  const scene = rec.scene;
+  const sData = scenes.find(x => x.id === sceneId);
+  if (!scene.__banner) {
+    // Create if missing
+    const lang = localStorage.getItem('lang') || 'vi';
+    const roadText = extractRoadText(sData, lang);
+    if (!roadText) return false;
+    const el = document.createElement('div');
+    el.className = 'scene-banner';
+    el.textContent = roadText;
+    const hs = scene.hotspotContainer().createHotspot(el, { yaw, pitch });
+    scene.__banner = { el, yaw, pitch, hs };
+    return true;
+  }
+  try {
+    // Recreate hotspot at new position
+    const cont = scene.hotspotContainer();
+    if (scene.__banner.hs) { try { cont.destroyHotspot(scene.__banner.hs); } catch(e) { /* ignore */ } }
+    const hs = cont.createHotspot(scene.__banner.el, { yaw, pitch });
+    scene.__banner = { ...scene.__banner, yaw, pitch, hs };
+    return true;
+  } catch (e) {
+    console.warn('[SceneBanner] set position failed:', e);
+    return false;
+  }
+}
+
+// Convenience: capture current center yaw/pitch and optionally move banner
+window.copyCenterForBanner = async function(copyOnly = true) {
+  try {
+    const v = active.view || viewer.scene()?.view();
+    if (!v) return;
+    const yaw = +v.yaw().toFixed(4);
+    const pitch = +v.pitch().toFixed(4);
+    const snippet = `"bannerYaw": ${yaw}, "bannerPitch": ${pitch}`;
+    if (navigator.clipboard?.writeText) await navigator.clipboard.writeText(snippet);
+    console.log('[SceneBanner] Center →', { yaw, pitch, snippet });
+    if (!copyOnly) setSceneBannerPosition(currentSceneId, yaw, pitch);
+  } catch (e) { console.warn('[SceneBanner] copyCenterForBanner error:', e); }
+};
+
+// Shortcut: Shift+B copies bannerYaw/bannerPitch of current center
+window.addEventListener('keydown', (e) => {
+  if (e.shiftKey && (e.key === 'B' || e.key === 'b')) {
+    window.copyCenterForBanner(true);
+  }
+});

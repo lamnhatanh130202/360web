@@ -49,8 +49,8 @@ export function createMinimap(opts) {
     let stageWidth = 1000; 
     let stageHeight = 1000;
 
-    const SCALE_MIN = 0.1;
-    const SCALE_MAX = 4.0;
+    const SCALE_MIN = 0.5;
+    const SCALE_MAX = 2.0;
 
     // [UPDATED] Hàm lấy tên Scene theo ngôn ngữ
     function getSceneName(nodeId) {
@@ -359,11 +359,23 @@ export function createMinimap(opts) {
 
             renderNodes();
             fillSelects();
-
-            // [FIX LOGIC ZOOM] Nếu đang có đường đi active thì ưu tiên zoom vào đường đó
-            if (activePath && activePath.length > 1) {
-                try { focusPath(activePath); } catch (e) { console.error('focusPath failed:', e); }
-            } else {
+            // Nếu đang có đường đi active trên tầng hiện tại, tự động focus vào đường đi
+            try {
+                const hasPath = Array.isArray(activePath) && activePath.length > 1;
+                if (hasPath) {
+                    const nodesOnThisFloor = activePath.filter(id => {
+                        const n = G.nodes.find(node => String(node.id) === String(id));
+                        return n && (n.floor ?? 0) === currentFloor;
+                    });
+                    if (nodesOnThisFloor.length > 0) {
+                        focusPath(activePath);
+                    } else {
+                        fitToScreen();
+                    }
+                } else {
+                    fitToScreen();
+                }
+            } catch (_) {
                 fitToScreen();
             }
         };
@@ -721,6 +733,102 @@ export function createMinimap(opts) {
         // Path highlight đã được xử lý trong logic vẽ edges với opacity khác nhau
     }
 
+    // --- Traveler dot animation ---
+    let travelDot = null;
+    function ensureTravelDot() {
+        if (!travelDot) {
+            travelDot = document.createElement('div');
+            travelDot.className = 'mm-travel-dot';
+            content.appendChild(travelDot);
+            travelDot.style.display = 'none';
+        } else if (!content.contains(travelDot)) {
+            content.appendChild(travelDot);
+        }
+    }
+    function setDotAt(x, y) {
+        ensureTravelDot();
+        travelDot.style.left = `${x}px`;
+        travelDot.style.top = `${y}px`;
+        travelDot.style.transform = 'translate(-50%, -50%)';
+    }
+    // Tính toán scale "vừa đủ" cho một đoạn tuyến
+    function computeSegmentScale(p0, p1, padding = 140) {
+        const vpRect = viewport.getBoundingClientRect();
+        const minX = Math.min(p0.x, p1.x);
+        const maxX = Math.max(p0.x, p1.x);
+        const minY = Math.min(p0.y, p1.y);
+        const maxY = Math.max(p0.y, p1.y);
+        const contentW = Math.max(1, (maxX - minX) + padding * 2);
+        const contentH = Math.max(1, (maxY - minY) + padding * 2);
+        const scaleW = vpRect.width / contentW;
+        const scaleH = vpRect.height / contentH;
+        let s = Math.min(scaleW, scaleH) * 1.0; // vừa đủ
+        s = Math.max(SCALE_MIN, Math.min(SCALE_MAX, s));
+        return s;
+    }
+
+    function animateSegment(p0, p1, duration = 550, targetScaleOverride = null) {
+        ensureTravelDot();
+        travelDot.style.display = 'block';
+        const t0 = performance.now();
+        const vpRect = viewport.getBoundingClientRect();
+        const startScale = view.scale;
+        const targetScale = targetScaleOverride != null ? targetScaleOverride : computeSegmentScale(p0, p1);
+        return new Promise(resolve => {
+            (function step(now){
+                const p = Math.min(1, (now - t0) / duration);
+                const ease = 1 - Math.pow(1 - p, 3);
+                const x = p0.x + (p1.x - p0.x) * ease;
+                const y = p0.y + (p1.y - p0.y) * ease;
+                setDotAt(x, y);
+                // Pan & zoom theo điểm di chuyển để luôn nhìn rõ đoạn tuyến
+                const currentScale = startScale + (targetScale - startScale) * ease;
+                view.scale = Math.max(SCALE_MIN, Math.min(SCALE_MAX, currentScale));
+                view.x = vpRect.width / 2 - x * view.scale;
+                view.y = vpRect.height / 2 - y * view.scale;
+                updateTransform();
+                if (p < 1) requestAnimationFrame(step); else resolve();
+            })(t0);
+        });
+    }
+    async function playTravel(path) {
+        try {
+            if (!Array.isArray(path) || path.length < 2) return Promise.resolve();
+            const ids = path.map(String);
+            // Focus visible part of path for better context
+            try { focusPath(ids); } catch(_) {}
+            autoFitLock = true; // tránh tự động fit trong lúc theo tuyến
+            // Handle floor changes: when a segment crosses floors, jump dot after switching floor
+            for (let i = 0; i < ids.length - 1; i++) {
+                const aId = ids[i];
+                const bId = ids[i+1];
+                const aNode = G.nodes.find(n => String(n.id) === aId);
+                const bNode = G.nodes.find(n => String(n.id) === bId);
+                if (!aNode || !bNode) continue;
+                const aFloor = aNode.floor ?? 0;
+                const bFloor = bNode.floor ?? 0;
+                if (aFloor !== currentFloor) setFloor(aFloor);
+                const pA = getNodePosition(aNode, aFloor);
+                const pB = getNodePosition(bNode, bFloor);
+                if (aFloor !== bFloor) {
+                    // Place dot at last point on current floor, then switch floor and continue
+                    setDotAt(pA.x, pA.y);
+                    travelDot.style.display = 'block';
+                    setFloor(bFloor);
+                    const pB2 = getNodePosition(bNode, bFloor);
+                    setDotAt(pB2.x, pB2.y);
+                } else {
+                    const segScale = computeSegmentScale(pA, pB);
+                    await animateSegment(pA, pB, 600, segScale);
+                }
+            }
+            // Keep dot at final target briefly
+            setTimeout(() => { if (travelDot) travelDot.style.display = 'none'; }, 800);
+            autoFitLock = false;
+        } catch (e) { console.warn('[Minimap] playTravel error:', e); }
+        return Promise.resolve();
+    }
+
     function drawEdge(x1, y1, x2, y2, opacity = 1.0, isHighlight = false) {
         const dx = x2 - x1;
         const dy = y2 - y1;
@@ -770,7 +878,7 @@ export function createMinimap(opts) {
     }
 
     function focusPath(path) {
-        // Zoom the viewport without panning the map content.
+        // Zoom and pan to fit the path bounding box centered in viewport.
         if (!Array.isArray(path) || path.length === 0) return;
         if (!savedView) savedView = { ...view };
 
@@ -780,39 +888,35 @@ export function createMinimap(opts) {
             if (!n) return;
             if ((n.floor ?? 0) === currentFloor) {
                 const pos = getNodePosition(n, currentFloor);
-                if (pos) nodesOnPath.push({ pos });
+                if (pos) nodesOnPath.push(pos);
             }
         });
 
         if (nodesOnPath.length === 0) return;
 
-        const xs = nodesOnPath.map(p => p.pos.x);
-        const ys = nodesOnPath.map(p => p.pos.y);
+        const xs = nodesOnPath.map(p => p.x);
+        const ys = nodesOnPath.map(p => p.y);
         const minX = Math.min(...xs);
         const maxX = Math.max(...xs);
         const minY = Math.min(...ys);
         const maxY = Math.max(...ys);
+        const cx = (minX + maxX) / 2;
+        const cy = (minY + maxY) / 2;
 
         const vpRect = viewport.getBoundingClientRect();
         const padding = 120;
-        const contentW = (maxX - minX) + padding * 2;
-        const contentH = (maxY - minY) + padding * 2;
+        const contentW = Math.max(1, (maxX - minX) + padding * 2);
+        const contentH = Math.max(1, (maxY - minY) + padding * 2);
         const scaleW = vpRect.width / contentW;
         const scaleH = vpRect.height / contentH;
-        let bboxScale = Math.min(scaleW, scaleH);
+        let targetScale = Math.min(scaleW, scaleH) * 1.05; // just enough
+        targetScale = Math.max(SCALE_MIN, Math.min(SCALE_MAX, targetScale));
 
-        // Target absolute scale, clamped
-        let targetScale = Math.max(bboxScale * 1.2, view.scale);
-        targetScale = Math.max(0.5, Math.min(2.0, targetScale));
-
-        // Keep current viewport center anchored so user perceives only zoom
         const startScale = view.scale;
         const startX = view.x;
         const startY = view.y;
-        const vpCenterX = vpRect.width / 2;
-        const vpCenterY = vpRect.height / 2;
-        const stageCenterX = (vpCenterX - startX) / startScale;
-        const stageCenterY = (vpCenterY - startY) / startScale;
+        const newX = vpRect.width / 2 - cx * targetScale;
+        const newY = vpRect.height / 2 - cy * targetScale;
 
         const duration = 500;
         const t0 = performance.now();
@@ -821,8 +925,8 @@ export function createMinimap(opts) {
             const ease = 1 - Math.pow(1 - p, 3);
             const currentScale = startScale + (targetScale - startScale) * ease;
             view.scale = currentScale;
-            view.x = vpCenterX - stageCenterX * currentScale;
-            view.y = vpCenterY - stageCenterY * currentScale;
+            view.x = startX + (newX - startX) * ease;
+            view.y = startY + (newY - startY) * ease;
             updateTransform();
             if (p < 1) requestAnimationFrame(animate);
         })(t0);
@@ -843,8 +947,8 @@ export function createMinimap(opts) {
             // Use an absolute target scale instead of multiplying to avoid accumulation
             const vpRect = viewport.getBoundingClientRect();
             const fitScale = Math.min(vpRect.width / stageWidth, vpRect.height / stageHeight) * 0.95;
-            // Aim for a moderate zoom (at least fitScale*1.2, but not less than current view.scale)
-            newScale = Math.max(view.scale, Math.max(fitScale * 1.2, 0.6));
+            // Aim for a moderate zoom (slightly above fit), without jumping too far
+            newScale = Math.max(view.scale, Math.max(fitScale * 1.1, SCALE_MIN));
             newScale = Math.max(SCALE_MIN, Math.min(SCALE_MAX, newScale));
         }
 
@@ -898,10 +1002,16 @@ export function createMinimap(opts) {
 
     // --- 5. EVENT LISTENERS ---
 
+    // Throttle wheel zoom and make steps gentler to avoid overshoot
+    let lastWheelTs = 0;
     viewport.addEventListener('wheel', (e) => {
         e.preventDefault();
         autoFitLock = true;
-        zoomAt(e.deltaY > 0 ? 0.9 : 1.1, e.clientX, e.clientY);
+        const now = performance.now();
+        if (now - lastWheelTs < 30) return; // throttle
+        lastWheelTs = now;
+        const step = e.deltaY > 0 ? 0.96 : 1.04; // gentler zoom
+        zoomAt(step, e.clientX, e.clientY);
     }, { passive: false });
 
     let isDragging = false;
@@ -967,11 +1077,11 @@ export function createMinimap(opts) {
 
     container.querySelector('#mmZoomIn').onclick = () => {
         const rect = viewport.getBoundingClientRect();
-        zoomAt(1.2, rect.left + rect.width/2, rect.top + rect.height/2);
+        zoomAt(1.08, rect.left + rect.width/2, rect.top + rect.height/2);
     };
     container.querySelector('#mmZoomOut').onclick = () => {
         const rect = viewport.getBoundingClientRect();
-        zoomAt(0.8, rect.left + rect.width/2, rect.top + rect.height/2);
+        zoomAt(0.92, rect.left + rect.width/2, rect.top + rect.height/2);
     };
     container.querySelector('#mmZoomReset').onclick = () => { autoFitLock = false; savedView = null; fitToScreen(true); };
 
@@ -1193,12 +1303,9 @@ export function createMinimap(opts) {
             console.log(`[Minimap] Switching floor to ${targetFloor} for path`);
             setFloor(targetFloor); 
         } else {
-            // Cùng tầng -> Vẽ và Zoom ngay
-            console.log('[Minimap] Same floor, rendering now...');
+            // Cùng tầng -> chỉ render, KHÔNG zoom minimap
+            console.log('[Minimap] Same floor, rendering without zoom...');
             renderNodes();
-            try { 
-                focusPath(safePath);
-            } catch (e) { console.error('Zoom error:', e); }
         }
 
         // 4. Hẹn giờ reset
@@ -1232,6 +1339,19 @@ export function createMinimap(opts) {
                     currentlyShowingLabels.add(String(nodeId));
                 });
             }, 0);
+            // Nếu người dùng đã zoom quá đà, tự động trả về vừa màn hình sau khi đổi scene
+            try {
+                const vpRect = viewport.getBoundingClientRect();
+                const fitScale = Math.min(vpRect.width / stageWidth, vpRect.height / stageHeight) * 0.95;
+                if (!activePath || activePath.length === 0) {
+                    const tooSmall = view.scale < fitScale * 0.75;
+                    const tooLarge = view.scale > fitScale * 1.5;
+                    if (tooSmall || tooLarge) {
+                        autoFitLock = false;
+                        fitToScreen(true);
+                    }
+                }
+            } catch (_) {}
         }
         // Cập nhật select nếu có
         if (selFrom && selFrom.querySelector(`option[value="${id}"]`)) selFrom.value = id;
@@ -1433,6 +1553,7 @@ export function createMinimap(opts) {
         updateSelectsWithScenes,
         setLanguage ,
         visualizePath, // [QUAN TRỌNG] Đã export hàm này
+        playTravel,
            // [QUAN TRỌNG] Hàm đổi ngôn ngữ
     };
 } 

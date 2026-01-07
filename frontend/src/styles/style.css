@@ -34,6 +34,7 @@ body {
   overflow: hidden; /* Tránh scroll */
   margin: 0;
   padding: 0;
+  touch-action: none; /* Đảm bảo pan/pinch/wheel đi vào viewer */
 }
 
 /* header/footer nổi trên pano  */
@@ -78,7 +79,8 @@ header {
     display: flex; /* Bố cục flex để sắp xếp nội dung */
     align-items: center; /* Căn giữa nội dung theo chiều dọc */
     justify-content: space-between; /* Dãn cách giữa các phần tử */
-    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2); /* Tạo hiệu ứng bóng cho header */
+    /* Loại bỏ bóng để không còn đường kẻ dưới header */
+    box-shadow: none;
     padding: 12px 24px; /* Tăng padding từ 10px 20px lên 12px 24px */
     transition: transform 0.3s ease; /* Smooth transition chỉ cho transform */
     backdrop-filter: blur(8px); /* Làm mờ nền phía sau */
@@ -248,6 +250,8 @@ main {
   display: block; /* Đảm bảo không có spacing */
   margin: 0;
   padding: 0;
+  position: relative;
+  z-index: 2;
 }
 
 .hotspot {
@@ -256,13 +260,122 @@ main {
   justify-content: center;
   transform: translate(-50%, -50%); /* căn giữa icon với vị trí yaw/pitch - giống CMS */
   transform-origin: center center; /* Đảm bảo căn giữa từ tâm */
-  touch-action: manipulation; /* Cho phép tap và scroll, nhưng cải thiện responsiveness */
+  touch-action: none; /* Cho phép Marzipano nhận đầy đủ pan/pinch thay vì trình duyệt xử lý */
   cursor: pointer;
   margin: 0;
   padding: 0;
   box-sizing: border-box;
   line-height: 0; /* Loại bỏ line-height ảnh hưởng */
   /* Không có kích thước cố định để phù hợp với icon */
+  position: relative; /* Cho phép label/arrow định vị tuyệt đối theo hotspot */
+}
+
+/* Label màu xanh như screenshot */
+.hs-label {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  transform: translate(-50%, -110%);
+  padding: 6px 10px;
+  background: #1f3f8a;
+  color: #fff;
+  font-weight: 600;
+  font-size: 14px;
+  border-radius: 4px;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.25);
+  white-space: nowrap;
+  pointer-events: none; /* Không chặn click vào hotspot */
+  z-index: 3;
+}
+
+/* Mũi tên hai chevron như hình, có bóng và hiệu ứng nhẹ */
+.hs-arrow {
+  position: absolute;
+  left: 50%;
+  top: var(--arrow-gap, 36px);
+  transform: translate(-50%, 0);
+  width: 120px;
+  height: 60px;
+  opacity: 0.75;
+  filter: drop-shadow(0 2px 2px rgba(0,0,0,0.35));
+  z-index: 1;
+  animation: hsArrowPulse 2.4s ease-in-out infinite;
+}
+
+@keyframes hsArrowPulse {
+  0% { opacity: 0.6; }
+  50% { opacity: 0.85; filter: drop-shadow(0 3px 4px rgba(0,0,0,0.45)); }
+  100% { opacity: 0.6; }
+}
+
+/* Chuyển động hướng mũi tên: tạo wave cho từng chevron */
+.hs-arrow path {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: hsChevronMove 1.6s ease-in-out infinite;
+}
+.hs-arrow path:nth-child(2) { animation-delay: 0.8s; }
+
+@keyframes hsChevronMove {
+  0%   { transform: translateY(0); opacity: 0.65; }
+  50%  { transform: translateY(-4px); opacity: 0.98; }
+  100% { transform: translateY(0); opacity: 0.65; }
+}
+
+.hotspot:hover .hs-label {
+  transform: translate(-50%, -118%) scale(1.02);
+}
+
+.hotspot:hover .hs-arrow {
+  opacity: 0.9;
+}
+
+/* Road banner - hiển thị tên đường cho một số scene đặc biệt */
+.road-banner {
+  margin-left: 16px;
+  padding: 6px 12px;
+  background: #0f2e6d;
+  color: #fff;
+  font-weight: 600;
+  font-size: 14px;
+  border-radius: 6px;
+  display: inline-block;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.25);
+  white-space: nowrap;
+}
+
+@media (max-width: 767px) {
+  .road-banner {
+    position: absolute;
+    left: 50%;
+    top: 8px;
+    transform: translateX(-50%);
+    margin-left: 0;
+    z-index: 20;
+  }
+}
+
+/* Scene-anchored road banner (hiển thị ngay trên cảnh) */
+.scene-banner {
+  background: #1f3f8a;
+  color: #fff;
+  font-weight: 600;
+  font-size: 16px;
+  padding: 8px 12px;
+  border-radius: 6px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.28);
+  white-space: nowrap;
+  transform: translate(-50%, -120%);
+  pointer-events: none; /* Không chặn thao tác viewer */
+  z-index: 10;
+}
+
+@media (max-width: 767px) {
+  .scene-banner {
+    font-size: 14px;
+    padding: 6px 10px;
+    transform: translate(-50%, -110%);
+  }
 }
 
 
@@ -615,6 +728,20 @@ main {
     background-color: rgba(59, 130, 246, 0.9) !important;
     height: 4px;
     z-index: 16;
+}
+
+/* Moving traveler indicator along route */
+.mm-travel-dot {
+  position: absolute;
+  width: clamp(10px, calc(20px / var(--mm-scale, 1)), 26px);
+  height: clamp(10px, calc(20px / var(--mm-scale, 1)), 26px);
+  background-color: #f59e0b; /* amber */
+  border: 2px solid #ffffff;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 25;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+  pointer-events: none;
 }
 
 /* ========== Mobile Simplification ========== */
