@@ -2,15 +2,15 @@
   {
     "id": "congtruong",
     "name": {
-      "en": "Main Gate",
-      "vi": "Cổng Chính -  Đường Đại Lộ Bình Dương"
+      "vi": "Cổng Chính -  Đường Đại Lộ Bình Dương",
+      "en": "Main Gate"
     },
     "type": "equirect",
     "url": "/uploads/congtruong_1765098324330.webp",
     "initialView": {
-      "yaw": 1.5255307666129818,
-      "pitch": -0.024124584169941343,
-      "hfov": 0.9276924009922387
+      "yaw": -3,
+      "pitch": 0,
+      "hfov": 0
     },
     "hotspots": [
       {
