@@ -12,8 +12,8 @@
   <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
 
   <script src="/marzipano.js"></script>
-  <script type="module" crossorigin src="/assets/index-Drom4l5c.js"></script>
-  <link rel="stylesheet" crossorigin href="/assets/index-BbXZSoMU.css">
+  <script type="module" crossorigin src="/assets/index-DooMDly1.js"></script>
+  <link rel="stylesheet" crossorigin href="/assets/index-DEtREkmu.css">
 </head>
 <body>
 
@@ -21,16 +21,18 @@
   <header class="header" id="mainHeader">
     <img id="logo" src="/assets/icon/logo BDU Eng.png" alt="Logo BDU" />
     <div class="brand">
-      <h1 id="tieude">Tham Quan Đại Học Bình Dương 360°</h1>
+      <h1 id="tieude" data-i18n="title">Tham Quan Đại Học Bình Dương 360°</h1>
     </div>
     <div id="tenKhuVuc" class="scene-title" aria-live="polite">Tên khu vực: Cổng Chính</div>
+    <!-- Road banner (only shown for configured gates) -->
+    <div id="roadBanner" class="road-banner" style="display:none"></div>
     <div class="header-actions">
       
       <div class="lang-switcher">
         <button id="lang-vi" class="lang-btn active" data-lang="vi">VI</button>
         <button id="lang-en" class="lang-btn" data-lang="en">EN</button>
       </div>
-      <button id="installButton" style="display:none">Cài đặt ứng dụng</button>
+      <button id="installButton" data-i18n="installApp" style="display:none">Cài đặt ứng dụng</button>
     </div>
   </header>
 

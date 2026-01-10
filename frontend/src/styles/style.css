@@ -288,18 +288,35 @@ main {
   z-index: 3;
 }
 
-/* Mũi tên hai chevron như hình, có bóng và hiệu ứng nhẹ */
-.hs-arrow {
+/* Mũi tên hotspot: wrapper để giữ rotate/tilt (inline) + phần inner để animate */
+.hs-arrow-outer {
   position: absolute;
   left: 50%;
   top: var(--arrow-gap, 36px);
-  transform: translate(-50%, 0);
   width: 120px;
   height: 60px;
   opacity: 0.75;
   filter: drop-shadow(0 2px 2px rgba(0,0,0,0.35));
   z-index: 1;
-  animation: hsArrowPulse 2.4s ease-in-out infinite;
+  pointer-events: none;
+}
+
+.hs-arrow-inner {
+  width: 100%;
+  height: 100%;
+  animation: hsArrowMove 1.05s ease-in-out infinite;
+}
+
+.hs-arrow {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+@keyframes hsArrowMove {
+  0%   { transform: translateY(0) scale(0.98); opacity: 0.60; }
+  50%  { transform: translateY(-10px) scale(1.05); opacity: 1; }
+  100% { transform: translateY(0) scale(0.98); opacity: 0.60; }
 }
 
 @keyframes hsArrowPulse {
@@ -308,13 +325,11 @@ main {
   100% { opacity: 0.6; }
 }
 
-/* Chuyển động hướng mũi tên: tạo wave cho từng chevron */
+/* Không animate từng path (tránh rối hình), chỉ animate cả cụm */
 .hs-arrow path {
   transform-box: fill-box;
   transform-origin: center;
-  animation: hsChevronMove 1.6s ease-in-out infinite;
 }
-.hs-arrow path:nth-child(2) { animation-delay: 0.8s; }
 
 @keyframes hsChevronMove {
   0%   { transform: translateY(0); opacity: 0.65; }
@@ -326,8 +341,14 @@ main {
   transform: translate(-50%, -118%) scale(1.02);
 }
 
-.hotspot:hover .hs-arrow {
+.hotspot:hover .hs-arrow-outer {
   opacity: 0.9;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hs-arrow-inner {
+    animation: none;
+  }
 }
 
 /* Road banner - hiển thị tên đường cho một số scene đặc biệt */
@@ -833,11 +854,19 @@ main {
   .minimap {
     width: 320px;
     height: 240px;
+    max-width: calc(100vw - 24px);
+    max-height: calc(100vh - 90px);
     left: 12px;   /* chuyển sang góc trái để tránh nút BOT */
     top: 72px;    /* bên dưới header một chút */
     right: auto;
     bottom: auto;
     z-index: 1000;
+  }
+
+  /* Nhỏ header minimap để chừa chỗ cho ảnh */
+  .minimap .mm-toolbar {
+    height: 30px;
+    padding: 4px 8px;
   }
   .minimap .mm-route { display: none; }
   .minimap .mm-zoom { display: none; }

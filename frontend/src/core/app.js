@@ -1,26 +1,26 @@
-// /src/core/app.js
+﻿// /src/core/app.js
 import { createMinimap } from "./ui/minimap.js";
 import { createVoiceBot } from "../bot/voiceBot.js";
 import { createFPSCounter } from "./ui/fpsCounter.js"; 
 
 export async function bootstrap(opts) {
-  const {
-    dataBaseUrl = '/api',
-    rootSelector = '#pano',
-    fadeSelector = '#fade',
-    minimapSelector = '#minimap',
-    hotspotsSelector = '#hotspots',
-  } = opts || {};
+ const {
+  dataBaseUrl = '/api',
+  rootSelector = '#pano',
+  fadeSelector = '#fade',
+  minimapSelector = '#minimap',
+  hotspotsSelector = '#hotspots',
+ } = opts || {};
 
-  let currentGraph = { nodes: [], edges: [] };
-  let currentSceneId = null;
+ let currentGraph = { nodes: [], edges: [] };
+ let currentSceneId = null;
 
   // ===== Load scenes =====
   const scenes = await fetch(`${dataBaseUrl}/scenes`).then(r => {
-    if (!r.ok) throw new Error('Không tải được scenes');
+    if (!r.ok) throw new Error('Kh么ng t岷 膽瓢峄 scenes');
     return r.json();
   }).catch(err => {
-    console.error('Lỗi khi tải scenes:', err);
+    console.error('L峄梚 khi t岷 scenes:', err);
     return [];
   });
   
@@ -35,30 +35,31 @@ export async function bootstrap(opts) {
 
   // ===== Viewer setup =====
   const root = document.querySelector(rootSelector);
-  if (!root) throw new Error(`Không tìm thấy ${rootSelector}`);
   const fadeEl = document.querySelector(fadeSelector);
 
-  // Đảm bảo element có kích thước trước khi khởi tạo viewer
   const ensureElementSize = (el) => {
+    if (!el) return;
     const rect = el.getBoundingClientRect();
     if (rect.width === 0 || rect.height === 0) {
       console.warn('[App] Element has zero size, setting default dimensions');
-      // Đảm bảo element có kích thước
+
       if (!el.style.width || el.style.width === '0px') {
         el.style.width = '100vw';
       }
+
       if (!el.style.height || el.style.height === '0px') {
         el.style.height = '100vh';
       }
-      // Force reflow
+
       el.offsetHeight;
     }
-    console.log('[App] Element size:', { width: rect.width, height: rect.height, computed: el.getBoundingClientRect() });
+    const computed = el.getBoundingClientRect();
+    console.log('[App] Element size:', { width: computed.width, height: computed.height });
   };
   
   ensureElementSize(root);
   
-  // Đợi DOM và styles đã render
+  // 膼峄 DOM v脿 styles 膽茫 render
   await new Promise(resolve => {
     if (document.readyState === 'complete') {
       requestAnimationFrame(resolve);
@@ -67,25 +68,25 @@ export async function bootstrap(opts) {
     }
   });
   
-  // Đảm bảo lại kích thước sau khi load
+  // 膼岷 b岷 l岷 k铆ch th瓢峄沜 sau khi load
   ensureElementSize(root);
   
-  // Kiểm tra Marzipano có được load không
+  // Ki峄僲 tra Marzipano c贸 膽瓢峄 load kh么ng
   if (typeof Marzipano === 'undefined') {
     throw new Error('Marzipano library not loaded. Please check if /marzipano.js is accessible.');
   }
   
-  // Kiểm tra WebGL support chi tiết hơn
+  // Ki峄僲 tra WebGL support chi ti岷縯 h啤n
   const checkWebGLSupport = () => {
     try {
       const canvas = document.createElement('canvas');
-      // Thử các context khác nhau
+      // Th峄?c谩c context kh谩c nhau
       const gl = canvas.getContext('webgl2') || 
                  canvas.getContext('webgl') || 
                  canvas.getContext('experimental-webgl');
       
       if (gl) {
-        // Kiểm tra xem context có thực sự hoạt động không
+        // Ki峄僲 tra xem context c贸 th峄眂 s峄?ho岷 膽峄檔g kh么ng
         const debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
         if (debugInfo) {
           const vendor = gl.getParameter(debugInfo.UNMASKED_VENDOR_WEBGL);
@@ -97,7 +98,7 @@ export async function bootstrap(opts) {
         return true;
       }
       
-      // Kiểm tra xem có bị block không
+      // Ki峄僲 tra xem c贸 b峄?block kh么ng
       const blocked = canvas.getContext('webgl', { failIfMajorPerformanceCaveat: false });
       if (!blocked) {
         console.warn('[App] WebGL context creation failed - may be blocked or unsupported');
@@ -121,11 +122,11 @@ export async function bootstrap(opts) {
     }
   };
   
-  // Chọn stageType dựa trên WebGL support
+  // Ch峄峮 stageType d峄盿 tr锚n WebGL support
   if (hasWebGL) {
     viewerOptions.stageType = "webgl";
   } else {
-    // Sử dụng CSS transforms nếu WebGL không khả dụng
+    // S峄?d峄g CSS transforms n岷縰 WebGL kh么ng kh岷?d峄g
     viewerOptions.stageType = "css";
     console.log('[App] Using CSS stage type as WebGL fallback');
   }
@@ -133,24 +134,32 @@ export async function bootstrap(opts) {
   try {
     viewer = new Marzipano.Viewer(root, viewerOptions);
     console.log('[App] Marzipano Viewer initialized successfully', hasWebGL ? 'with WebGL' : 'with CSS fallback');
-    // Ensure wheel and pinch zoom controls are registered
+    // Ensure wheel and pinch zoom controls are registered.
+    // Some Marzipano builds throw inside registerDefaultControls (e.g. missing Hammer).
     try {
       const ctrls = typeof viewer.controls === 'function' ? viewer.controls() : null;
-      if (Marzipano.registerDefaultControls && ctrls) {
-        // Correct API: pass Controls instance, not Viewer
-        Marzipano.registerDefaultControls(ctrls);
-      } else if (ctrls) {
-        ctrls.registerMethod('scrollZoom', new Marzipano.ScrollZoomControlMethod(), true);
-        ctrls.registerMethod('pinchZoom', new Marzipano.PinchZoomControlMethod(), true);
+      if (ctrls) {
+        let usedDefault = false;
+        if (typeof Marzipano.registerDefaultControls === 'function') {
+          try {
+            Marzipano.registerDefaultControls(ctrls);
+            usedDefault = true;
+          } catch (e) {
+            console.warn('[App] Default controls registration failed, falling back:', e);
+          }
+        }
+
+        // If default controls fail (e.g. Hammer.js integration missing), we rely on our own
+        // wheel + touch pinch fallbacks later in this file.
       }
-      console.log('[App] Zoom controls registered (scroll + pinch)');
+      console.log('[App] Zoom controls registered (default or fallback)');
     } catch (ctrlErr) {
       console.warn('[App] Failed to register zoom controls:', ctrlErr);
     }
   } catch (error) {
     console.error('[App] Failed to initialize Marzipano Viewer:', error);
     
-    // Retry với CSS nếu lần đầu dùng WebGL
+    // Retry v峄沬 CSS n岷縰 l岷 膽岷 d霉ng WebGL
     if (hasWebGL && error.message && error.message.includes('WebGL')) {
       console.log('[App] WebGL failed, retrying with CSS stage type');
       ensureElementSize(root);
@@ -165,13 +174,19 @@ export async function bootstrap(opts) {
         console.log('[App] Marzipano Viewer initialized with CSS fallback');
         try {
           const ctrls = typeof viewer.controls === 'function' ? viewer.controls() : null;
-          if (Marzipano.registerDefaultControls && ctrls) {
-            Marzipano.registerDefaultControls(ctrls);
-          } else if (ctrls) {
-            ctrls.registerMethod('scrollZoom', new Marzipano.ScrollZoomControlMethod(), true);
-            ctrls.registerMethod('pinchZoom', new Marzipano.PinchZoomControlMethod(), true);
+          if (ctrls) {
+            let usedDefault = false;
+            if (typeof Marzipano.registerDefaultControls === 'function') {
+              try {
+                Marzipano.registerDefaultControls(ctrls);
+                usedDefault = true;
+              } catch (e) {
+                console.warn('[App] Default controls registration failed (CSS fallback), falling back:', e);
+              }
+            }
+            // Rely on our own wheel + pinch fallbacks.
           }
-          console.log('[App] Zoom controls registered (scroll + pinch) [CSS fallback]');
+          console.log('[App] Zoom controls registered (default or fallback) [CSS fallback]');
         } catch (ctrlErr2) {
           console.warn('[App] Failed to register zoom controls (CSS fallback):', ctrlErr2);
         }
@@ -181,11 +196,11 @@ export async function bootstrap(opts) {
         throw cssError;
       }
     } else {
-      // Retry với cấu hình đơn giản hơn
+      // Retry v峄沬 c岷 h矛nh 膽啤n gi岷 h啤n
       ensureElementSize(root);
       await new Promise(resolve => setTimeout(resolve, 300));
       try {
-        // Thử không chỉ định stageType (để Marzipano tự chọn)
+        // Th峄?kh么ng ch峄?膽峄媙h stageType (膽峄?Marzipano t峄?ch峄峮)
         viewer = new Marzipano.Viewer(root, {
           controls: {
             mouseViewMode: 'drag'
@@ -194,13 +209,19 @@ export async function bootstrap(opts) {
         console.log('[App] Marzipano Viewer initialized on retry (Marzipano auto-selected stage type)');
         try {
           const ctrls = typeof viewer.controls === 'function' ? viewer.controls() : null;
-          if (Marzipano.registerDefaultControls && ctrls) {
-            Marzipano.registerDefaultControls(ctrls);
-          } else if (ctrls) {
-            ctrls.registerMethod('scrollZoom', new Marzipano.ScrollZoomControlMethod(), true);
-            ctrls.registerMethod('pinchZoom', new Marzipano.PinchZoomControlMethod(), true);
+          if (ctrls) {
+            let usedDefault = false;
+            if (typeof Marzipano.registerDefaultControls === 'function') {
+              try {
+                Marzipano.registerDefaultControls(ctrls);
+                usedDefault = true;
+              } catch (e) {
+                console.warn('[App] Default controls registration failed (retry), falling back:', e);
+              }
+            }
+            // Rely on our own wheel + pinch fallbacks.
           }
-          console.log('[App] Zoom controls registered (scroll + pinch) [retry]');
+          console.log('[App] Zoom controls registered (default or fallback) [retry]');
         } catch (ctrlErr3) {
           console.warn('[App] Failed to register zoom controls (retry):', ctrlErr3);
         }
@@ -218,137 +239,395 @@ export async function bootstrap(opts) {
       if (e.target.closest('#minimap') || e.target.closest('header') || e.target.closest('footer')) return;
       userActivity();
       const delta = e.deltaY;
-      // Small step to feel smooth; positive = zoom out, negative = zoom in
-      fovDelta(delta > 0 ? +0.08 : -0.08);
+      // Noticeable step; positive = zoom out, negative = zoom in
+      fovDelta(delta > 0 ? +0.18 : -0.18);
       scheduleAutoResume();
-    }, { passive: true });
+    }, { passive: true, capture: true });
     console.log('[App] Wheel zoom fallback attached to #pano');
   } catch (wheelErr) {
     console.warn('[App] Failed to attach wheel zoom fallback:', wheelErr);
   }
 
-  // Final error handling nếu tất cả đều fail
+  // Fallback: touch pinch zoom without Hammer.js
+  try {
+    const dist = (t1, t2) => {
+      const dx = (t1.clientX - t2.clientX);
+      const dy = (t1.clientY - t2.clientY);
+      return Math.sqrt(dx * dx + dy * dy);
+    };
+    const pinchState = { active: false, startDist: 0, startFov: 0 };
+
+    root.addEventListener('touchstart', (e) => {
+      if (!e.touches || e.touches.length !== 2) return;
+      const v = getActiveView();
+      if (!v) return;
+      pinchState.active = true;
+      pinchState.startDist = dist(e.touches[0], e.touches[1]) || 1;
+      pinchState.startFov = v.fov();
+    }, { passive: true });
+
+    root.addEventListener('touchmove', (e) => {
+      if (!pinchState.active || !e.touches || e.touches.length !== 2) return;
+      const v = getActiveView();
+      if (!v) return;
+      // prevent browser page zoom/scroll while pinching on pano
+      try { e.preventDefault(); } catch (_) {}
+      userActivity();
+
+      const d = dist(e.touches[0], e.touches[1]) || 1;
+      const scale = d / (pinchState.startDist || 1);
+
+      const ZMIN = Marzipano.util.degToRad(20), ZMAX = Marzipano.util.degToRad(110);
+      const target = pinchState.startFov / Math.max(0.25, Math.min(4, scale));
+      v.setFov(Math.min(ZMAX, Math.max(ZMIN, target)));
+      requestRender();
+      scheduleAutoResume();
+    }, { passive: false });
+
+    root.addEventListener('touchend', (e) => {
+      if (!e.touches || e.touches.length < 2) pinchState.active = false;
+    }, { passive: true });
+    root.addEventListener('touchcancel', () => { pinchState.active = false; }, { passive: true });
+
+    console.log('[App] Pinch zoom fallback attached to #pano');
+  } catch (touchErr) {
+    console.warn('[App] Failed to attach pinch zoom fallback:', touchErr);
+  }
+
+  // Final error handling n岷縰 t岷 c岷?膽峄乽 fail
   if (!viewer) {
     const isWebGLError = true; // Assume WebGL error if we got here
-    const errorMsg = 'WebGL không được hỗ trợ. Vui lòng kiểm tra cài đặt trình duyệt hoặc thử trình duyệt khác.';
+    const errorMsg = 'WebGL kh么ng 膽瓢峄 h峄?tr峄? Vui l貌ng ki峄僲 tra c脿i 膽岷穞 tr矛nh duy峄噒 ho岷穋 th峄?tr矛nh duy峄噒 kh谩c.';
     
     if (root) {
       root.innerHTML = `<div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; color: red; font-size: 18px; padding: 20px; text-align: center;">
         <div style="margin-bottom: 10px;">${errorMsg}</div>
-        <div style="font-size: 14px; color: #666; margin-top: 10px;">Nếu vấn đề vẫn tiếp tục, vui lòng thử:</div>
+        <div style="font-size: 14px; color: #666; margin-top: 10px;">N岷縰 v岷 膽峄?v岷玭 ti岷縫 t峄, vui l貌ng th峄?</div>
         <ul style="font-size: 14px; color: #666; text-align: left; margin-top: 10px;">
-          <li>Kiểm tra WebGL có được bật trong cài đặt trình duyệt</li>
-          <li>Cập nhật driver đồ họa</li>
-          <li>Thử trình duyệt khác (Chrome, Firefox, Edge)</li>
-          <li>Kiểm tra tại: <a href="https://webglreport.com/" target="_blank" style="color: #0066cc;">webglreport.com</a></li>
+          <li>Ki峄僲 tra WebGL c贸 膽瓢峄 b岷璽 trong c脿i 膽岷穞 tr矛nh duy峄噒</li>
+          <li>C岷璸 nh岷璽 driver 膽峄?h峄峚</li>
+          <li>Th峄?tr矛nh duy峄噒 kh谩c (Chrome, Firefox, Edge)</li>
+          <li>Ki峄僲 tra t岷: <a href="https://webglreport.com/" target="_blank" style="color: #0066cc;">webglreport.com</a></li>
         </ul>
       </div>`;
     }
     throw new Error(errorMsg);
   }
-  const geometry = new Marzipano.EquirectGeometry([{ width: 4096 }]);
-  const limiter = Marzipano.RectilinearView.limit.traditional(
-    Marzipano.util.degToRad(20),
-    Marzipano.util.degToRad(110)
-  );
+ const geometry = new Marzipano.EquirectGeometry([{ width: 4096 }]);
+ // NOTE: RectilinearView.limit.traditional(resolution, maxVfov, maxHfov)
+ // The previous code passed FOV values into the resolution slot, which can prevent
+ // view updates (including setFov) from applying correctly.
+ const MIN_FOV = Marzipano.util.degToRad(20);
+ const MAX_FOV = Marzipano.util.degToRad(110);
+ const limiter = Marzipano.util.compose(
+  Marzipano.RectilinearView.limit.vfov(MIN_FOV, MAX_FOV),
+  Marzipano.RectilinearView.limit.pitch(-Math.PI / 2, Math.PI / 2)
+ );
 
-  const sceneCache = {};
-  let active = { id: null, scene: null, view: null };
+ const sceneCache = {};
+ let active = { id: null, scene: null, view: null };
 
-  // ===== Pub/Sub (scenechange) =====
-  const _listeners = { scenechange: new Set() };
-  function onSceneChange(cb) { _listeners.scenechange.add(cb); return () => _listeners.scenechange.delete(cb); }
-  function _emit(type, payload) { _listeners[type]?.forEach(fn => fn(payload)); }
+ // ===== Render helper =====
+ function requestRender() {
+  try {
+   const rl = viewer && typeof viewer.renderLoop === 'function' ? viewer.renderLoop() : null;
+   if (rl && typeof rl.renderOnNextFrame === 'function') {
+    rl.renderOnNextFrame();
+    return;
+   }
+  } catch (_) {}
+  try {
+   const stage = viewer && typeof viewer.stage === 'function' ? viewer.stage() : null;
+   if (stage && typeof stage.render === 'function') stage.render();
+  } catch (_) {}
+ }
 
-  // ===== Fade helper =====
-  function fade(to = 1, dur = 200) {
-    if (!fadeEl) return Promise.resolve();
-    const from = +getComputedStyle(fadeEl).opacity || 0;
-    return new Promise(res => {
-      const t0 = performance.now();
-      (function step(t) {
-        const p = Math.min(1, (t - t0) / dur);
-        fadeEl.style.opacity = String(from + (to - from) * p);
-        p < 1 ? requestAnimationFrame(step) : res();
-      })(t0);
-    });
-  }
+ function getActiveView() {
+  try {
+   const s = viewer && typeof viewer.scene === 'function' ? viewer.scene() : null;
+   const v = s && typeof s.view === 'function' ? s.view() : null;
+   if (v) {
+    active.scene = s;
+    active.view = v;
+    try { ensureViewSize(v); } catch (_) {}
+    return v;
+   }
+  } catch (_) {}
+  return active.view || null;
+ }
 
-  // Tooltip singleton for hotspots
-  const tip = document.createElement('div');
-  tip.className = 'hs-tip';
-  document.body.appendChild(tip);
+ function ensureViewSize(v) {
+  if (!v || typeof v.setSize !== 'function') return false;
+  const stage = viewer && typeof viewer.stage === 'function' ? viewer.stage() : null;
+  const w = stage && typeof stage.width === 'function' ? stage.width() : 0;
+  const h = stage && typeof stage.height === 'function' ? stage.height() : 0;
+  if (!(w > 0 && h > 0)) return false;
+  let vw = 0, vh = 0;
+  try { vw = typeof v.width === 'function' ? v.width() : 0; } catch (_) {}
+  try { vh = typeof v.height === 'function' ? v.height() : 0; } catch (_) {}
+  if (!(vw > 0 && vh > 0)) {
+    v.setSize({ width: w, height: h });
+    return true;
+  }
+  return false;
+ }
 
-  function showTip(html, x, y) {
-    tip.innerHTML = html;
-    tip.style.left = x + 'px';
-    tip.style.top = y + 'px';
-    tip.style.display = 'block';
-  }
-  function moveTip(x, y) {
-    if (tip.style.display !== 'none') {
-      tip.style.left = x + 'px';
-      tip.style.top = y + 'px';
-    }
-  }
-  function hideTip() {
-    tip.style.display = 'none';
-    tip.innerHTML = '';
-  }
+ // ===== Pub/Sub (scenechange) =====
+ const _listeners = { scenechange: new Set() };
+ function onSceneChange(cb) { _listeners.scenechange.add(cb); return () => _listeners.scenechange.delete(cb); }
+ function _emit(type, payload) { _listeners[type]?.forEach(fn => fn(payload)); }
 
-  // ===== Hotspots =====
-  function addHotspot(scene, h) {
-    const el = document.createElement('div');
-    el.className = 'hotspot';
+ // ===== Fade helper =====
+ function fade(to = 1, dur = 200) {
+  if (!fadeEl) return Promise.resolve();
+  const from = +getComputedStyle(fadeEl).opacity || 0;
+  return new Promise(res => {
+   const t0 = performance.now();
+   (function step(t) {
+    const p = Math.min(1, (t - t0) / dur);
+    fadeEl.style.opacity = String(from + (to - from) * p);
+    p < 1 ? requestAnimationFrame(step) : res();
+   })(t0);
+  });
+ }
+
+ // Tooltip singleton for hotspots
+ const tip = document.createElement('div');
+ tip.className = 'hs-tip';
+ document.body.appendChild(tip);
+
+ // Hover preview (flat equirect image) like CMS "Xem nhanh ảnh"
+ const hoverPreviewEl = document.getElementById('hoverPreview');
+ const previewImageEl = document.getElementById('previewImage');
+ try {
+  if (previewImageEl) {
+   previewImageEl.loading = 'lazy';
+   previewImageEl.decoding = 'async';
+  }
+ } catch (_) {}
+
+ function showHoverPreview(src, x, y) {
+  if (!hoverPreviewEl || !previewImageEl || !src) return;
+  if (previewImageEl.dataset.src !== src) {
+   previewImageEl.dataset.src = src;
+   previewImageEl.src = src;
+  }
+  hoverPreviewEl.style.left = (x + 14) + 'px';
+  hoverPreviewEl.style.top = (y + 14) + 'px';
+  hoverPreviewEl.style.display = 'block';
+  hoverPreviewEl.setAttribute('aria-hidden', 'false');
+ }
+
+ function moveHoverPreview(x, y) {
+  if (!hoverPreviewEl || hoverPreviewEl.style.display === 'none') return;
+  hoverPreviewEl.style.left = (x + 14) + 'px';
+  hoverPreviewEl.style.top = (y + 14) + 'px';
+ }
+
+ function hideHoverPreview() {
+  if (!hoverPreviewEl || !previewImageEl) return;
+  hoverPreviewEl.style.display = 'none';
+  hoverPreviewEl.setAttribute('aria-hidden', 'true');
+ }
+
+ function showTip(html, x, y) {
+  tip.innerHTML = html;
+  tip.style.left = x + 'px';
+  tip.style.top = y + 'px';
+  tip.style.display = 'block';
+ }
+ function moveTip(x, y) {
+  if (tip.style.display !== 'none') {
+   tip.style.left = x + 'px';
+   tip.style.top = y + 'px';
+  }
+ }
+ function hideTip() {
+  tip.style.display = 'none';
+  tip.innerHTML = '';
+ }
+
+ // ===== Hotspots =====
+  // Global arrow config: force same orientation for all arrows
+  const ARROW_GLOBAL = {
+    forceFixed: true,    // set to true to ignore yaw/per-hotspot rotation
+    rotate: 0,           // degrees; chevron path already points up
+    tilt: 50,            // degrees; stronger floor lie
+    offsetY: 24,         // px; push lower to match screenshot
+    scale: 0.85          // slightly smaller
+  };
+
+  let ARROW_SHADOW_SEQ = 0;
+
+   function normalizeLang(lang) {
+    const l = (lang || localStorage.getItem('lang') || 'vi');
+    return String(l).toLowerCase() === 'en' ? 'en' : 'vi';
+   }
+
+   function getSceneFieldByLang(scene, field, lang) {
+    if (!scene) return '';
+    const v = scene[field];
+    if (!v) return '';
+    if (typeof v === 'object') return v[lang] || v.vi || v.en || '';
+    return String(v);
+   }
+
+   function applyHotspotLabelForLang(hotspotEl, lang) {
+    if (!hotspotEl) return;
+    const lbl = hotspotEl.querySelector('.hs-label');
+    if (!lbl) return;
+    const vi = hotspotEl.dataset.labelVi || '';
+    const en = hotspotEl.dataset.labelEn || vi;
+    lbl.textContent = lang === 'en' ? (en || vi) : (vi || en);
+   }
+
+   function refreshHotspotLabels(lang) {
+    const l = normalizeLang(lang);
+    document.querySelectorAll('.hotspot[data-label-vi], .hotspot[data-label-en]').forEach(el => {
+     applyHotspotLabelForLang(el, l);
+    });
+   }
+
+   function refreshSceneBanners(lang) {
+    const l = normalizeLang(lang);
+    try {
+     Object.keys(sceneCache).forEach((sceneId) => {
+      const rec = sceneCache[sceneId];
+      const sc = rec?.scene;
+      if (!sc?.__banner?.el) return;
+      const sData = scenesById.get(String(sceneId)) || scenes.find(x => String(x.id) === String(sceneId));
+      const text = extractRoadText(sData, l);
+      sc.__banner.el.textContent = text || '';
+      sc.__banner.el.style.display = text ? '' : 'none';
+     });
+    } catch (e) {
+     console.warn('[SceneBanner] Refresh failed:', e);
+    }
+   }
+
+ function addHotspot(scene, h) {
+  const el = document.createElement('div');
+  el.className = 'hotspot';
+    // Give a perspective context so the arrow can "lie" on the floor
+    try {
+      el.style.perspective = '700px';
+      el.style.transformStyle = 'preserve-3d';
+    } catch {}
+    // Build arrow SVG with customizable style and rotation
+    // Visual style: default to a clean blue outline
+    const arrowColor = h.arrowColor || '#1E4FA3';
+    const arrowWidth = Number.isFinite(+h.arrowWidth) ? Math.max(2, +h.arrowWidth) : 8;
+    const outlineColor = h.arrowOutlineColor || '#0E315F';
+    const outlineWidth = Math.max(arrowWidth + 2, arrowWidth);
+
+    // Double-chevron like the provided screenshot
+    const chevronTop = 'M32 20 L60 6 L88 20';
+    const chevronBottom = 'M32 44 L60 30 L88 44';
+
+    // Orientation: force fixed for all, matching the provided example
+    const useFixed = ARROW_GLOBAL && ARROW_GLOBAL.forceFixed === true;
+    const arrowRotate = useFixed
+      ? +ARROW_GLOBAL.rotate
+      : (Number.isFinite(+h.arrowRotate)
+          ? +h.arrowRotate
+          : (h.arrowAuto !== false && Number.isFinite(+h.yaw)
+              ? (+h.yaw) * 180 / Math.PI - 90
+              : -90));
+
+    // Tilt: make arrow look like it's lying on the ground (use global if forced)
+    const arrowTilt = useFixed
+      ? +ARROW_GLOBAL.tilt
+      : (Number.isFinite(+h.arrowTilt) ? +h.arrowTilt : 35);
+
+    // Offset and scale: make position match the desired look
+    const arrowOffsetY = useFixed
+      ? +ARROW_GLOBAL.offsetY
+      : (Number.isFinite(+h.arrowOffsetY) ? +h.arrowOffsetY : 0);
+    const arrowScale = useFixed
+      ? +ARROW_GLOBAL.scale
+      : (Number.isFinite(+h.arrowScale) ? +h.arrowScale : 1);
+    const shadowId = `hsArrowShadow_${++ARROW_SHADOW_SEQ}`;
+    const arrowSvg = `
+      <div class="hs-arrow-outer" aria-hidden="true" style="transform: translate(-50%, 0) translateY(${arrowOffsetY}px) rotate(${arrowRotate}deg) rotateX(${arrowTilt}deg) scale(${arrowScale}); transform-origin: center bottom; transform-style: preserve-3d; pointer-events: none;">
+        <div class="hs-arrow-inner">
+          <svg class="hs-arrow" viewBox="0 0 120 60" aria-hidden="true">
+            <defs>
+              <filter id="${shadowId}" x="-50%" y="-50%" width="200%" height="200%">
+                <feDropShadow dx="0" dy="2" stdDeviation="2" flood-color="rgba(0,0,0,0.35)"/>
+              </filter>
+            </defs>
+            <g filter="url(#${shadowId})">
+              <path d="${chevronTop}" fill="none" stroke="${outlineColor}" stroke-width="${outlineWidth}" stroke-linecap="round" stroke-linejoin="round" />
+              <path d="${chevronBottom}" fill="none" stroke="${outlineColor}" stroke-width="${outlineWidth}" stroke-linecap="round" stroke-linejoin="round" />
+              <path d="${chevronTop}" fill="none" stroke="${arrowColor}" stroke-width="${arrowWidth}" stroke-linecap="round" stroke-linejoin="round" />
+              <path d="${chevronBottom}" fill="none" stroke="${arrowColor}" stroke-width="${arrowWidth}" stroke-linecap="round" stroke-linejoin="round" />
+            </g>
+          </svg>
+        </div>
+      </div>`;
+
+    const targetScene = scenesById.get(String(h.target)) || scenes.find(x => x.id === h.target);
+    const labelVi = (getSceneNameByLang(targetScene, 'vi') || (h.title || h.label || h.text || '')).trim();
+    const labelEn = (getSceneNameByLang(targetScene, 'en') || labelVi).trim();
+    const descVi = (getSceneDescByLang(targetScene, 'vi') || (h.desc || '')).trim();
+    const descEn = (getSceneDescByLang(targetScene, 'en') || descVi).trim();
+
+    el.dataset.targetScene = String(h.target ?? '');
+    el.dataset.labelVi = labelVi;
+    el.dataset.labelEn = labelEn;
+    el.dataset.descVi = descVi;
+    el.dataset.descEn = descEn;
+
     el.innerHTML = `
-      <div class="hs-label">${(h.title || h.label || '').trim() || ''}</div>
-      <svg class="hs-arrow" viewBox="0 0 120 60" aria-hidden="true">
-        <g fill="none" stroke="#fff" stroke-width="8" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M12 42 L36 28 L60 42" />
-          <path d="M60 42 L84 28 L108 42" />
-        </g>
-      </svg>
+      <div class="hs-label"></div>
+      ${arrowSvg}
       <img class="hotspot-icon" src="${h.icon || '/assets/icon/vitri.png'}" alt="">
     `;
-    // Text đã được hiển thị trong tooltip khi hover, không cần hiển thị dưới icon
+    // Text 膽茫 膽瓢峄 hi峄僴 th峄?trong tooltip khi hover, kh么ng c岷 hi峄僴 th峄?d瓢峄沬 icon
 
-  const targetScene = scenes.find(x => x.id === h.target);
-  const hsTitle = h.title || h.label || h.text || (targetScene?.name?.vi || targetScene?.name || h.target);
-    const hsDesc = h.desc || targetScene?.desc || '';
-    const hsImg = h.thumb || targetScene?.preview || '';
+  const hsImg = h.thumb || targetScene?.preview || '';
+  const panoPreview = (targetScene && (targetScene.url || targetScene.src)) ? (targetScene.url || targetScene.src) : '';
 
-    // Cập nhật label hiển thị trực tiếp trên hotspot
-    const lbl = el.querySelector('.hs-label');
-    if (lbl) lbl.textContent = hsTitle;
+    // C岷璸 nh岷璽 label hi峄僴 th峄?tr峄眂 ti岷縫 tr锚n hotspot
+    // Apply initial label according to current language
+    applyHotspotLabelForLang(el, normalizeLang());
 
-    // Tăng khoảng cách giữa mũi tên và icon (có thể tùy biến bằng h.arrowGap)
+    // T膬ng kho岷g c谩ch gi峄痑 m农i t锚n v脿 icon (c贸 th峄?t霉y bi岷縩 b岷眓g h.arrowGap)
     const arrowGap = Number.isFinite(+h.arrowGap) ? Math.max(20, +h.arrowGap) : 36;
     el.style.setProperty('--arrow-gap', arrowGap + 'px');
 
-    const tipHtml = `
-      <div class="row">
-        ${hsImg ? `<img src="${hsImg}" alt="">` : ''}
-        <div>
-          <h4>${hsTitle}</h4>
-          ${hsDesc ? `<div class="sub">${hsDesc}</div>` : ''}
-        </div>
-        </div>
-    `;
+    const getTipHtml = () => {
+      const l = normalizeLang();
+      const desc = l === 'en' ? (el.dataset.descEn || el.dataset.descVi || '') : (el.dataset.descVi || el.dataset.descEn || '');
+      // Do not show scene name on hover (label is already rendered on hotspot).
+      // Keep tooltip only for description (if present).
+      if (!desc) return '';
+      return `<div class="sub">${desc}</div>`;
+    };
 
-    el.addEventListener('mouseenter', (e) => {
-      showTip(tipHtml, e.clientX + 8, e.clientY + 8);
-    });
-    el.addEventListener('mousemove', (e) => {
-      moveTip(e.clientX + 8, e.clientY + 8);
-    });
-    el.addEventListener('mouseleave', () => { hideTip(); });
+  el.addEventListener('mouseenter', (e) => {
+    const html = getTipHtml();
+    if (html) showTip(html, e.clientX + 8, e.clientY + 8);
+    else hideTip();
+    // Show flat preview image (equirectangular) on hover
+    showHoverPreview(panoPreview, e.clientX, e.clientY);
+  });
+  el.addEventListener('mousemove', (e) => {
+   moveTip(e.clientX + 8, e.clientY + 8);
+   moveHoverPreview(e.clientX, e.clientY);
+  });
+  el.addEventListener('mouseleave', () => {
+   hideTip();
+   hideHoverPreview();
+  });
 
     el.addEventListener('click', async () => {
       hideTip();
+      hideHoverPreview();
       try { await travelToScene(h.target); } catch (e) { console.warn('[Hotspot] travel failed, fallback:', e); await fade(1,120); await loadScene(h.target, active.id); await fade(0,120); }
     });
 
-    // Mobile touch handling - cho phép pan khi drag, chỉ xử lý tap khi không drag
+    // Mobile touch handling - cho ph茅p pan khi drag, ch峄?x峄?l媒 tap khi kh么ng drag
     let touchStartX = 0;
     let touchStartY = 0;
     let touchMoved = false;
@@ -358,12 +637,12 @@ export async function bootstrap(opts) {
     const TAP_DURATION = 300; // ms
 
     el.addEventListener('touchstart', (e) => {
-      // Nếu là multi-touch (pinch), chuyển sự kiện cho viewer bằng cách tạm thời tắt pointer-events
+      // N岷縰 l脿 multi-touch (pinch), chuy峄僴 s峄?ki峄噉 cho viewer b岷眓g c谩ch t岷 th峄漣 t岷痶 pointer-events
       if (e.touches.length > 1) {
-        isDraggingHotspot = true; // đánh dấu đang thao tác để bỏ qua xử lý tap
+        isDraggingHotspot = true; // 膽谩nh d岷 膽ang thao t谩c 膽峄?b峄?qua x峄?l媒 tap
         el.style.pointerEvents = 'none';
-        void el.offsetHeight; // force reflow để áp dụng ngay
-        return; // để viewer nhận các sự kiện pinch
+        void el.offsetHeight; // force reflow 膽峄?谩p d峄g ngay
+        return; // 膽峄?viewer nh岷璶 c谩c s峄?ki峄噉 pinch
       }
       const touch = e.touches[0];
       touchStartX = touch.clientX;
@@ -371,7 +650,7 @@ export async function bootstrap(opts) {
       touchMoved = false;
       touchStartTime = Date.now();
       isDraggingHotspot = false;
-      // Không preventDefault để cho phép event lan truyền đến viewer
+      // Kh么ng preventDefault 膽峄?cho ph茅p event lan truy峄乶 膽岷縩 viewer
     }, { passive: true });
 
     el.addEventListener('touchmove', (e) => {
@@ -381,75 +660,70 @@ export async function bootstrap(opts) {
       const dy = Math.abs(touch.clientY - touchStartY);
       if (dx > TAP_THRESHOLD || dy > TAP_THRESHOLD) {
         if (!touchMoved) {
-          // Lần đầu phát hiện drag - cho phép event đi qua đến viewer
+          // L岷 膽岷 ph谩t hi峄噉 drag - cho ph茅p event 膽i qua 膽岷縩 viewer
           touchMoved = true;
           isDraggingHotspot = true;
-          hideTip(); // Ẩn tooltip khi đang drag
+          hideTip(); // 岷╪ tooltip khi 膽ang drag
           
-          // Tắt pointer-events để các touch event tiếp theo có thể đi qua đến viewer
-          // và viewer có thể bắt đầu pan gesture từ các touchmove/touchend tiếp theo
+          // T岷痶 pointer-events 膽峄?c谩c touch event ti岷縫 theo c贸 th峄?膽i qua 膽岷縩 viewer
+          // v脿 viewer c贸 th峄?b岷痶 膽岷 pan gesture t峄?c谩c touchmove/touchend ti岷縫 theo
           el.style.pointerEvents = 'none';
-          // Force reflow để đảm bảo style được áp dụng ngay
+          // Force reflow 膽峄?膽岷 b岷 style 膽瓢峄 谩p d峄g ngay
           void el.offsetHeight;
         }
       }
-      // Không preventDefault để viewer có thể nhận được touchmove
+      // Kh么ng preventDefault 膽峄?viewer c贸 th峄?nh岷璶 膽瓢峄 touchmove
     }, { passive: true });
 
     el.addEventListener('touchend', (e) => {
-      // Bật lại pointer-events sau mọi thao tác chạm
+      // B岷璽 l岷 pointer-events sau m峄峣 thao t谩c ch岷
       el.style.pointerEvents = 'auto';
       
-      if (e.touches.length > 0) return; // Nếu vẫn còn touch khác, bỏ qua
+      if (e.touches.length > 0) return; // N岷縰 v岷玭 c貌n touch kh谩c, b峄?qua
       const touchDuration = Date.now() - touchStartTime;
       
-      // Nếu đã drag hoặc vừa pinch, không xử lý tap - để viewer xử lý pan/zoom
+      // N岷縰 膽茫 drag ho岷穋 v峄玜 pinch, kh么ng x峄?l媒 tap - 膽峄?viewer x峄?l媒 pan/zoom
       if (touchMoved || isDraggingHotspot) {
         touchMoved = false;
         isDraggingHotspot = false;
         return;
       }
       
-      // Chỉ xử lý nếu là tap (không phải drag) và thời gian ngắn
+      // Ch峄?x峄?l媒 n岷縰 l脿 tap (kh么ng ph岷 drag) v脿 th峄漣 gian ng岷痭
       if (touchDuration < TAP_DURATION) {
         e.preventDefault();
-        e.stopPropagation(); // Ngăn click event sau đó
-        const touch = e.changedTouches[0];
-        if (tip.style.display === 'block') {
-          // Tap lần 2: điều hướng với hiệu ứng travel
-          hideTip();
-          travelToScene(h.target).catch(() => { fade(1,120).then(() => loadScene(h.target, active.id)).then(() => fade(0,120)); });
-        } else {
-          // Tap lần 1: hiển thị tooltip
-          showTip(tipHtml, touch.clientX + 8, touch.clientY + 8);
-        }
+        e.stopPropagation(); // Ng膬n click event sau 膽贸
+        // Mobile UX: tap 1 lần để điều hướng luôn (không yêu cầu tap 2 lần)
+        hideTip();
+        travelToScene(h.target).catch(() => { fade(1,120).then(() => loadScene(h.target, active.id)).then(() => fade(0,120)); });
       }
       touchMoved = false;
       isDraggingHotspot = false;
     }, { passive: false });
     
-    // Xử lý touchcancel để đảm bảo reset state
+    // X峄?l媒 touchcancel 膽峄?膽岷 b岷 reset state
     el.addEventListener('touchcancel', () => {
-      // Luôn khôi phục pointer-events nếu thao tác bị hủy (bao gồm pinch)
+      // Lu么n kh么i ph峄 pointer-events n岷縰 thao t谩c b峄?h峄 (bao g峄搈 pinch)
       el.style.pointerEvents = 'auto';
       touchMoved = false;
       isDraggingHotspot = false;
       hideTip();
     }, { passive: true });
 
-    scene.hotspotContainer().createHotspot(el, { yaw: +h.yaw, pitch: +h.pitch });
-    root.addEventListener('mouseleave', hideTip, { passive: true });
-  }
+  scene.hotspotContainer().createHotspot(el, { yaw: +h.yaw, pitch: +h.pitch });
+  root.addEventListener('mouseleave', hideTip, { passive: true });
+ }
 
-  // ===== Create Scene =====
-  function createScene(s) {
-    const source = Marzipano.ImageUrlSource.fromString(s.url || s.src);
-    const view = new Marzipano.RectilinearView({
-      yaw: +(s.initialView?.yaw ?? 0),
-      pitch: +(s.initialView?.pitch ?? 0),
-      fov: +(s.initialView?.hfov ?? 1.2)
-    }, limiter);
-    const scene = viewer.createScene({ source, geometry, view });
+ // ===== Create Scene =====
+ function createScene(s) {
+  const source = Marzipano.ImageUrlSource.fromString(s.url || s.src);
+  const view = new Marzipano.RectilinearView({
+   yaw: +(s.initialView?.yaw ?? 0),
+   pitch: +(s.initialView?.pitch ?? 0),
+   fov: +(s.initialView?.hfov ?? 1.2)
+  }, limiter);
+  try { ensureViewSize(view); } catch (_) {}
+  const scene = viewer.createScene({ source, geometry, view });
     (s.hotspots || []).forEach(addHotspot.bind(null, scene));
     // Add scene-anchored road banner directly in panorama
     try {
@@ -467,43 +741,66 @@ export async function bootstrap(opts) {
     } catch (e) {
       console.warn('[SceneBanner] Unable to add banner:', e);
     }
-    return { scene, view };
-  }
+  return { scene, view };
+ }
 
 // ===== UI title helper =====
 function updateTenKhuVuc(sceneId) {
-  const el = document.getElementById('tenKhuVuc');
-  const mobileTitle = document.getElementById('mobileSceneTitle');
-  const s = scenes.find(x => x.id === sceneId);
-  const currentLang = localStorage.getItem('lang') || 'vi';
-  const sceneName = (s?.name?.[currentLang]) || s?.name?.vi || s?.name || sceneId;
-  if (el) el.textContent = sceneName;
-  if (mobileTitle) {
-    mobileTitle.textContent = sceneName;
-    // Ensure visible on mobile
-    if (window.innerWidth < 768) mobileTitle.style.display = 'block';
-  }
+ const el = document.getElementById('tenKhuVuc');
+ const mobileTitle = document.getElementById('mobileSceneTitle');
+ const s = scenes.find(x => x.id === sceneId);
+ const currentLang = localStorage.getItem('lang') || 'vi';
+ const sceneName = (s?.name?.[currentLang]) || s?.name?.vi || s?.name?.en || s?.name || sceneId;
+ if (el) {
+ const prefix = currentLang === 'en' ? 'Current Scene' : 'Tên khu vực';
+ el.textContent = `${prefix}: ${sceneName}`;
+ }
+ if (mobileTitle) {
+  mobileTitle.textContent = sceneName;
+  // Ensure visible on mobile
+  if (window.innerWidth < 768) mobileTitle.style.display = 'block';
+ }
+}
+
+function getSceneNameByLang(scene, lang) {
+  if (!scene) return '';
+  const n = scene.name;
+  if (n && typeof n === 'object') return n[lang] || n.vi || n.en || scene.id;
+  return n || scene.id;
+}
+
+function getSceneDescByLang(scene, lang) {
+  if (!scene) return '';
+  const d = scene.desc;
+  if (!d) return '';
+  if (typeof d === 'object') return d[lang] || d.vi || d.en || '';
+  return String(d);
 }
 
 // ===== Road banner helper =====
 function updateRoadBanner(sceneId) {
-  const rb = document.getElementById('roadBanner');
+  // Ensure banner element exists even if missing in HTML
+  function ensureRoadBanner() {
+    let el = document.getElementById('roadBanner');
+    if (el) return el;
+    const header = document.getElementById('mainHeader');
+    if (!header) return null;
+    el = document.createElement('div');
+    el.id = 'roadBanner';
+    el.className = 'road-banner';
+    el.style.display = 'none';
+    const actions = header.querySelector('.header-actions');
+    if (actions) header.insertBefore(el, actions); else header.appendChild(el);
+    return el;
+  }
+  const rb = ensureRoadBanner();
   if (!rb) return;
   const s = scenes.find(x => x.id === sceneId);
   const currentLang = localStorage.getItem('lang') || 'vi';
+  // L岷 n峄檌 dung 膽瓢峄漬g b岷眓g extractor th峄憂g nh岷
+  const roadText = extractRoadText(s, currentLang);
 
-  // Ưu tiên dùng trường tuỳ chọn s.road nếu CMS có; nếu không, cố gắng lấy từ tên scene
-  let roadText = (s?.road && (typeof s.road === 'string' ? s.road : s.road[currentLang])) || '';
-
-  if (!roadText) {
-    const nameText = (s?.name?.[currentLang]) || s?.name?.vi || s?.name || '';
-    // Nếu tên chứa "Đường" hoặc "Road" thì lấy cụm sau đó
-    const matchVi = /Đường\s+[^\-]+(?:\-[^]*)?/i.exec(nameText);
-    const matchEn = /Road\s+[^\-]+(?:\-[^]*)?/i.exec(nameText);
-    roadText = (matchVi && matchVi[0]) || (matchEn && matchEn[0]) || '';
-  }
-
-  // Chỉ hiển thị cho một số cổng (có thể mở rộng danh sách)
+  // Ch峄?hi峄僴 th峄?cho m峄檛 s峄?c峄昻g (c贸 th峄?m峄?r峄檔g danh s谩ch)
   const specialGateIds = new Set(['congtruong', 'congphu']);
   const shouldShow = specialGateIds.has(String(sceneId)) && !!roadText;
 
@@ -516,16 +813,25 @@ function updateRoadBanner(sceneId) {
   }
 }
 
+ // Live language update (no refresh)
+ window.addEventListener('change-lang', (e) => {
+  const lang = normalizeLang(e?.detail);
+  try { updateTenKhuVuc(currentSceneId); } catch (_) {}
+  try { updateRoadBanner(currentSceneId); } catch (_) {}
+  try { refreshSceneBanners(lang); } catch (_) {}
+  try { refreshHotspotLabels(lang); } catch (_) {}
+ });
+
   // ===== Auto-rotate & idle resume =====
   // Auto-rotate speed is per animation frame; keep extremely low for slowest motion
   const autoRotate = { on: false, raf: 0, speed: 0.0001 };
-  const idle = { timer: 0, delay: 7500 }; // 7.5 giây
+  const idle = { timer: 0, delay: 7500 }; // 7.5 gi芒y
   
-  // Detect user interaction với viewer (drag, touch) để reset timer
-  // KHÔNG trigger khi click vào các nút controls
+  // Detect user interaction v峄沬 viewer (drag, touch) 膽峄?reset timer
+  // KH脭NG trigger khi click v脿o c谩c n煤t controls
   let isInteracting = false;
   root.addEventListener('mousedown', (e) => {
-    // Bỏ qua nếu click vào nút controls
+    // B峄?qua n岷縰 click v脿o n煤t controls
     if (e.target.closest('button') || e.target.closest('#controls') || e.target.closest('footer')) {
       return;
     }
@@ -533,7 +839,7 @@ function updateRoadBanner(sceneId) {
     userActivity();
   }, { passive: true });
   root.addEventListener('mousemove', (e) => {
-    // Bỏ qua nếu đang hover vào nút controls
+    // B峄?qua n岷縰 膽ang hover v脿o n煤t controls
     if (e.target.closest('button') || e.target.closest('#controls') || e.target.closest('footer')) {
       return;
     }
@@ -542,16 +848,16 @@ function updateRoadBanner(sceneId) {
     }
   }, { passive: true });
   root.addEventListener('mouseup', (e) => {
-    // Bỏ qua nếu click vào nút controls
+    // B峄?qua n岷縰 click v脿o n煤t controls
     if (e.target.closest('button') || e.target.closest('#controls') || e.target.closest('footer')) {
       isInteracting = false;
       return;
     }
     isInteracting = false;
-    userActivity(); // Reset timer khi thả chuột
+    userActivity(); // Reset timer khi th岷?chu峄檛
   }, { passive: true });
   root.addEventListener('touchstart', (e) => {
-    // Bỏ qua nếu touch vào nút controls
+    // B峄?qua n岷縰 touch v脿o n煤t controls
     if (e.target.closest('button') || e.target.closest('#controls') || e.target.closest('footer')) {
       return;
     }
@@ -559,7 +865,7 @@ function updateRoadBanner(sceneId) {
     userActivity();
   }, { passive: true });
   root.addEventListener('touchmove', (e) => {
-    // Bỏ qua nếu touch vào nút controls
+    // B峄?qua n岷縰 touch v脿o n煤t controls
     if (e.target.closest('button') || e.target.closest('#controls') || e.target.closest('footer')) {
       return;
     }
@@ -568,48 +874,48 @@ function updateRoadBanner(sceneId) {
     }
   }, { passive: true });
   root.addEventListener('touchend', (e) => {
-    // Bỏ qua nếu touch vào nút controls
+    // B峄?qua n岷縰 touch v脿o n煤t controls
     if (e.target.closest('button') || e.target.closest('#controls') || e.target.closest('footer')) {
       isInteracting = false;
       return;
     }
     isInteracting = false;
-    userActivity(); // Reset timer khi thả tay
+    userActivity(); // Reset timer khi th岷?tay
   }, { passive: true });
 
   function _autoLoop() {
-    if (!autoRotate.on) return;
-    const v = active.view || viewer.scene()?.view();
-    if (v) v.setYaw(v.yaw() + autoRotate.speed);
-    autoRotate.raf = requestAnimationFrame(_autoLoop);
-  }
+  if (!autoRotate.on) return;
+  const v = getActiveView();
+  if (v) v.setYaw(v.yaw() + autoRotate.speed);
+  autoRotate.raf = requestAnimationFrame(_autoLoop);
+ }
 function startAutoRotate() {
-  if (autoRotate.on) return true; 
-  autoRotate.on = true;
-  if (!autoRotate.raf) autoRotate.raf = requestAnimationFrame(_autoLoop);
-  return true;
+ if (autoRotate.on) return true; 
+ autoRotate.on = true;
+ if (!autoRotate.raf) autoRotate.raf = requestAnimationFrame(_autoLoop);
+ return true;
 }
 function stopAutoRotate() {
-  autoRotate.on = false;
-  if (autoRotate.raf) { cancelAnimationFrame(autoRotate.raf); autoRotate.raf = 0; }
-  // [FIXED] Không xóa timer idle ở đây, userActivity sẽ lo việc đó
-  return false;
+ autoRotate.on = false;
+ if (autoRotate.raf) { cancelAnimationFrame(autoRotate.raf); autoRotate.raf = 0; }
+  // [FIXED] Kh么ng x贸a timer idle 峄?膽芒y, userActivity s岷?lo vi峄嘽 膽贸
+ return false;
 } 
 function userActivity() {
-  // Dừng xoay tự động ngay lập tức khi user tương tác
+  // D峄玭g xoay t峄?膽峄檔g ngay l岷璸 t峄ヽ khi user t瓢啤ng t谩c
   stopAutoRotate();
-  if (idle.timer) clearTimeout(idle.timer); // Xóa bộ đếm cũ
-  // Đặt lại bộ đếm để tự xoay lại sau 7.5 giây không có tương tác
+  if (idle.timer) clearTimeout(idle.timer); // X贸a b峄?膽岷縨 c农
+  // 膼岷穞 l岷 b峄?膽岷縨 膽峄?t峄?xoay l岷 sau 7.5 gi芒y kh么ng c贸 t瓢啤ng t谩c
   idle.timer = setTimeout(() => { 
     console.log('[AutoRotate] Resuming after 7.5s idle');
     startAutoRotate();
   }, idle.delay);
 }
 
-// Hàm scheduleAutoResume - tương tự userActivity nhưng có thể gọi khi đã dừng
+// H脿m scheduleAutoResume - t瓢啤ng t峄?userActivity nh瓢ng c贸 th峄?g峄峣 khi 膽茫 d峄玭g
 function scheduleAutoResume() {
-  if (idle.timer) clearTimeout(idle.timer); // Xóa bộ đếm cũ
-  // Đặt lại bộ đếm để tự xoay lại sau 7.5 giây
+  if (idle.timer) clearTimeout(idle.timer); // X贸a b峄?膽岷縨 c农
+  // 膼岷穞 l岷 b峄?膽岷縨 膽峄?t峄?xoay l岷 sau 7.5 gi芒y
   idle.timer = setTimeout(() => { 
     console.log('[AutoRotate] Resuming after 7.5s idle (scheduled)');
     startAutoRotate();
@@ -620,7 +926,7 @@ function scheduleAutoResume() {
   async function loadScene(id, previousSceneId = null) {
     const s = scenes.find(x => x.id === id);
     if (!s) {
-      console.warn('[App] Scene không tồn tại:', id);
+      console.warn('[App] Scene kh么ng t峄搉 t岷:', id);
       return;
     }
     console.log('[App] Loading scene:', { id, url: s.url, name: s.name });
@@ -643,34 +949,34 @@ function scheduleAutoResume() {
       return;
     }
 
-    active = { id, scene, view };
-    currentSceneId = id;
-    updateTenKhuVuc(id);
+  active = { id, scene, view };
+  currentSceneId = id;
+  updateTenKhuVuc(id);
   updateRoadBanner(id);
 
-    // update currentGraph
-    let graphChanged = false;
-    if (!currentGraph.nodes.find(node => node.id === id)) {
-      currentGraph.nodes.push({
-        id: id,
-        label: s?.name?.vi || s?.name || id,
-        x: Math.random() * 100 - 50,
-        y: Math.random() * 100 - 50,
-        floor: s.floor ?? 0
-      });
-      graphChanged = true;
-    }
+  // update currentGraph
+  let graphChanged = false;
+  if (!currentGraph.nodes.find(node => node.id === id)) {
+   currentGraph.nodes.push({
+    id: id,
+    label: s?.name?.vi || s?.name || id,
+    x: Math.random() * 100 - 50,
+    y: Math.random() * 100 - 50,
+    floor: s.floor ?? 0
+   });
+   graphChanged = true;
+  }
 
-    if (previousSceneId) {
-      const edgeExists = currentGraph.edges.some(edge =>
-        (edge.from === previousSceneId && edge.to === id) ||
-        (edge.from === id && edge.to === previousSceneId)
-      );
-      if (!edgeExists && currentGraph.nodes.find(node => node.id === previousSceneId)) {
-        currentGraph.edges.push({ from: previousSceneId, to: id, w: 1 });
-        graphChanged = true;
-      }
-    }
+  if (previousSceneId) {
+   const edgeExists = currentGraph.edges.some(edge =>
+    (edge.from === previousSceneId && edge.to === id) ||
+    (edge.from === id && edge.to === previousSceneId)
+   );
+   if (!edgeExists && currentGraph.nodes.find(node => node.id === previousSceneId)) {
+    currentGraph.edges.push({ from: previousSceneId, to: id, w: 1 });
+    graphChanged = true;
+   }
+  }
 
     if (graphChanged) {
       if (minimap?.refresh) {
@@ -680,41 +986,53 @@ function scheduleAutoResume() {
       handleGraphChange(currentGraph);
     }
 
-    startAutoRotate();
-    _emit('scenechange', { id, name: s?.name || id });
-  }
+  startAutoRotate();
+  _emit('scenechange', { id, name: s?.name || id });
+ }
 
-  // ===== Helpers: yaw/fov =====
-  function yawDelta(d = 0) {
-    const v = active.view || viewer.scene()?.view();
-    if (v) v.setYaw(v.yaw() + d);
-  }
-  function fovDelta(d = 0) {
-    const v = active.view || viewer.scene()?.view(); if (!v) return;
+ // ===== Helpers: yaw/fov =====
+ function yawDelta(d = 0) {
+  const v = getActiveView();
+  if (v) {
+    v.setYaw(v.yaw() + d);
+    requestRender();
+  }
+ }
+ function fovDelta(d = 0) {
+   const v = getActiveView(); if (!v) return;
+    try { ensureViewSize(v); } catch (_) {}
     const ZMIN = Marzipano.util.degToRad(20), ZMAX = Marzipano.util.degToRad(110);
     const before = v.fov();
     const after = Math.min(ZMAX, Math.max(ZMIN, before + d));
     v.setFov(after);
-    try { console.log('[Zoom] FOV change:', { beforeDeg: Marzipano.util.radToDeg(before).toFixed(2), afterDeg: Marzipano.util.radToDeg(after).toFixed(2) }); } catch (_) {}
-  }
+   requestRender();
+    try {
+      const applied = v.fov();
+      console.log('[Zoom] FOV change:', {
+        beforeDeg: Marzipano.util.radToDeg(before).toFixed(2),
+        targetDeg: Marzipano.util.radToDeg(after).toFixed(2),
+        appliedDeg: Marzipano.util.radToDeg(applied).toFixed(2)
+      });
+    } catch (_) {}
+ }
 
-  // ===== Smooth impulse rotate =====
-  function impulseRotate(dir = 1, dur = 900) {
-    const v = active.view || viewer.scene()?.view(); if (!v) return;
-    userActivity();
-    const MAX = 0.012;
-    const t0 = performance.now();
-    let raf = 0;
-    function easeInOutQuad(x) { return x < 0.5 ? 2 * x * x : 1 - Math.pow(-2 * x + 2, 2) / 2; }
-    (function loop(t) {
-      const elapsed = t - t0;
-      const p = Math.min(1, elapsed / dur);
-      const speed = MAX * easeInOutQuad(p < 0.5 ? p * 2 : (1 - p) * 2);
-      v.setYaw(v.yaw() + dir * speed);
-      if (p < 1) raf = requestAnimationFrame(loop);
-      else scheduleAutoResume();
-    })(t0);
-  }
+ // ===== Smooth impulse rotate =====
+ function impulseRotate(dir = 1, dur = 900) {
+  const v = getActiveView(); if (!v) return;
+  userActivity();
+  const MAX = 0.012;
+  const t0 = performance.now();
+  let raf = 0;
+  function easeInOutQuad(x) { return x < 0.5 ? 2 * x * x : 1 - Math.pow(-2 * x + 2, 2) / 2; }
+  (function loop(t) {
+   const elapsed = t - t0;
+   const p = Math.min(1, elapsed / dur);
+   const speed = MAX * easeInOutQuad(p < 0.5 ? p * 2 : (1 - p) * 2);
+   v.setYaw(v.yaw() + dir * speed);
+   if (p < 1) raf = requestAnimationFrame(loop);
+   else scheduleAutoResume();
+  })(t0);
+ }
 
   // ===== Controls API =====
   const controls = {
@@ -722,7 +1040,7 @@ function scheduleAutoResume() {
       console.log('[Controls] left() called');
       userActivity();
       try {
-        const v = active.view || viewer.scene()?.view();
+        const v = getActiveView();
         if (!v) {
           console.warn('[Controls] left() - No view available');
           return;
@@ -736,7 +1054,7 @@ function scheduleAutoResume() {
       console.log('[Controls] right() called');
       userActivity();
       try {
-        const v = active.view || viewer.scene()?.view();
+        const v = getActiveView();
         if (!v) {
           console.warn('[Controls] right() - No view available');
           return;
@@ -750,12 +1068,12 @@ function scheduleAutoResume() {
       console.log('[Controls] zoomIn() called');
       userActivity();
       try {
-        const v = active.view || viewer.scene()?.view();
+        const v = getActiveView();
         if (!v) {
           console.warn('[Controls] zoomIn() - No view available');
           return;
         }
-        fovDelta(-0.10);
+        fovDelta(-0.18);
         scheduleAutoResume();
       } catch (e) {
         console.error("[Controls] zoomIn() error:", e);
@@ -765,45 +1083,45 @@ function scheduleAutoResume() {
       console.log('[Controls] zoomOut() called');
       userActivity();
       try {
-        const v = active.view || viewer.scene()?.view();
+        const v = getActiveView();
         if (!v) {
           console.warn('[Controls] zoomOut() - No view available');
           return;
         }
-        fovDelta(+0.10);
+        fovDelta(+0.18);
         scheduleAutoResume();
       } catch (e) {
         console.error("[Controls] zoomOut() error:", e);
       }
     },
-    isAutoRotating: () => autoRotate.on
-  };
-  // ===== Keyboard handling =====
-  (function setupKeys() {
-    const MAX_SPEED = 0.015, ACCEL = 0.00035, DECEL = 0.0006;
-    let vx = 0, dir = 0, running = false, rafId = 0;
-    function loop() {
-      if (dir) { vx += dir * ACCEL; vx = Math.max(-MAX_SPEED, Math.min(MAX_SPEED, vx)); }
-      else { if (vx > 0) vx = Math.max(0, vx - DECEL); else if (vx < 0) vx = Math.min(0, vx + DECEL); }
-      const v = active.view || viewer.scene()?.view();
-      if (v && vx) v.setYaw(v.yaw() + vx);
-      if (running) rafId = requestAnimationFrame(loop);
-    }
-    function start() { if (!running) { running = true; rafId = requestAnimationFrame(loop); } }
+  isAutoRotating: () => autoRotate.on
+ };
+ // ===== Keyboard handling =====
+ (function setupKeys() {
+  const MAX_SPEED = 0.015, ACCEL = 0.00035, DECEL = 0.0006;
+  let vx = 0, dir = 0, running = false, rafId = 0;
+  function loop() {
+   if (dir) { vx += dir * ACCEL; vx = Math.max(-MAX_SPEED, Math.min(MAX_SPEED, vx)); }
+   else { if (vx > 0) vx = Math.max(0, vx - DECEL); else if (vx < 0) vx = Math.min(0, vx + DECEL); }
+    const v = getActiveView();
+   if (v && vx) v.setYaw(v.yaw() + vx);
+   if (running) rafId = requestAnimationFrame(loop);
+  }
+  function start() { if (!running) { running = true; rafId = requestAnimationFrame(loop); } }
 
-    function stop() { dir = 0; }
+  function stop() { dir = 0; }
     window.addEventListener('keydown', e => {
-      if (e.key === 'ArrowLeft') { userActivity(); dir = -1; start(); }
-      if (e.key === 'ArrowRight') { userActivity(); dir = +1; start(); }
-      // Quick zoom keys: + / - / =
-      if (e.key === '+' || e.key === '=' ) { e.preventDefault(); userActivity(); try { fovDelta(-0.12); } finally { scheduleAutoResume(); } }
-      if (e.key === '-' ) { e.preventDefault(); userActivity(); try { fovDelta(+0.12); } finally { scheduleAutoResume(); } }
-    }, { passive: true });
-    window.addEventListener('keyup', e => {
-      if (e.key === 'ArrowLeft' && dir === -1) { dir = 0; scheduleAutoResume(); }
-      if (e.key === 'ArrowRight' && dir === +1) { dir = 0; scheduleAutoResume(); }
-    }, { passive: true });
-  })();
+   if (e.key === 'ArrowLeft') { userActivity(); dir = -1; start(); }
+   if (e.key === 'ArrowRight') { userActivity(); dir = +1; start(); }
+        // Quick zoom keys: + / - / =
+        if (e.key === '+' || e.key === '=' ) { e.preventDefault(); userActivity(); try { fovDelta(-0.28); } finally { scheduleAutoResume(); } }
+        if (e.key === '-' ) { e.preventDefault(); userActivity(); try { fovDelta(+0.28); } finally { scheduleAutoResume(); } }
+  }, { passive: true });
+  window.addEventListener('keyup', e => {
+   if (e.key === 'ArrowLeft' && dir === -1) { dir = 0; scheduleAutoResume(); }
+   if (e.key === 'ArrowRight' && dir === +1) { dir = 0; scheduleAutoResume(); }
+  }, { passive: true });
+ })();
 
   // ===== Minimap =====
   const minimapEl = document.querySelector(minimapSelector);
@@ -832,20 +1150,20 @@ function scheduleAutoResume() {
     }
   }
 
-  async function handleGraphChange(newGraph) {
-    try {
-      await fetch(`${dataBaseUrl}/graph`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newGraph),
-      });
-    } catch (err) {
-      console.error('Lỗi khi lưu graph:', err);
-    }
-  }
+ async function handleGraphChange(newGraph) {
+  try {
+   await fetch(`${dataBaseUrl}/graph`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(newGraph),
+   });
+  } catch (err) {
+   console.error('L峄梚 khi l瓢u graph:', err);
+  }
+ }
 
   // load current graph
-  currentGraph = await fetch(`${dataBaseUrl}/graph`).then(r => r.ok ? r.json() : { nodes: [], edges: [] }).catch(err => { console.error('Lỗi khi tải graph ban đầu:', err); return { nodes: [], edges: [] }; });
+  currentGraph = await fetch(`${dataBaseUrl}/graph`).then(r => r.ok ? r.json() : { nodes: [], edges: [] }).catch(err => { console.error('L峄梚 khi t岷 graph ban 膽岷:', err); return { nodes: [], edges: [] }; });
   
   // ===== FPS Counter =====
   const fpsCounter = createFPSCounter({
@@ -855,31 +1173,31 @@ function scheduleAutoResume() {
     showGraph: false, // Set to true to show FPS graph
   });
   
-  // Log graph data để debug
+  // Log graph data 膽峄?debug
   console.log('[App] Graph loaded:', {
-    nodeCount: currentGraph.nodes?.length || 0,
-    edgeCount: currentGraph.edges?.length || 0,
-    sampleNodes: currentGraph.nodes?.slice(0, 3).map(n => ({
-      id: n.id,
-      floor: n.floor ?? 0,
-      x: n.x,
-      y: n.y,
-      hasPositions: !!n.positions,
-      positionsKeys: n.positions ? Object.keys(n.positions) : []
-    })) || []
-  });
+  nodeCount: currentGraph.nodes?.length || 0,
+  edgeCount: currentGraph.edges?.length || 0,
+  sampleNodes: currentGraph.nodes?.slice(0, 3).map(n => ({
+   id: n.id,
+   floor: n.floor ?? 0,
+   x: n.x,
+   y: n.y,
+   hasPositions: !!n.positions,
+   positionsKeys: n.positions ? Object.keys(n.positions) : []
+  })) || []
+ });
 
-  // ===== safeNavigator: non-blocking wrapper around navigateTo =====
-  function safeNavigateTo(sceneId) {
-    try {
-      setTimeout(() => {
-        (async () => {
-          try { await navigateTo(sceneId); } catch (e) { console.error('safeNavigateTo navigateTo failed', e); }
-        })();
-      }, 0);
-    } catch (e) { console.error('safeNavigateTo error', e); }
-    return Promise.resolve();
-  }
+ // ===== safeNavigator: non-blocking wrapper around navigateTo =====
+ function safeNavigateTo(sceneId) {
+  try {
+   setTimeout(() => {
+    (async () => {
+     try { await navigateTo(sceneId); } catch (e) { console.error('safeNavigateTo navigateTo failed', e); }
+    })();
+   }, 0);
+  } catch (e) { console.error('safeNavigateTo error', e); }
+  return Promise.resolve();
+ }
 
   // ===== Global navigation throttle (3s) =====
   const NAV_DELAY_MS = 3000;
@@ -930,7 +1248,7 @@ function scheduleAutoResume() {
     if (!hs) return null;
     let yaw = typeof hs.yaw === 'number' ? hs.yaw : (typeof hs.theta === 'number' ? hs.theta : null);
     if (yaw == null) return null;
-    // If value looks like degrees (> 2π), convert to radians
+    // If value looks like degrees (> 2蟺), convert to radians
     if (Math.abs(yaw) > (2 * Math.PI + 0.0001)) yaw = degToRad(yaw);
     return yaw;
   }
@@ -1114,28 +1432,28 @@ function scheduleAutoResume() {
     return ttsSpeak(text);
   }
 
-  // Inject Google Maps API key to window for minimap (if available)
-  // Frontend có thể nhận API key từ window hoặc config
-  // Có thể set từ backend config hoặc environment variable
-  if (typeof window !== 'undefined') {
-    // Có thể lấy từ backend config hoặc env variable
-    // window.__GOOGLE_MAPS_API_KEY__ = dataBaseUrl.includes('localhost') ? '' : (process.env.VITE_GOOGLE_MAPS_API_KEY || '');
-    // Tạm thời để empty, có thể set sau từ config
-  }
+ // Inject Google Maps API key to window for minimap (if available)
+ // Frontend c贸 th峄?nh岷璶 API key t峄?window ho岷穋 config
+ // C贸 th峄?set t峄?backend config ho岷穋 environment variable
+ if (typeof window !== 'undefined') {
+  // C贸 th峄?l岷 t峄?backend config ho岷穋 env variable
+  // window.__GOOGLE_MAPS_API_KEY__ = dataBaseUrl.includes('localhost') ? '' : (process.env.VITE_GOOGLE_MAPS_API_KEY || '');
+  // T岷 th峄漣 膽峄?empty, c贸 th峄?set sau t峄?config
+ }
 
-  // Phát hiện mobile để cấu hình minimap ở chế độ đơn giản (read-only)
+  // Ph谩t hi峄噉 mobile 膽峄?c岷 h矛nh minimap 峄?ch岷?膽峄?膽啤n gi岷 (read-only)
   let isMobile = window.innerWidth < 768;
-  const shouldInitMinimap = !!minimapEl; // luôn khởi tạo minimap cả trên mobile (read-only)
+  const shouldInitMinimap = !!minimapEl; // lu么n kh峄焛 t岷 minimap c岷?tr锚n mobile (read-only)
 
-  // Helper function để tạo minimap
+  // Helper function 膽峄?t岷 minimap
   const createMinimapInstance = () => {
     const checkIsMobile = window.innerWidth < 768;
     if (!minimapEl) return null;
     return createMinimap({
       container: minimapEl,
       graph: currentGraph,
-      // Trên mobile: chỉ hiển thị vị trí hiện tại, bỏ tìm đường thủ công
-      readOnly: checkIsMobile,
+      // Tr锚n mobile: ch峄?hi峄僴 th峄?v峄?tr铆 hi峄噉 t岷, b峄?t矛m 膽瓢峄漬g th峄?c么ng
+      readOnly: false,
       mobileMode: checkIsMobile,
       onGotoScene: (id) => { userActivity(); primeAudioPlayback(); return navigateThrottled(id); },
       onPathPlay: (path) => {
@@ -1239,8 +1557,10 @@ function scheduleAutoResume() {
         const el = document.getElementById('minimap');
         if (!el) return;
         const hidden = el.classList.contains('minimap--hidden');
-        mmBtn.textContent = '🗺';
-        mmBtn.title = hidden ? 'Hiện minimap' : 'Ẩn minimap';
+        // Use Unicode escapes to avoid encoding issues in this file.
+        // Show map icon when minimap is hidden (action: show), otherwise show X (action: hide).
+        mmBtn.textContent = hidden ? '\uD83D\uDDFA' : '\u2715';
+        mmBtn.title = hidden ? 'Hien minimap' : 'An minimap';
         mmBtn.setAttribute('aria-label', mmBtn.title);
       };
       mmBtn.addEventListener('click', () => {
@@ -1264,7 +1584,7 @@ function scheduleAutoResume() {
       const updateLangBtn = () => {
         const current = localStorage.getItem('lang') || 'vi';
         langBtn.textContent = current.toUpperCase();
-        langBtn.title = current === 'vi' ? 'Đổi sang EN' : 'Switch to VI';
+        langBtn.title = current === 'vi' ? '膼峄昳 sang EN' : 'Switch to VI';
         langBtn.setAttribute('aria-label', langBtn.title);
       };
       updateLangBtn();
@@ -1272,16 +1592,16 @@ function scheduleAutoResume() {
         const current = (localStorage.getItem('lang') || 'vi').toLowerCase();
         const next = current === 'vi' ? 'en' : 'vi';
         localStorage.setItem('lang', next);
-        // Thông báo cho minimap và các thành phần khác
+        // Th么ng b谩o cho minimap v脿 c谩c th脿nh ph岷 kh谩c
         window.dispatchEvent(new CustomEvent('change-lang', { detail: next }));
-        // Cập nhật tiêu đề khu vực
+        // C岷璸 nh岷璽 ti锚u 膽峄?khu v峄眂
         try { updateTenKhuVuc(currentSceneId); } catch (_) {}
         updateLangBtn();
       });
     }
   })();
 
-  // Refresh minimap với graph đã load từ API sau khi minimap đã khởi tạo xong (chỉ nếu không phải mobile)
+  // Refresh minimap v峄沬 graph 膽茫 load t峄?API sau khi minimap 膽茫 kh峄焛 t岷 xong (ch峄?n岷縰 kh么ng ph岷 mobile)
   if (minimap && minimap.refresh && currentGraph && currentGraph.nodes && currentGraph.nodes.length > 0 && !isMobile) {
     setTimeout(() => {
       minimap.refresh(currentGraph);
@@ -1289,7 +1609,7 @@ function scheduleAutoResume() {
     }, 200);
   }
   
-  // Handle window resize: chuyển chế độ mobile/desktop cho minimap
+  // Handle window resize: chuy峄僴 ch岷?膽峄?mobile/desktop cho minimap
   let resizeTimeout;
   window.addEventListener('resize', () => {
     clearTimeout(resizeTimeout);
@@ -1312,8 +1632,8 @@ function scheduleAutoResume() {
     }, 250);
   });
 
- 
-  // ===== API helpers =====
+
+ // ===== API helpers =====
   async function navigateTo(id) { await travelToScene(id); }
 
   // Start at first scene
@@ -1321,49 +1641,49 @@ function scheduleAutoResume() {
     console.log('[App] Starting with first scene:', scenes[0].id);
     await loadScene(scenes[0].id);
   } else {
-    console.error('[App] Không có scene nào để hiển thị.');
+    console.error('[App] Kh么ng c贸 scene n脿o 膽峄?hi峄僴 th峄?');
   }
 
 
   onSceneChange(({ id }) => {
     updateTenKhuVuc(id);
     const activeSceneData = scenes.find(s => s.id === id);
-    // Luôn cập nhật minimap để làm nổi bật vị trí hiện tại (kể cả mobile)
+    // Lu么n c岷璸 nh岷璽 minimap 膽峄?l脿m n峄昳 b岷璽 v峄?tr铆 hi峄噉 t岷 (k峄?c岷?mobile)
     if (activeSceneData && minimap?.setActive) minimap.setActive(id);
   });
 
 
 const voiceBot = createVoiceBot({
   container: document.body,
-  buttonId: 'voice-command-btn', // Sử dụng button có sẵn trong HTML
-  // Cung cấp các đối tượng cảnh đầy đủ để bot giọng nói có thể truy cập vào các trường sàn/giọng nói
+  buttonId: 'voice-command-btn', // S峄?d峄g button c贸 s岷祅 trong HTML
+  // Cung c岷 c谩c 膽峄慽 t瓢峄g c岷h 膽岷 膽峄?膽峄?bot gi峄峮g n贸i c贸 th峄?truy c岷璸 v脿o c谩c tr瓢峄漬g s脿n/gi峄峮g n贸i
   getScenes: () => scenes.map(s => ({
-    id: s.id,
-    name: s.name,               // keep original name object {vi,en}
-    hotspots: s.hotspots || [],
-    floor: s.floor,            // numeric floor used for announcements
-    voice: s.voice || '',
-    voiceIntro: s.voiceIntro || ''
-  })),
-  getCurrentSceneId: ()=> currentSceneId,
-  onGotoScene: async(id)=> safeNavigateTo(id),
+  id: s.id,
+  name: s.name,        // keep original name object {vi,en}
+  hotspots: s.hotspots || [],
+  floor: s.floor,      // numeric floor used for announcements
+  voice: s.voice || '',
+  voiceIntro: s.voiceIntro || ''
+ })),
+ getCurrentSceneId: ()=> currentSceneId,
+ onGotoScene: async(id)=> safeNavigateTo(id),
   onPathPlay: async (path)=> {
-    console.log('[App] VoiceBot path:', path); // Log để kiểm tra
+    console.log('[App] VoiceBot path:', path); // Log 膽峄?ki峄僲 tra
     
     if (!Array.isArray(path) || !path.length) return Promise.resolve();
     primeAudioPlayback();
 
-    // Gọi visualizePath NGAY LẬP TỨC để làm mờ và zoom minimap
+    // G峄峣 visualizePath NGAY L岷琍 T峄– 膽峄?l脿m m峄?v脿 zoom minimap
     if (minimap && minimap.visualizePath) {
       console.log('[App] Calling minimap.visualizePath...');
       minimap.visualizePath(path);
     } else {
       console.warn('[App] Minimap not found or visualizePath missing!');
-      // Fallback: nếu chưa có visualizePath, thử dùng highlightPath
+      // Fallback: n岷縰 ch瓢a c贸 visualizePath, th峄?d霉ng highlightPath
       if (minimap && minimap.highlightPath) minimap.highlightPath(path.map(String));
     }
     
-    // Đợi một chút để minimap có thời gian render và zoom
+    // 膼峄 m峄檛 ch煤t 膽峄?minimap c贸 th峄漣 gian render v脿 zoom
     await new Promise(resolve => setTimeout(resolve, 300));
     
     const FADE_MS = 120, MAX_STEPS = 200;
@@ -1376,40 +1696,40 @@ const voiceBot = createVoiceBot({
     try { await announceArrival(ids[ids.length - 1]); } catch (e) {}
     return Promise.resolve();
   },
-  getGraph: () => currentGraph,
-  getTours: async () => {
-    try {
-      const url = `${dataBaseUrl}/tours`;
-      console.log('[VoiceBot] Fetching tours from:', url);
-      const res = await fetch(url);
-      console.log('[VoiceBot] Tours response status:', res.status);
-      if (res.ok) {
-        const tours = await res.json();
-        console.log('[VoiceBot] Tours fetched successfully:', tours);
-        return tours;
-      } else {
-        const errorText = await res.text();
-        console.error('[VoiceBot] Tours fetch failed:', res.status, errorText);
-        return [];
-      }
-    } catch (e) {
-      console.error('[VoiceBot] Failed to fetch tours:', e);
-      return [];
-    }
-  },
-  tts: { enabled: true, useGoogle: true, voice: 'vi-VN-Wavenet-B' }, // Enable Google Cloud TTS
-  baseUrl: dataBaseUrl || '' // Use same origin for API calls
+ getGraph: () => currentGraph,
+ getTours: async () => {
+  try {
+   const url = `${dataBaseUrl}/tours`;
+   console.log('[VoiceBot] Fetching tours from:', url);
+   const res = await fetch(url);
+   console.log('[VoiceBot] Tours response status:', res.status);
+   if (res.ok) {
+    const tours = await res.json();
+    console.log('[VoiceBot] Tours fetched successfully:', tours);
+    return tours;
+   } else {
+    const errorText = await res.text();
+    console.error('[VoiceBot] Tours fetch failed:', res.status, errorText);
+    return [];
+   }
+  } catch (e) {
+   console.error('[VoiceBot] Failed to fetch tours:', e);
+   return [];
+  }
+ },
+ tts: { enabled: true, useGoogle: true, voice: 'vi-VN-Wavenet-B' }, // Enable Google Cloud TTS
+ baseUrl: dataBaseUrl || '' // Use same origin for API calls
 });
 await voiceBot.mount();
 
-  // Đảm bảo nút VoiceBot luôn hiển thị (đặc biệt trên mobile)
+  // 膼岷 b岷 n煤t VoiceBot lu么n hi峄僴 th峄?(膽岷穋 bi峄噒 tr锚n mobile)
   function ensureVoiceButtonVisible() {
     const btn = document.getElementById('voice-command-btn');
     if (!btn) return;
     btn.style.display = 'block';
     btn.style.position = 'fixed';
     btn.style.right = '15px';
-    // Đặt cao hơn footer để không che
+    // 膼岷穞 cao h啤n footer 膽峄?kh么ng che
     btn.style.bottom = (window.innerWidth < 768) ? '110px' : '100px';
     btn.style.zIndex = '10020';
     btn.style.pointerEvents = 'auto';
@@ -1418,123 +1738,127 @@ await voiceBot.mount();
   window.addEventListener('resize', ensureVoiceButtonVisible);
 
 
-  // ===== Analytics tracking =====
-  let sessionId = localStorage.getItem('session_id') || `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-  localStorage.setItem('session_id', sessionId);
+ // ===== Analytics tracking =====
+ let sessionId = localStorage.getItem('session_id') || `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+ localStorage.setItem('session_id', sessionId);
 
-  console.log('[Analytics] Session ID:', sessionId);
-  console.log('[Analytics] API Base URL:', dataBaseUrl);
+ console.log('[Analytics] Session ID:', sessionId);
+ console.log('[Analytics] API Base URL:', dataBaseUrl);
 
-  // Track initial visit
-  fetch(`${dataBaseUrl}/analytics/visit`, {
-    method: 'POST',
-    headers: { 'X-Session-ID': sessionId }
-  })
-  .then(res => {
-    if (res.ok) {
-      return res.json();
-    }
-    throw new Error(`Visit tracking failed: ${res.status}`);
-  })
-  .then(data => {
-    console.log('[Analytics] Visit tracked:', data);
-    console.log('[Analytics] Current concurrent users:', data.concurrent);
-  })
-  .catch(err => {
-    console.error('[Analytics] Failed to track visit:', err);
-  });
+ // Track initial visit
+ fetch(`${dataBaseUrl}/analytics/visit`, {
+  method: 'POST',
+  headers: { 'X-Session-ID': sessionId }
+ })
+ .then(res => {
+  if (res.ok) {
+   return res.json();
+  }
+  throw new Error(`Visit tracking failed: ${res.status}`);
+ })
+ .then(data => {
+  console.log('[Analytics] Visit tracked:', data);
+  console.log('[Analytics] Current concurrent users:', data.concurrent);
+ })
+ .catch(err => {
+  console.error('[Analytics] Failed to track visit:', err);
+ });
 
-  // Ping every 1 minute to keep session alive (reduced from 2 minutes for better tracking)
-  const pingInterval = setInterval(() => {
-    fetch(`${dataBaseUrl}/analytics/ping`, {
-      method: 'POST',
-      headers: { 'X-Session-ID': sessionId }
-    })
-    .then(res => res.ok ? res.json() : Promise.reject(new Error(`Ping failed: ${res.status}`)))
-    .then(data => {
-      // Only log occasionally to reduce console spam
-      if (Math.random() < 0.1) {  // Log 10% of pings
-        console.log('[Analytics] Ping OK:', data);
-      }
-    })
-    .catch(err => console.error('[Analytics] Ping failed:', err));
-  }, 60000);  // 1 minute instead of 2 minutes
+ // Ping every 1 minute to keep session alive (reduced from 2 minutes for better tracking)
+ const pingInterval = setInterval(() => {
+  fetch(`${dataBaseUrl}/analytics/ping`, {
+   method: 'POST',
+   headers: { 'X-Session-ID': sessionId }
+  })
+  .then(res => res.ok ? res.json() : Promise.reject(new Error(`Ping failed: ${res.status}`)))
+  .then(data => {
+   // Only log occasionally to reduce console spam
+   if (Math.random() < 0.1) { // Log 10% of pings
+    console.log('[Analytics] Ping OK:', data);
+   }
+  })
+  .catch(err => console.error('[Analytics] Ping failed:', err));
+ }, 60000); // 1 minute instead of 2 minutes
 
-  // Update concurrent users display every 30 seconds (reduced from 10 seconds for better performance)
-  let concurrentEl = null;
-  let concurrentUpdateInterval = null;
-  const updateConcurrent = async () => {
-    try {
-      const res = await fetch(`${dataBaseUrl}/analytics/concurrent`);
-      if (res.ok) {
-        const data = await res.json();
-        // Only log occasionally to reduce console spam
-        if (Math.random() < 0.1) {  // Log 10% of updates
-          console.log('[Analytics] Concurrent users:', data.concurrent);
-        }
-        if (concurrentEl) {
-          concurrentEl.innerHTML = `<span style="display: inline-block; width: 8px; height: 8px; background: #10b981; border-radius: 50%; animation: pulse 2s infinite;"></span><span>${data.concurrent || 0} người đang xem</span>`;
-        }
-      } else {
-        console.warn('[Analytics] Failed to get concurrent:', res.status);
-      }
-    } catch (e) {
-      console.error('[Analytics] Failed to fetch concurrent users:', e);
-    }
-  };
+ // Update concurrent users display every 30 seconds (reduced from 10 seconds for better performance)
+ let concurrentEl = null;
+ let concurrentUpdateInterval = null;
+ const updateConcurrent = async () => {
+  try {
+   const res = await fetch(`${dataBaseUrl}/analytics/concurrent`);
+   if (res.ok) {
+    const data = await res.json();
+    // Only log occasionally to reduce console spam
+    if (Math.random() < 0.1) { // Log 10% of updates
+     console.log('[Analytics] Concurrent users:', data.concurrent);
+    }
+    if (concurrentEl) {
+      const lang = (localStorage.getItem('lang') || 'vi').toLowerCase() === 'en' ? 'en' : 'vi';
+      const suffix = lang === 'en' ? 'watching' : 'người đang xem';
+      concurrentEl.innerHTML = `<span style="display: inline-block; width: 8px; height: 8px; background: #10b981; border-radius: 50%; animation: pulse 2s infinite;"></span><span>${data.concurrent || 0} ${suffix}</span>`;
+    }
+   } else {
+    console.warn('[Analytics] Failed to get concurrent:', res.status);
+   }
+  } catch (e) {
+   console.error('[Analytics] Failed to fetch concurrent users:', e);
+  }
+ };
 
-  // Create concurrent users display in header
-  const headerActions = document.querySelector('.header-actions');
-  if (headerActions && !document.getElementById('concurrent-users')) {
-    concurrentEl = document.createElement('div');
-    concurrentEl.id = 'concurrent-users';
-    concurrentEl.style.cssText = 'font-size: 13px; color: rgba(255,255,255,0.9); padding: 6px 12px; background: rgba(0,0,0,0.2); border-radius: 6px; margin-right: 12px; display: flex; align-items: center; gap: 6px;';
-    concurrentEl.innerHTML = '<span style="display: inline-block; width: 8px; height: 8px; background: #10b981; border-radius: 50%; animation: pulse 2s infinite;"></span><span>Đang tải...</span>';
-    headerActions.insertBefore(concurrentEl, headerActions.firstChild);
-    updateConcurrent();
-    concurrentUpdateInterval = setInterval(updateConcurrent, 30000);  // 30 seconds instead of 10
-  }
+ // Create concurrent users display in header
+ const headerActions = document.querySelector('.header-actions');
+ if (headerActions && !document.getElementById('concurrent-users')) {
+  concurrentEl = document.createElement('div');
+  concurrentEl.id = 'concurrent-users';
+  concurrentEl.style.cssText = 'font-size: 13px; color: rgba(255,255,255,0.9); padding: 6px 12px; background: rgba(0,0,0,0.2); border-radius: 6px; margin-right: 12px; display: flex; align-items: center; gap: 6px;';
+  concurrentEl.innerHTML = '<span style="display: inline-block; width: 8px; height: 8px; background: #10b981; border-radius: 50%; animation: pulse 2s infinite;"></span><span>Đang tải...</span>';
+  headerActions.insertBefore(concurrentEl, headerActions.firstChild);
+  updateConcurrent();
+  concurrentUpdateInterval = setInterval(updateConcurrent, 30000); // 30 seconds instead of 10
+ }
 
-  // Cleanup on page unload
-  window.addEventListener('beforeunload', () => {
-    clearInterval(pingInterval);
-    if (concurrentUpdateInterval) {
-      clearInterval(concurrentUpdateInterval);
-    }
-  });
+ // Cleanup on page unload
+ window.addEventListener('beforeunload', () => {
+  clearInterval(pingInterval);
+  if (concurrentUpdateInterval) {
+   clearInterval(concurrentUpdateInterval);
+  }
+ });
 
-  // ===== Return external API =====
+ // ===== Return external API =====
   return {
     navigateTo,
     route: (from, to) => minimap?.routeAndPlay?.(from, to),
     onSceneChange,
+    // Compatibility alias used by some UI code: app.on('sceneChange', (id, name) => ...)
+    on: (eventName, handler) => {
+      const key = String(eventName || '').toLowerCase();
+      if (key === 'scenechange') {
+        return onSceneChange(({ id, name }) => {
+          try { handler?.(id, name); } catch (e) { console.warn('[App] sceneChange handler failed:', e); }
+        });
+      }
+      console.warn('[App] Unsupported event name:', eventName);
+      return () => {};
+    },
     controls, 
     fpsCounter, // Expose FPS counter for external control
     getActiveScene: () => {
-      const s = scenes.find(x => x.id === active.id);
-      return { id: active.id, name: s?.name || active.id };
-    },
-    graph: minimap?.getGraph?.() || null,
-    updateSize: () => viewer.updateSize?.(),
-    minimap: minimap, // Expose minimap to allow updating selects with i18n
-    scenes: scenes // Expose scenes for i18n
-  };
+   const s = scenes.find(x => x.id === active.id);
+   return { id: active.id, name: s?.name || active.id };
+  },
+  graph: minimap?.getGraph?.() || null,
+  updateSize: () => viewer.updateSize?.(),
+  minimap: minimap, // Expose minimap to allow updating selects with i18n
+  scenes: scenes // Expose scenes for i18n
+ };
 }
 
 // Extract road text for scene-anchored banner
 function extractRoadText(scene, lang = (localStorage.getItem('lang') || 'vi')) {
   if (!scene) return '';
   const fromField = scene?.road && (typeof scene.road === 'string' ? scene.road : scene.road[lang]);
-  if (fromField) return fromField;
-  const overrides = {
-    congphu: { vi: 'Đường Hoàng Hoa Thám', en: 'Hoang Hoa Tham Street' },
-  };
-  const ov = overrides[String(scene.id)];
-  if (ov) return ov[lang] || ov.vi;
-  const nameText = (scene?.name?.[lang]) || scene?.name?.vi || scene?.name || '';
-  const matchVi = /Đường\s+[^\-]+/i.exec(nameText);
-  const matchEn = /Road\s+[^\-]+/i.exec(nameText);
-  return (matchVi && matchVi[0]) || (matchEn && matchEn[0]) || '';
+  return fromField || '';
 }
 
 // Move/update scene banner position at runtime
@@ -1577,7 +1901,7 @@ window.copyCenterForBanner = async function(copyOnly = true) {
     const pitch = +v.pitch().toFixed(4);
     const snippet = `"bannerYaw": ${yaw}, "bannerPitch": ${pitch}`;
     if (navigator.clipboard?.writeText) await navigator.clipboard.writeText(snippet);
-    console.log('[SceneBanner] Center →', { yaw, pitch, snippet });
+    console.log('[SceneBanner] Center ->', { yaw, pitch, snippet });
     if (!copyOnly) setSceneBannerPosition(currentSceneId, yaw, pitch);
   } catch (e) { console.warn('[SceneBanner] copyCenterForBanner error:', e); }
 };

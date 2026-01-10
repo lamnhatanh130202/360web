@@ -1206,6 +1206,44 @@ def get_graph():
         else:
             graph_data = {"nodes": [], "edges": []}
     
+    # --- Always sync edges from scenes/hotspots (source of truth) ---
+    # graph.json is used primarily for node positions; edges should reflect current hotspots.
+    try:
+        if _scenes and isinstance(graph_data, dict):
+            generated = generate_graph_from_scenes(_scenes)
+
+            old_nodes = graph_data.get('nodes', []) if isinstance(graph_data.get('nodes', []), list) else []
+            old_map = {str(n.get('id')): n for n in old_nodes if isinstance(n, dict) and n.get('id') is not None}
+
+            merged_nodes = []
+            for new_node in generated.get('nodes', []):
+                node_id = str(new_node.get('id'))
+                old_node = old_map.get(node_id)
+                if old_node:
+                    merged_nodes.append({
+                        **old_node,           # keep positions (x/y/positions)
+                        **new_node,           # update id/label/floor from scenes
+                        'x': old_node.get('x') if old_node.get('x') is not None else new_node.get('x'),
+                        'y': old_node.get('y') if old_node.get('y') is not None else new_node.get('y'),
+                        'positions': old_node.get('positions') or new_node.get('positions')
+                    })
+                else:
+                    merged_nodes.append(new_node)
+
+            # Optionally keep old nodes that are not present in scenes (avoid sudden disappearance)
+            new_ids = {str(n.get('id')) for n in merged_nodes if isinstance(n, dict) and n.get('id') is not None}
+            for old_node in old_nodes:
+                oid = str(old_node.get('id'))
+                if oid and oid not in new_ids:
+                    merged_nodes.append(old_node)
+
+            graph_data = {
+                'nodes': merged_nodes,
+                'edges': generated.get('edges', [])
+            }
+    except Exception as e:
+        print(f"⚠ Warning: could not sync graph edges from scenes: {e}")
+
     return jsonify(graph_data), 200
 
 @app.route("/api/graph/cleanup", methods=["POST"])

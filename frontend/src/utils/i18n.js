@@ -65,6 +65,13 @@ export async function setLanguage(lang) {
  * Apply translations to all elements with data-i18n attributes
  */
 export function applyTranslations() {
+  // Keep document language + title in sync
+  try {
+    document.documentElement.lang = currentLang || 'vi';
+    const newTitle = t('title', document.title);
+    if (newTitle) document.title = newTitle;
+  } catch {}
+
   // 1. Áp dụng bản dịch nội dung văn bản
   document.querySelectorAll('[data-i18n]').forEach(el => {
     const key = el.getAttribute('data-i18n');

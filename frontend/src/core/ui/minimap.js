@@ -17,15 +17,17 @@ export function createMinimap(opts) {
     let G = normalizeGraph(graph || { nodes: [], edges: [] });
 
     // Cấu hình đường dẫn ảnh nền các tầng
+    // Use CMS minimap assets so updates in CMS reflect immediately in the viewer.
+    // Nginx config also sets no-cache for /cms/assets/minimap/*.
     const floorBackgrounds = {
-        0:   "/assets/minimap/so_do_ca_truong.jpg",
-        1:   "/assets/minimap/lau_1_khu_a_b.jpg",
-        2:   "/assets/minimap/lau_2_khu_a_b.jpg",
-        3:   "/assets/minimap/lau_3_khu_a_b.jpg",
-        4:   "/assets/minimap/lau_4_khu_a.jpg",
-        5:   "/assets/minimap/lau_5_khu_a.jpg",
-        5.5: "/assets/minimap/mat_lung_lau_5_khu_a.jpg",
-        6:   "/assets/minimap/lau_6_khu_a.jpg"
+        0:   "/cms/assets/minimap/sơ_đồ_cả_trường.jpg",
+        1:   "/cms/assets/minimap/lầu_1_Khu_A-B.jpg",
+        2:   "/cms/assets/minimap/lầu_2_Khu_A-B.jpg",
+        3:   "/cms/assets/minimap/lầu_3_Khu_A-B.jpg",
+        4:   "/cms/assets/minimap/lầu_4_Khu_A.jpg",
+        5:   "/cms/assets/minimap/lầu_5_Khu_A.jpg",
+        5.5: "/cms/assets/minimap/mặt_lửng_lầu_5_Khu_A.jpg",
+        6:   "/cms/assets/minimap/lầu_6_Khu_A.jpg"
     };
 
     // State nội bộ
@@ -49,8 +51,39 @@ export function createMinimap(opts) {
     let stageWidth = 1000; 
     let stageHeight = 1000;
 
-    const SCALE_MIN = 0.5;
-    const SCALE_MAX = 2.0;
+    // Zoom limits should depend on the current image size vs viewport.
+    // A fixed SCALE_MIN (like 0.5) breaks large images because fit scale can be ~0.1,
+    // causing zoom to jump to 0.5 and then never zoom out.
+    const SCALE_ABS_MIN = 0.05;
+    const SCALE_ABS_MAX = 3.0;
+
+    function getFitScale() {
+        const vpRect = viewport?.getBoundingClientRect?.();
+        const vw = vpRect?.width || 0;
+        const vh = vpRect?.height || 0;
+        const sw = Number(stageWidth) || 0;
+        const sh = Number(stageHeight) || 0;
+        if (vw <= 0 || vh <= 0 || sw <= 0 || sh <= 0) return 1;
+        return Math.min(vw / sw, vh / sh) * 0.95;
+    }
+
+    function getScaleMin() {
+        const fit = getFitScale();
+        // Allow zooming out a bit beyond fit, but never force min above 1.
+        return Math.max(SCALE_ABS_MIN, Math.min(1, fit * 0.6));
+    }
+
+    function getScaleMax() {
+        const fit = getFitScale();
+        // Keep zoom-in reasonable relative to fit; cap globally.
+        return Math.max(1.5, Math.min(SCALE_ABS_MAX, fit * 10));
+    }
+
+    function clampScale(s) {
+        const min = getScaleMin();
+        const max = getScaleMax();
+        return Math.max(min, Math.min(max, s));
+    }
 
     // [UPDATED] Hàm lấy tên Scene theo ngôn ngữ
     function getSceneName(nodeId) {
@@ -392,15 +425,13 @@ export function createMinimap(opts) {
         return { x: node.x || 0, y: node.y || 0 };
     }
 
-    // Tìm các node có kết nối với nodeId (qua edges)
+    // Tìm các node có thể đi tới trực tiếp từ nodeId (edges có hướng: from -> to)
     function findConnectedNodes(nodeId) {
         const connected = [];
         const nodeIdStr = String(nodeId);
         G.edges.forEach(edge => {
             if (String(edge.from) === nodeIdStr) {
                 connected.push(edge.to);
-            } else if (String(edge.to) === nodeIdStr) {
-                connected.push(edge.from);
             }
         });
         return connected;
@@ -763,7 +794,7 @@ export function createMinimap(opts) {
         const scaleW = vpRect.width / contentW;
         const scaleH = vpRect.height / contentH;
         let s = Math.min(scaleW, scaleH) * 1.0; // vừa đủ
-        s = Math.max(SCALE_MIN, Math.min(SCALE_MAX, s));
+        s = clampScale(s);
         return s;
     }
 
@@ -783,7 +814,7 @@ export function createMinimap(opts) {
                 setDotAt(x, y);
                 // Pan & zoom theo điểm di chuyển để luôn nhìn rõ đoạn tuyến
                 const currentScale = startScale + (targetScale - startScale) * ease;
-                view.scale = Math.max(SCALE_MIN, Math.min(SCALE_MAX, currentScale));
+                view.scale = clampScale(currentScale);
                 view.x = vpRect.width / 2 - x * view.scale;
                 view.y = vpRect.height / 2 - y * view.scale;
                 updateTransform();
@@ -871,6 +902,8 @@ export function createMinimap(opts) {
         const scaleW = vpRect.width / stageWidth;
         const scaleH = vpRect.height / stageHeight;
         let newScale = Math.min(scaleW, scaleH) * 0.95;
+        // On mobile, avoid upscaling the background image (looks like the minimap is "too big").
+        if (mobileMode) newScale = Math.min(1, newScale);
         const newX = (vpRect.width - stageWidth * newScale) / 2;
         const newY = (vpRect.height - stageHeight * newScale) / 2;
         view = { scale: newScale, x: newX, y: newY };
@@ -910,7 +943,7 @@ export function createMinimap(opts) {
         const scaleW = vpRect.width / contentW;
         const scaleH = vpRect.height / contentH;
         let targetScale = Math.min(scaleW, scaleH) * 1.05; // just enough
-        targetScale = Math.max(SCALE_MIN, Math.min(SCALE_MAX, targetScale));
+        targetScale = clampScale(targetScale);
 
         const startScale = view.scale;
         const startX = view.x;
@@ -945,11 +978,10 @@ export function createMinimap(opts) {
         let newScale = view.scale;
         if (opts.zoom) {
             // Use an absolute target scale instead of multiplying to avoid accumulation
-            const vpRect = viewport.getBoundingClientRect();
-            const fitScale = Math.min(vpRect.width / stageWidth, vpRect.height / stageHeight) * 0.95;
-            // Aim for a moderate zoom (slightly above fit), without jumping too far
-            newScale = Math.max(view.scale, Math.max(fitScale * 1.1, SCALE_MIN));
-            newScale = Math.max(SCALE_MIN, Math.min(SCALE_MAX, newScale));
+            const fitScale = getFitScale();
+            // Aim for a moderate zoom (slightly above fit), without jumping too far.
+            newScale = Math.max(view.scale, fitScale * 1.1);
+            newScale = clampScale(newScale);
         }
 
         const vpRect = viewport.getBoundingClientRect();
@@ -992,7 +1024,7 @@ export function createMinimap(opts) {
         const stageX = (mouseX - view.x) / view.scale;
         const stageY = (mouseY - view.y) / view.scale;
         let newScale = view.scale * factor;
-        newScale = Math.max(SCALE_MIN, Math.min(SCALE_MAX, newScale));
+        newScale = clampScale(newScale);
         view.x = mouseX - stageX * newScale;
         view.y = mouseY - stageY * newScale;
         view.scale = newScale;
@@ -1572,10 +1604,8 @@ function dijkstraPath(G, startId, endId) {
     const adj = {};
     edges.forEach(e => {
         if (!adj[e.from]) adj[e.from] = [];
-        if (!adj[e.to]) adj[e.to] = [];
         const weight = e.w || 1; 
         adj[e.from].push({ node: e.to, w: weight });
-        adj[e.to].push({ node: e.from, w: weight }); 
     });
     const distances = {};
     const previous = {};

@@ -2,8 +2,12 @@
   {
     "id": "congtruong",
     "name": {
-      "vi": "Cổng Chính -  Đường Đại Lộ Bình Dương",
+      "vi": "Cổng Chính",
       "en": "Main Gate"
+    },
+    "road": {
+      "vi": "Đại Lộ Bình Dương",
+      "en": "Binh Duong Avenue"
     },
     "type": "equirect",
     "url": "/uploads/congtruong_1765098324330.webp",
@@ -39,6 +43,10 @@
     "name": {
       "en": "Side Gate",
       "vi": "Cổng Phụ"
+    },
+    "road": {
+      "vi": "Đường Hoàng Hoa Thám",
+      "en": "Hoang Hoa Tham Street"
     },
     "type": "equirect",
     "url": "/uploads/congphu_1767434197839.webp",
@@ -124,15 +132,15 @@
   {
     "id": "duonglencong",
     "name": {
-      "en": "Path to Main Gate",
-      "vi": "Đường Lên Cổng"
+      "vi": "Đường Lên Cổng",
+      "en": "Path to Main Gate"
     },
     "type": "equirect",
     "url": "/uploads/duonglencong_1767434264051.webp",
     "initialView": {
-      "hfov": 0.9276924009922387,
+      "yaw": 0.9652595819981933,
       "pitch": -0.26876889610511157,
-      "yaw": 0.9652595819981933
+      "hfov": 0.9276924009922387
     },
     "hotspots": [
       {
@@ -146,12 +154,6 @@
         "pitch": -0.026936003590138924,
         "target": "loidi1",
         "yaw": 1.331251080350663
-      },
-      {
-        "target": "truocphongtuyensinh",
-        "yaw": 0,
-        "pitch": 0,
-        "label": "Trước phòng tuyển sinh"
       }
     ],
     "floor": 0
@@ -2582,7 +2584,7 @@
     "initialView": {
       "yaw": -1.4112413794493346,
       "pitch": -0.17008683445529726,
-      "hfov": 0.9276924009922387
+      "hfov": 1.7440453162626923
     },
     "hotspots": [
       {
@@ -2598,7 +2600,7 @@
         "yaw": 0.6243810755661414
       },
       {
-        "label": "Đường Lên Cổng",
+        "label": "Khối văn phòng C1-1",
         "pitch": -0.0870373376228315,
         "target": "loidi1",
         "yaw": -1.4653102804615301
