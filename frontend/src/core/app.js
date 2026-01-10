@@ -37,6 +37,14 @@ export async function bootstrap(opts) {
   const root = document.querySelector(rootSelector);
   const fadeEl = document.querySelector(fadeSelector);
 
+    // Start with a black overlay to avoid flashing on initial load.
+    try {
+      if (fadeEl) {
+        fadeEl.style.opacity = '1';
+        fadeEl.style.pointerEvents = 'auto';
+      }
+    } catch (_) {}
+
   const ensureElementSize = (el) => {
     if (!el) return;
     const rect = el.getBoundingClientRect();
@@ -319,6 +327,8 @@ export async function bootstrap(opts) {
  // view updates (including setFov) from applying correctly.
  const MIN_FOV = Marzipano.util.degToRad(20);
  const MAX_FOV = Marzipano.util.degToRad(110);
+ const DEFAULT_FOV_DEG = 53.02;
+ const DEFAULT_FOV = Marzipano.util.degToRad(DEFAULT_FOV_DEG);
  const limiter = Marzipano.util.compose(
   Marzipano.RectilinearView.limit.vfov(MIN_FOV, MAX_FOV),
   Marzipano.RectilinearView.limit.pitch(-Math.PI / 2, Math.PI / 2)
@@ -326,6 +336,13 @@ export async function bootstrap(opts) {
 
  const sceneCache = {};
  let active = { id: null, scene: null, view: null };
+ let isSceneTransitioning = false;
+
+ // Transition overlay strength (0..1). Keep it < 1 so users still see the old scene.
+ const TRANSITION_MASK_OPACITY = 0.6;
+
+ // Marzipano internal scene transition duration (ms)
+ const SCENE_SWITCH_MS = 700;
 
  // ===== Render helper =====
  function requestRender() {
@@ -381,14 +398,47 @@ export async function bootstrap(opts) {
  function fade(to = 1, dur = 200) {
   if (!fadeEl) return Promise.resolve();
   const from = +getComputedStyle(fadeEl).opacity || 0;
+  try { fadeEl.style.pointerEvents = to > 0.02 ? 'auto' : 'none'; } catch (_) {}
   return new Promise(res => {
    const t0 = performance.now();
+   const easeInOutCubic = (x) => (x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2);
    (function step(t) {
-    const p = Math.min(1, (t - t0) / dur);
-    fadeEl.style.opacity = String(from + (to - from) * p);
-    p < 1 ? requestAnimationFrame(step) : res();
+    const p = Math.min(1, (t - t0) / Math.max(0, dur));
+    const e = easeInOutCubic(p);
+    fadeEl.style.opacity = String(from + (to - from) * e);
+    if (p < 1) {
+      requestAnimationFrame(step);
+    } else {
+      try { fadeEl.style.pointerEvents = to > 0.02 ? 'auto' : 'none'; } catch (_) {}
+      res();
+    }
    })(t0);
   });
+ }
+
+ // Unified transition used by ALL scene navigation paths.
+ async function transitionToScene(toId, fromId = null, opts = {}) {
+  const outMs = Number(opts.outMs ?? 220);
+  const holdMs = Number(opts.holdMs ?? 320);
+  const inMs = Number(opts.inMs ?? 260);
+  const mask = Number.isFinite(opts.maskOpacity) ? Number(opts.maskOpacity) : TRANSITION_MASK_OPACITY;
+
+  if (!toId) return;
+  if (isSceneTransitioning) return;
+  isSceneTransitioning = true;
+  try {
+    userActivity();
+    await fade(Math.max(0, Math.min(1, mask)), outMs);
+    await loadScene(toId, fromId);
+    if (typeof opts.onAfterLoad === 'function') {
+      try { await opts.onAfterLoad(); } catch (e) { console.warn('[Transition] onAfterLoad failed:', e); }
+    }
+    if (holdMs > 0) await new Promise(r => setTimeout(r, holdMs));
+    await fade(0, inMs);
+    scheduleAutoResume();
+  } finally {
+    isSceneTransitioning = false;
+  }
  }
 
  // Tooltip singleton for hotspots
@@ -624,7 +674,7 @@ export async function bootstrap(opts) {
     el.addEventListener('click', async () => {
       hideTip();
       hideHoverPreview();
-      try { await travelToScene(h.target); } catch (e) { console.warn('[Hotspot] travel failed, fallback:', e); await fade(1,120); await loadScene(h.target, active.id); await fade(0,120); }
+      try { await travelToScene(h.target); } catch (e) { console.warn('[Hotspot] travel failed, fallback:', e); await transitionToScene(h.target, active.id); }
     });
 
     // Mobile touch handling - cho ph茅p pan khi drag, ch峄?x峄?l媒 tap khi kh么ng drag
@@ -695,7 +745,7 @@ export async function bootstrap(opts) {
         e.stopPropagation(); // Ng膬n click event sau 膽贸
         // Mobile UX: tap 1 lần để điều hướng luôn (không yêu cầu tap 2 lần)
         hideTip();
-        travelToScene(h.target).catch(() => { fade(1,120).then(() => loadScene(h.target, active.id)).then(() => fade(0,120)); });
+        travelToScene(h.target).catch(() => { transitionToScene(h.target, active.id); });
       }
       touchMoved = false;
       isDraggingHotspot = false;
@@ -717,10 +767,12 @@ export async function bootstrap(opts) {
  // ===== Create Scene =====
  function createScene(s) {
   const source = Marzipano.ImageUrlSource.fromString(s.url || s.src);
+  const rawFov = Number(s?.initialView?.hfov);
+  const initFov = (Number.isFinite(rawFov) && rawFov > 0) ? rawFov : DEFAULT_FOV;
   const view = new Marzipano.RectilinearView({
    yaw: +(s.initialView?.yaw ?? 0),
    pitch: +(s.initialView?.pitch ?? 0),
-   fov: +(s.initialView?.hfov ?? 1.2)
+   fov: Math.min(MAX_FOV, Math.max(MIN_FOV, initFov))
   }, limiter);
   try { ensureViewSize(view); } catch (_) {}
   const scene = viewer.createScene({ source, geometry, view });
@@ -942,7 +994,7 @@ function scheduleAutoResume() {
 
     const { scene, view } = sceneCache[id];
     try {
-      await scene.switchTo({ transitionDuration: 0 });
+      await scene.switchTo({ transitionDuration: SCENE_SWITCH_MS });
       console.log('[App] Scene switched successfully:', id);
     } catch (e) {
       console.error('[App] Error switching to scene:', id, e);
@@ -1330,29 +1382,33 @@ function scheduleAutoResume() {
         const farFov = Math.min(maxFov, prevFov * 1.25);
         await animateFov(v, farFov, 320);
       }
-      // 3) Crossfade and switch
-      await fade(0.5, 150);
-      await loadScene(toId, fromId);
-      const newView = active.view || viewer.scene()?.view();
-      // Keep arrival yaw consistent with departure heading if known
-      const carryYaw = getHotspotYaw(fromId, toId);
-      if (newView && typeof carryYaw === 'number') newView.setYaw(carryYaw);
-      // 4) Zoom-in on the destination scene, then ease to comfortable FOV
-      if (newView) {
-        const minFov = Marzipano.util.degToRad(20);
-        const nearFovArrive = Math.max(minFov, Math.min(prevFov, prevFov * 0.75));
-        newView.setFov(nearFovArrive);
-      }
-      await fade(0, 150);
+      // 3) Fade out old scene, switch, wait briefly for new tiles, then fade in
+      let newView = null;
+      await transitionToScene(toId, fromId, {
+        outMs: 220,
+        holdMs: 420,
+        inMs: 260,
+        onAfterLoad: async () => {
+          newView = active.view || viewer.scene()?.view();
+          // Keep arrival yaw consistent with departure heading if known
+          const carryYaw = getHotspotYaw(fromId, toId);
+          if (newView && typeof carryYaw === 'number') newView.setYaw(carryYaw);
+          // Set a near FOV so arrival feels like zoom-in
+          if (newView) {
+            const minFov = Marzipano.util.degToRad(20);
+            const nearFovArrive = Math.max(minFov, Math.min(prevFov, prevFov * 0.75));
+            newView.setFov(nearFovArrive);
+          }
+        }
+      });
       if (newView) {
         // Hold the zoom-in briefly, then ease back to previous FOV
         await new Promise(r => setTimeout(r, 220));
         await animateFov(newView, prevFov, 520);
       }
-      scheduleAutoResume();
     } catch (e) {
       console.warn('[App] travelToScene fallback to direct navigate:', e);
-      await fade(1, 120); await loadScene(toId, fromId); await fade(0, 120);
+      await transitionToScene(toId, fromId);
     }
   }
 
@@ -1639,7 +1695,7 @@ function scheduleAutoResume() {
   // Start at first scene
   if (scenes && scenes.length > 0) {
     console.log('[App] Starting with first scene:', scenes[0].id);
-    await loadScene(scenes[0].id);
+    await transitionToScene(scenes[0].id);
   } else {
     console.error('[App] Kh么ng c贸 scene n脿o 膽峄?hi峄僴 th峄?');
   }

@@ -2,7 +2,10 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import "../styles/ScenePreview.css"; 
 
-const INITIAL_VIEW_DEFAULTS = { yaw: 0, pitch: 0, hfov: 1.2 };
+const DEFAULT_FOV_DEG = 53.02;
+const DEFAULT_HFOV = (DEFAULT_FOV_DEG * Math.PI) / 180;
+const SCENE_SWITCH_MS = 700;
+const INITIAL_VIEW_DEFAULTS = { yaw: 0, pitch: 0, hfov: DEFAULT_HFOV };
 
 // Định nghĩa tên tầng (giống bên Edit)
 const FLOOR_NAMES = {
@@ -141,17 +144,19 @@ export default function ScenePreview({ apiBase = "/api" }) {
     const limiter = M.RectilinearView.limit.traditional(M.util.degToRad(100), M.util.degToRad(120));
     
     const savedView = sceneData.initialView || {};
+    const savedFov = Number(savedView.hfov);
+    const initialFov = (Number.isFinite(savedFov) && savedFov > 0) ? savedFov : INITIAL_VIEW_DEFAULTS.hfov;
     const initialViewParams = { 
         yaw: savedView.yaw ?? INITIAL_VIEW_DEFAULTS.yaw, 
         pitch: savedView.pitch ?? INITIAL_VIEW_DEFAULTS.pitch, 
-        fov: savedView.hfov ?? INITIAL_VIEW_DEFAULTS.hfov 
+      fov: initialFov 
     };
 
     const view = new M.RectilinearView(initialViewParams, limiter);
     const scene = marzipanoViewerRef.current.createScene({ source, geometry, view });
     
     activeSceneRef.current = scene;
-    scene.switchTo({ transitionDuration: 0 });
+    scene.switchTo({ transitionDuration: SCENE_SWITCH_MS });
 
     hotspotNodesRef.current = [];
 

@@ -37,6 +37,22 @@ body {
   touch-action: none; /* Đảm bảo pan/pinch/wheel đi vào viewer */
 }
 
+/* Scene transition overlay */
+#fade {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100vw;
+  height: 100vh;
+  background: #000;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 30000;
+  will-change: opacity;
+}
+
 /* header/footer nổi trên pano  */
 .header {
   position: relative;    /* Sẽ được override bởi header selector bên dưới */
