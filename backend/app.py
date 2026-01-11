@@ -5,6 +5,7 @@ import os, json, base64, uuid, math, time, threading
 from datetime import datetime, timedelta
 from collections import deque
 from functools import wraps
+from contextlib import contextmanager
 import jwt
 import requests
 
@@ -243,6 +244,63 @@ def load_stats_from_file():
         # để bạn có thể khôi phục thủ công nếu cần.
         return default_stats
 
+
+def _atomic_write_json(path, data):
+    """Write JSON atomically to avoid truncated/corrupt files on crashes.
+
+    Approach: write to a temp file in the same directory, then os.replace().
+    """
+    import tempfile
+    directory = os.path.dirname(path) or '.'
+    os.makedirs(directory, exist_ok=True)
+    fd, tmp_path = tempfile.mkstemp(prefix='._tmp_', suffix='.json', dir=directory)
+    try:
+        with os.fdopen(fd, 'w', encoding='utf-8') as f:
+            json.dump(data, f, ensure_ascii=False, indent=2)
+            try:
+                f.flush()
+                os.fsync(f.fileno())
+            except Exception:
+                # Best-effort; some filesystems may not support fsync
+                pass
+        os.replace(tmp_path, path)
+    finally:
+        try:
+            if os.path.exists(tmp_path):
+                os.remove(tmp_path)
+        except Exception:
+            pass
+
+
+@contextmanager
+def _stats_file_lock():
+    """Inter-process lock for stats.json (needed with multiple Gunicorn workers).
+
+    Without this, each worker can overwrite stats.json with its own stale in-memory
+    copy, causing apparent 'resets' or data loss.
+    """
+    lock_path = f"{STATS_FILE}.lock"
+    os.makedirs(os.path.dirname(STATS_FILE) or '.', exist_ok=True)
+    lock_f = open(lock_path, 'w', encoding='utf-8')
+    try:
+        try:
+            import fcntl
+            fcntl.flock(lock_f.fileno(), fcntl.LOCK_EX)
+        except Exception:
+            # On platforms without fcntl, we fall back to best-effort.
+            pass
+        yield
+    finally:
+        try:
+            import fcntl
+            fcntl.flock(lock_f.fileno(), fcntl.LOCK_UN)
+        except Exception:
+            pass
+        try:
+            lock_f.close()
+        except Exception:
+            pass
+
 stats_data = load_stats_from_file() # Load lần đầu
 
 # --- Simple In-Memory Cache ---
@@ -334,19 +392,8 @@ stats_lock = threading.Lock()
 app.config['MAX_CONTENT_LENGTH'] = 32 * 1024 * 1024
 
 def load_stats():
-    try:
-        if os.path.exists(STATS_FILE):
-            with open(STATS_FILE, 'r', encoding='utf-8') as f:
-                return json.load(f)
-    except Exception as e:
-        print(f"Error loading stats: {e}")
-    return {
-        "daily": {},
-        "weekly": {},
-        "monthly": {},
-        "peak_concurrent": 0,
-        "peak_concurrent_date": None
-    }
+    """Backward-compatible loader; delegates to the safer loader with backup."""
+    return load_stats_from_file()
 
 def save_stats(stats, lock_acquired=False):
     """Save stats to file. If lock_acquired=True, assumes caller already has stats_lock"""
@@ -356,22 +403,21 @@ def save_stats(stats, lock_acquired=False):
         
         if lock_acquired:
             # Người gọi đã khóa, không lấy lại nữa
-            with open(STATS_FILE, 'w', encoding='utf-8') as f:
-                json.dump(stats, f, ensure_ascii=False, indent=2)
+            _atomic_write_json(STATS_FILE, stats)
             # Chỉ ghi nhật ký thỉnh thoảng để giảm I/O
             if should_log:
                 print(f"[Analytics] Stats saved to {STATS_FILE} (today: {today_visits} visits)")
         else:
             # Có được khóa nếu chưa được giữ
             with stats_lock:
-                with open(STATS_FILE, 'w', encoding='utf-8') as f:
-                    json.dump(stats, f, ensure_ascii=False, indent=2)
+                _atomic_write_json(STATS_FILE, stats)
                 if should_log:
                     print(f"[Analytics] Stats saved to {STATS_FILE} (today: {today_visits} visits)")
     except Exception as e:
         print(f"[Analytics] Error saving stats: {e}")
 
-stats_data = load_stats()
+# NOTE: stats_data is initialized earlier via load_stats_from_file();
+# do not overwrite it here (doing so can drop data if stats.json is temporarily invalid).
 
 def get_date_key(date=None):
     if date is None:
@@ -447,13 +493,9 @@ def periodic_cleanup():
         try:
             with stats_lock:
                 cleanup_inactive_sessions()
-                
-                # --- KIỂM TRA AN TOÀN TRƯỚC KHI LƯU ---
-                # Chỉ lưu nếu có dữ liệu thực tế (tránh ghi đè file trắng do lỗi logic)
-                if len(stats_data.get('daily', {})) > 0 or stats_data.get('peak_concurrent', 0) > 0:
-                    save_stats(stats_data, lock_acquired=True)
-                else:
-                    print("[Analytics] ⚠ Stats data is empty, skipping auto-save to prevent data loss.")
+                # IMPORTANT: Do not write stats_data here.
+                # With multiple Gunicorn workers, each worker has its own in-memory stats_data.
+                # Writing it periodically can overwrite newer data from other workers.
                     
         except Exception as e:
             print(f"[Cleanup] ✗ Error in periodic cleanup: {e}")
@@ -470,35 +512,39 @@ def record_visit():
     Should be called within stats_lock context.
     """
     now = datetime.now()
-    
-    # Update daily stats
-    day_key = get_date_key(now)
-    stats_data.setdefault('daily', {})
-    stats_data['daily'][day_key] = stats_data['daily'].get(day_key, 0) + 1
-    
-    # Update weekly stats
-    week_key = get_week_key(now)
-    stats_data.setdefault('weekly', {})
-    stats_data['weekly'][week_key] = stats_data['weekly'].get(week_key, 0) + 1
-    
-    # Update monthly stats
-    month_key = get_month_key(now)
-    stats_data.setdefault('monthly', {})
-    stats_data['monthly'][month_key] = stats_data['monthly'].get(month_key, 0) + 1
-    
-    # Update peak concurrent
     current_concurrent = len(active_sessions)
-    if current_concurrent > stats_data.get('peak_concurrent', 0):
-        stats_data['peak_concurrent'] = current_concurrent
-        stats_data['peak_concurrent_date'] = now.isoformat()
-        print(f"[Analytics] New peak concurrent users: {current_concurrent}")
-    
-    # Save stats to file
-    try:
-        with open(STATS_FILE, 'w', encoding='utf-8') as f:
-            json.dump(stats_data, f, ensure_ascii=False, indent=2)
-    except Exception as e:
-        print(f"[Analytics] Error saving stats: {e}")
+
+    # Multi-worker safe: lock + read-modify-write on disk
+    with _stats_file_lock():
+        disk_stats = load_stats_from_file()
+        if not isinstance(disk_stats, dict):
+            disk_stats = {"daily": {}, "weekly": {}, "monthly": {}, "peak_concurrent": 0, "peak_concurrent_date": None}
+
+        # Update daily stats
+        day_key = get_date_key(now)
+        disk_stats.setdefault('daily', {})
+        disk_stats['daily'][day_key] = disk_stats['daily'].get(day_key, 0) + 1
+
+        # Update weekly stats
+        week_key = get_week_key(now)
+        disk_stats.setdefault('weekly', {})
+        disk_stats['weekly'][week_key] = disk_stats['weekly'].get(week_key, 0) + 1
+
+        # Update monthly stats
+        month_key = get_month_key(now)
+        disk_stats.setdefault('monthly', {})
+        disk_stats['monthly'][month_key] = disk_stats['monthly'].get(month_key, 0) + 1
+
+        # Update peak concurrent (best-effort; note: active_sessions is per-worker)
+        if current_concurrent > disk_stats.get('peak_concurrent', 0):
+            disk_stats['peak_concurrent'] = current_concurrent
+            disk_stats['peak_concurrent_date'] = now.isoformat()
+            print(f"[Analytics] New peak concurrent users: {current_concurrent}")
+
+        _atomic_write_json(STATS_FILE, disk_stats)
+        # Keep this worker's in-memory view in sync
+        stats_data.clear()
+        stats_data.update(disk_stats)
 
 def cleanup_inactive_sessions():
     """Remove sessions inactive for more than 2 minutes"""
@@ -2153,12 +2199,25 @@ def get_analytics():
             if os.path.exists(STATS_FILE):
                 with open(STATS_FILE, 'r', encoding='utf-8') as f:
                     loaded_data = json.load(f)
-                    stats_data = loaded_data
-                    print(f"[Analytics] Reloaded stats: {len(loaded_data.get('daily', {}))} daily, peak: {loaded_data.get('peak_concurrent', 0)}")
+                    if isinstance(loaded_data, dict) and any(k in loaded_data for k in ('daily', 'weekly', 'monthly', 'peak_concurrent')):
+                        stats_data = loaded_data
+                        print(f"[Analytics] Reloaded stats: {len(loaded_data.get('daily', {}))} daily, peak: {loaded_data.get('peak_concurrent', 0)}")
+                    else:
+                        print(f"[Analytics] Warning: stats.json has unexpected structure; keeping in-memory stats.")
             else:
                 print(f"[Analytics] Warning: Stats file not found: {STATS_FILE}")
         except Exception as e:
             print(f"[Analytics] Error reloading stats in get_analytics: {e}")
+            # Backup the corrupted/truncated file if possible (prevents silent data loss)
+            try:
+                if os.path.exists(STATS_FILE):
+                    timestamp = int(time.time())
+                    backup_path = f"{STATS_FILE}.corrupt.{timestamp}.bak"
+                    import shutil
+                    shutil.copy(STATS_FILE, backup_path)
+                    print(f"[Analytics] ⚠ Backed up corrupted stats file to: {backup_path}")
+            except Exception as backup_err:
+                print(f"[Analytics] ✗ Failed to backup corrupted stats file: {backup_err}")
             import traceback
             traceback.print_exc()
         

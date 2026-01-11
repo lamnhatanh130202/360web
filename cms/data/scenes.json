@@ -2,26 +2,26 @@
   {
     "id": "congtruong",
     "name": {
-      "vi": "Cổng Chính",
-      "en": "Main Gate"
+      "en": "Main Gate",
+      "vi": "Cổng Chính"
     },
     "road": {
-      "vi": "Đại Lộ Bình Dương",
-      "en": "Binh Duong Avenue"
+      "en": "Binh Duong Avenue",
+      "vi": "Đại Lộ Bình Dương"
     },
     "type": "equirect",
     "url": "/uploads/congtruong_1765098324330.webp",
     "initialView": {
-      "yaw": -3,
-      "pitch": 0,
-      "hfov": 0
+      "yaw": 0.23341752266506788,
+      "pitch": -0.17347580883654068,
+      "hfov": 0.9276924009922387
     },
     "hotspots": [
       {
         "label": "Đường Lên Cổng",
-        "pitch": -0.11981753309105869,
+        "pitch": -0.0879415503578116,
         "target": "duonglencong",
-        "yaw": 0.00740174494844432
+        "yaw": -0.19859969148506096
       },
       {
         "label": "Trung Tâm PTNLS",

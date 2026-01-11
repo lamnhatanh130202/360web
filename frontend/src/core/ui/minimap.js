@@ -17,17 +17,16 @@ export function createMinimap(opts) {
     let G = normalizeGraph(graph || { nodes: [], edges: [] });
 
     // Cấu hình đường dẫn ảnh nền các tầng
-    // Use CMS minimap assets so updates in CMS reflect immediately in the viewer.
-    // Nginx config also sets no-cache for /cms/assets/minimap/*.
+    // Use ASCII filenames to avoid macOS Unicode normalization issues.
     const floorBackgrounds = {
-        0:   "/cms/assets/minimap/sơ_đồ_cả_trường.jpg",
-        1:   "/cms/assets/minimap/lầu_1_Khu_A-B.jpg",
-        2:   "/cms/assets/minimap/lầu_2_Khu_A-B.jpg",
-        3:   "/cms/assets/minimap/lầu_3_Khu_A-B.jpg",
-        4:   "/cms/assets/minimap/lầu_4_Khu_A.jpg",
-        5:   "/cms/assets/minimap/lầu_5_Khu_A.jpg",
-        5.5: "/cms/assets/minimap/mặt_lửng_lầu_5_Khu_A.jpg",
-        6:   "/cms/assets/minimap/lầu_6_Khu_A.jpg"
+        0:   "/assets/minimap/so_do_ca_truong.jpg",
+        1:   "/assets/minimap/lau_1_khu_a_b.jpg",
+        2:   "/assets/minimap/lau_2_khu_a_b.jpg",
+        3:   "/assets/minimap/lau_3_khu_a_b.jpg",
+        4:   "/assets/minimap/lau_4_khu_a.jpg",
+        5:   "/assets/minimap/lau_5_khu_a.jpg",
+        5.5: "/assets/minimap/mat_lung_lau_5_khu_a.jpg",
+        6:   "/assets/minimap/lau_6_khu_a.jpg"
     };
 
     // State nội bộ
@@ -548,7 +547,11 @@ export function createMinimap(opts) {
         currentlyShowingLabels.clear();
         
         // Tìm node gần nhất (để xác định các node kết nối)
-        const closestNode = findClosestNode(stageX, stageY, 50);
+        // Radius should be in screen pixels, not stage units (otherwise it changes with zoom).
+        const radiusPx = 50;
+        const scale = Math.max(0.001, Number(view?.scale) || 1);
+        const radiusStage = radiusPx / scale;
+        const closestNode = findClosestNode(stageX, stageY, radiusStage);
         
         if (closestNode) {
             // KHÔNG hiện label của node gần nhất, chỉ hiện label của các node có kết nối trực tiếp

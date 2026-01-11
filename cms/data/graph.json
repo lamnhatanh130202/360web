@@ -3,7 +3,7 @@
     {
       "id": "congtruong",
       "floor": 0,
-      "label": "Cổng Chính -  Đường Đại Lộ Bình Dương",
+      "label": "Cổng Chính",
       "positions": {
         "0": {
           "x": 199,
@@ -82,12 +82,12 @@
       "id": "loidi1",
       "label": "Khối văn phòng C1 - 1",
       "floor": 0,
-      "x": 744,
-      "y": 876,
+      "x": 794,
+      "y": 950,
       "positions": {
         "0": {
-          "x": 744,
-          "y": 876
+          "x": 794,
+          "y": 950
         }
       }
     },
@@ -95,12 +95,12 @@
       "id": "loidi2",
       "label": "Khối văn phòng C1 - 2",
       "floor": 0,
-      "x": 901,
-      "y": 902,
+      "x": 943,
+      "y": 962,
       "positions": {
         "0": {
-          "x": 901,
-          "y": 902
+          "x": 943,
+          "y": 962
         }
       }
     },
@@ -940,12 +940,12 @@
       "id": "khoivanphongc13",
       "label": "Khối văn phòng C1 - 3",
       "floor": 0,
-      "x": 1013,
-      "y": 995,
+      "x": 1060,
+      "y": 973,
       "positions": {
         "0": {
-          "x": 1013,
-          "y": 995
+          "x": 1060,
+          "y": 973
         }
       }
     },
@@ -2100,7 +2100,7 @@
     },
     {
       "from": "congphu",
-      "to": "duonglencong",
+      "to": "santruong",
       "w": 1
     }
   ]

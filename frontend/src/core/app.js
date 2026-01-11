@@ -1815,6 +1815,20 @@ await voiceBot.mount();
  .then(data => {
   console.log('[Analytics] Visit tracked:', data);
   console.log('[Analytics] Current concurrent users:', data.concurrent);
+
+   // Update UI immediately (avoid having to refresh while waiting for next poll)
+   try {
+    if (typeof data?.concurrent === 'number') {
+     lastConcurrent = data.concurrent;
+    }
+    if (concurrentEl) {
+     const lang = (localStorage.getItem('lang') || 'vi').toLowerCase() === 'en' ? 'en' : 'vi';
+     const suffix = lang === 'en' ? 'watching' : 'người đang xem';
+     concurrentEl.innerHTML = `<span style="display: inline-block; width: 8px; height: 8px; background: #10b981; border-radius: 50%; animation: pulse 2s infinite;"></span><span>${(typeof lastConcurrent === 'number' ? lastConcurrent : (data.concurrent || 0))} ${suffix}</span>`;
+    }
+   } catch (e) {
+    console.warn('[Analytics] Failed to update concurrent badge from visit:', e);
+   }
  })
  .catch(err => {
   console.error('[Analytics] Failed to track visit:', err);
@@ -1839,11 +1853,15 @@ await voiceBot.mount();
  // Update concurrent users display every 30 seconds (reduced from 10 seconds for better performance)
  let concurrentEl = null;
  let concurrentUpdateInterval = null;
+ let lastConcurrent = null;
  const updateConcurrent = async () => {
   try {
    const res = await fetch(`${dataBaseUrl}/analytics/concurrent`);
    if (res.ok) {
     const data = await res.json();
+    if (typeof data?.concurrent === 'number') {
+     lastConcurrent = data.concurrent;
+    }
     // Only log occasionally to reduce console spam
     if (Math.random() < 0.1) { // Log 10% of updates
      console.log('[Analytics] Concurrent users:', data.concurrent);
@@ -1851,7 +1869,7 @@ await voiceBot.mount();
     if (concurrentEl) {
       const lang = (localStorage.getItem('lang') || 'vi').toLowerCase() === 'en' ? 'en' : 'vi';
       const suffix = lang === 'en' ? 'watching' : 'người đang xem';
-      concurrentEl.innerHTML = `<span style="display: inline-block; width: 8px; height: 8px; background: #10b981; border-radius: 50%; animation: pulse 2s infinite;"></span><span>${data.concurrent || 0} ${suffix}</span>`;
+      concurrentEl.innerHTML = `<span style="display: inline-block; width: 8px; height: 8px; background: #10b981; border-radius: 50%; animation: pulse 2s infinite;"></span><span>${(typeof lastConcurrent === 'number' ? lastConcurrent : (data.concurrent || 0))} ${suffix}</span>`;
     }
    } else {
     console.warn('[Analytics] Failed to get concurrent:', res.status);
